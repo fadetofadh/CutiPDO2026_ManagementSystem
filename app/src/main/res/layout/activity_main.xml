@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Employee:"
+            android:textSize="16sp"
+            android:textColor="#333333"/>
+
+        <Spinner
+            android:id="@+id/spEmployeeName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="15dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Leave Dates:"
+            android:textSize="16sp"
+            android:textColor="#333333"/>
+
+        <EditText
+            android:id="@+id/etSelectedDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="15dp"
+            android:focusable="false"
+            android:clickable="true"
+            android:hint="Click to select date range..."
+            android:drawableEnd="@android:drawable/ic_menu_my_calendar"
+            android:padding="12dp"
+            android:background="@android:drawable/editbox_background_normal"/>
+
+        <TextView
+            android:id="@+id/tvTotalDaysDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="Duration: 0 Day(s)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#2D3748"
+            android:background="#F7FAFC"
+            android:layout_marginBottom="15dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Leave Type Option:"
+            android:textSize="16sp"
+            android:textColor="#333333"/>
+
+        <Spinner
+            android:id="@+id/spLeaveType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginBottom="15dp">
+
+            <Button
+                android:id="@+id/btnAddToBatch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Add"
+                android:backgroundTint="#1E88E5"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="4dp"/>
+
+            <Button
+                android:id="@+id/btnReviewSubmit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Review"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnCancelPortal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel Completed Requests"
+            android:backgroundTint="#E53E3E"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+</ScrollView>

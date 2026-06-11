@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.CutiPDO2026">
+
+        <!-- 1. SPLASH SCREEN IS NOW THE MAIN LAUNCHER ENTRANCE -->
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 2. Login Activity declared as a standard structural app window component -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <!-- 3. Division Head form panel template -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- 4. Supervisor review board workspace panel -->
+        <activity
+            android:name=".SupervisorActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ReviewQueueActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CancelPortalActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CheckBalanceActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

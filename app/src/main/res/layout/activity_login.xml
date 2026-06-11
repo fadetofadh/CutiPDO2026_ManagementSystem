@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="30dp"
+    tools:context=".LoginActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PORTAL GATEWAY"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="40dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Your Role"
+        android:textStyle="bold"
+        android:textColor="#555555"
+        android:layout_marginBottom="10dp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupRole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="30dp">
+
+        <RadioButton
+            android:id="@+id/rbKadiv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KADIV (Head Div)"
+            android:textSize="15sp"
+            android:layout_marginRight="20dp"
+            android:checked="true"/> <RadioButton
+        android:id="@+id/rbSpv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SPV (Supervisor)"
+        android:textSize="15sp"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="System Passcode"
+        android:textStyle="bold"
+        android:textColor="#555555"
+        android:layout_marginBottom="5dp"/>
+
+    <EditText
+        android:id="@+id/etPasscode"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Enter verification code"
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:background="@android:drawable/editbox_background_normal"
+        android:layout_marginBottom="35dp"/>
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="VERIFY &amp; ENTER"
+        android:textSize="16sp"
+        android:backgroundTint="#008577"/>
+
+    <Button
+        android:id="@+id/btnCheckBalancePortal"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:text="@string/btn_check_balance_portal"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#4A5568"
+        android:layout_marginTop="24dp"/>
+
+</LinearLayout>

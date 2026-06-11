@@ -1,0 +1,51 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.test.cutipdo2026'
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.test.cutipdo2026"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation libs.activity.ktx
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.ext.junit
+    // Retrofit Core Library
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // GSON Converter (Translates Java into Google Sheets JSON)
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    // Add this line to import the slide-reveal drawer mechanics
+    implementation 'com.github.chthai64:SwipeRevealLayout:1.4.0'
+    // Gson for saving the queue to SharedPreferences
+    implementation 'com.google.code.gson:gson:2.10.1'
+}

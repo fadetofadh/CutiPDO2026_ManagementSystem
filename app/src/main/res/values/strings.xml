@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">CutiPDO2026</string>
+    <string-array name="leave_types_array">
+        <item>Cuti</item>
+        <item>PDO</item>
+    </string-array>
+    <string-array name="roles_array">
+        <item>Select Your Portal Role...</item>
+        <item>Head of Division (KADIV)</item>
+        <item>Supervisor (SPV)</item>
+    </string-array>
+    <string name="label_select_employee">Select Employee:</string>
+    <string name="label_leave_type">Leave Type Option:</string>
+    <string name="btn_select_start_date">Select Start Date</string>
+    <string name="btn_select_end_date">Select End Date</string>
+    <string name="btn_add">Add</string>
+    <string name="btn_review">Review</string>
+    <string name="btn_cancel_completed">Cancel Completed Requests</string>
+    <string name="btn_check_balance_portal">CHECK BALANCE PORTAL</string>
+</resources>
