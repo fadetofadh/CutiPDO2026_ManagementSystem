@@ -17,4 +17,8 @@
     <string name="btn_review">Review</string>
     <string name="btn_cancel_completed">Cancel Completed Requests</string>
     <string name="btn_check_balance_portal">CHECK BALANCE PORTAL</string>
+    <string name="msg_uploading">UPLOADING BATCH PACKAGES...</string>
+    <string name="btn_submit_all_count">SUBMIT ALL TO SUPERVISOR (%1$d)</string>
+    <string name="msg_item_removed">Item removed from batch.</string>
+    <string name="duration_placeholder">Duration: %1$d Day(s)</string>
 </resources>

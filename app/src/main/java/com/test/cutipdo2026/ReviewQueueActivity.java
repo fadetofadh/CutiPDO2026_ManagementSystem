@@ -1,8 +1,10 @@
 package com.test.cutipdo2026;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -33,6 +36,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
     private int successUploadCount = 0;
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_review_queue);
@@ -58,7 +62,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
                 queueManager.saveQueue(batchList);
                 queueAdapter.notifyItemRemoved(position);
                 updateSubmitButtonText();
-                Toast.makeText(ReviewQueueActivity.this, "Item removed from batch.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ReviewQueueActivity.this, getString(R.string.msg_item_removed), Toast.LENGTH_SHORT).show();
 
                 if (batchList.isEmpty()) finish();
             }
@@ -83,7 +87,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
         btnFinalSubmitAll.setOnClickListener(v -> {
             btnFinalSubmitAll.setEnabled(false);
-            btnFinalSubmitAll.setText("UPLOADING BATCH PACKAGES...");
+            btnFinalSubmitAll.setText(getString(R.string.msg_uploading));
             // Prevent interaction with the list while uploading
             rvReviewQueue.setAlpha(0.5f);
             rvReviewQueue.setClickable(false);
@@ -121,7 +125,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
             @Override
             public int describeContents() { return 0; }
             @Override
-            public void writeToParcel(android.os.Parcel dest, int flags) {}
+            public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {}
         });
 
         // 2. Parse the existing saved text string back into milliseconds to pre-select dates
@@ -133,15 +137,19 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
             if (rawDateText.contains(" to ")) {
                 String[] splitDates = rawDateText.split(" to ");
-                long startMs = parser.parse(splitDates[0]).getTime();
-                long endMs = parser.parse(splitDates[1]).getTime();
-                existingSelectionMs = new Pair<>(startMs, endMs);
+                Date start = parser.parse(splitDates[0]);
+                Date end = parser.parse(splitDates[1]);
+                if (start != null && end != null) {
+                    existingSelectionMs = new Pair<>(start.getTime(), end.getTime());
+                }
             } else {
-                long singleDayMs = parser.parse(rawDateText).getTime();
-                existingSelectionMs = new Pair<>(singleDayMs, singleDayMs);
+                Date single = parser.parse(rawDateText);
+                if (single != null) {
+                    existingSelectionMs = new Pair<>(single.getTime(), single.getTime());
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Fallback grid alignment tracker if parsing strings fails
+            Log.e("ReviewQueue", "Error parsing date", e);
         }
 
         // 3. Initialize the Material Range Picker with the constraints AND pre-selection data
@@ -170,7 +178,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
                 String endString = format.format(new Date(selection.second));
 
                 // Assign updated date strings and count to your item model instance
-                request.setTargetDate(startString.equals(endString) ? startString : startString + " to " + endString);
+                request.setTargetDate(Objects.equals(startString, endString) ? startString : startString + " to " + endString);
                 request.setTotalDays(updatedDaysCount);
 
                 // 💡 NEW WORKFLOW: Scan the edited range selection for weekend days
@@ -220,7 +228,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
         googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     successUploadCount++;
 
@@ -235,11 +243,11 @@ public class ReviewQueueActivity extends AppCompatActivity {
                     callMeBotApi.sendWhatsAppMessage("+628998366182", messageContent, "YOUR_API_KEY_HERE")
                             .enqueue(new Callback<ResponseBody>() {
                                 @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> res) {
+                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> res) {
                                     // Message sent successfully to the gateway!
                                 }
                                 @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                                     // Silently fail or log if the messaging network dips
                                 }
                             });
@@ -254,7 +262,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Toast.makeText(ReviewQueueActivity.this, "Upload loop failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 btnFinalSubmitAll.setEnabled(true);
                 updateSubmitButtonText();
@@ -263,6 +271,6 @@ public class ReviewQueueActivity extends AppCompatActivity {
     }
 
     private void updateSubmitButtonText() {
-        btnFinalSubmitAll.setText("SUBMIT ALL TO SUPERVISOR (" + batchList.size() + ")");
+        btnFinalSubmitAll.setText(getString(R.string.btn_submit_all_count, batchList.size()));
     }
 }
