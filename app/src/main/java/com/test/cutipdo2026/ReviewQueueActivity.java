@@ -28,7 +28,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
     private ArrayList<QueuedRequest> batchList;
     private ReviewQueueAdapter queueAdapter;
     private GoogleSheetsApi googleSheetsApi;
-    private CallMeBotApi callMeBotApi; // 💡 Add this near your googleSheetsApi declaration
+    private CallMeBotApi callMeBotApi;
     private QueueManager queueManager;
     private int successUploadCount = 0;
 
