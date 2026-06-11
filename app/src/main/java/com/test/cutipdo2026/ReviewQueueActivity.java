@@ -226,7 +226,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
         QueuedRequest item = batchList.get(index);
         LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
 
-        googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<ResponseBody>() {
+        googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -241,7 +241,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
                     // Replace with your registered international phone number and your exact CallMeBot API key
                     callMeBotApi.sendWhatsAppMessage("+628998366182", messageContent, "YOUR_API_KEY_HERE")
-                            .enqueue(new Callback<ResponseBody>() {
+                            .enqueue(new Callback<>() {
                                 @Override
                                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> res) {
                                     // Message sent successfully to the gateway!
