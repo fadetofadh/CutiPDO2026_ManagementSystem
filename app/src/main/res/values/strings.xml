@@ -24,7 +24,7 @@
     <string name="check_leave_balance">CHECK LEAVE BALANCE</string>
     <string name="select_name_to_check_balance">Select your name to check your remaining allowance</string>
     <string name="employee_name">Employee Name</string>
-    <string name="prompt_select_employee_name">-- Select Employee Name --</string>
+    <string name="prompt_select_employee_name">&#8211; Select Employee Name &#8211;</string>
     <string name="cuti">CUTI</string>
     <string name="pdo">PDO</string>
     <string name="days_left">Days Left</string>
@@ -80,8 +80,8 @@
     <string name="no_pending_requests">No pending leave requests found.</string>
 
     <!-- Placeholders / Tools -->
-    <string name="placeholder_employee_category">Employee Name - Category</string>
-    <string name="placeholder_dates_duration">Dates: 2026-06-11 to 2026-06-12 (2 Days)</string>
+    <string name="placeholder_employee_category">Employee Name &#8211; Category</string>
+    <string name="placeholder_dates_duration">Dates: 2026&#8211;06&#8211;11 to 2026&#8211;06&#8211;12 (2 Days)</string>
     <string name="placeholder_class">Class</string>
 
     <!-- Toasts & Dialogs -->
@@ -113,8 +113,8 @@
 
     <string name="label_cuti_pdo">Cuti &#8212; PDO</string>
     <string name="label_insufficient_balance">Insufficient Balance</string>
-    <string name="alert_insufficient_balance_msg">This employee has insufficient balance for a %1$d-day leave.\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
-    <string name="alert_insufficient_balance_weekend_msg">This employee has insufficient balance for a %1$d-day leave (Weekend included).\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="alert_insufficient_balance_msg">This employee has insufficient balance for a %1$d&#8211;day leave.\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="alert_insufficient_balance_weekend_msg">This employee has insufficient balance for a %1$d&#8211;day leave (Weekend included).\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
     <string name="btn_ok">OK</string>
     <string name="label_select_leave_dates_title">Select Leave Dates</string>
     <string name="label_modify_allocation_dates_title">Modify Allocation Dates Timeline</string>
