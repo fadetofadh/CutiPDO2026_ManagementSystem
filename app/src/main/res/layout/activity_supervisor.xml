@@ -15,7 +15,7 @@
             android:id="@+id/tvHeaderTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SUPERVISOR APPROVAL PANEL"
+            android:text="@string/supervisor_approval_panel"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -35,7 +35,7 @@
             android:id="@+id/tvNoData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No pending leave requests found."
+            android:text="@string/no_pending_requests"
             android:textSize="16sp"
             android:textColor="#888888"
             android:layout_centerInParent="true"
@@ -80,7 +80,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Processing..."
+                android:text="@string/msg_processing"
                 android:textColor="#333333"
                 android:textSize="16sp" />
         </LinearLayout>

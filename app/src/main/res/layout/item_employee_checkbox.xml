@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp"
+    android:padding="8dp"
     android:gravity="center_vertical"
     android:background="?attr/selectableItemBackground">
 
@@ -18,7 +18,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Employee Name"
+        android:text="@string/employee_name"
         android:textSize="16sp"
         android:layout_marginStart="8dp" />
 
@@ -26,7 +26,7 @@
         android:id="@+id/tvEmployeeClass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Class"
+        android:text="@string/placeholder_class"
         android:textSize="14sp"
         android:textColor="#666666" />
 </LinearLayout>

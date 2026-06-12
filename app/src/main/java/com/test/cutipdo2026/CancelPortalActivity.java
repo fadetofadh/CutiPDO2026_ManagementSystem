@@ -84,14 +84,14 @@ public class CancelPortalActivity extends AppCompatActivity {
                     historyList = response.body();
 
                     if (historyList.isEmpty()) {
-                        Toast.makeText(CancelPortalActivity.this, "No approved requests available to revoke.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_no_approved_requests), Toast.LENGTH_LONG).show();
                     } else {
                         lvCancelHistory.setVisibility(View.VISIBLE);
                         listAdapter = new CancelAdapter(CancelPortalActivity.this, historyList);
                         lvCancelHistory.setAdapter(listAdapter);
                     }
                 } else {
-                    Toast.makeText(CancelPortalActivity.this, "Server response error code: " + response.code(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_server_error_code, response.code()), Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -99,30 +99,27 @@ public class CancelPortalActivity extends AppCompatActivity {
             public void onFailure(Call<List<LeaveRequestData>> call, Throwable t) {
                 // 🛡️ Safety Switch: Clear loader on absolute hardware or script network crash
                 pbCancelLoader.setVisibility(View.GONE);
-                Toast.makeText(CancelPortalActivity.this, "Network Link Failure: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_failure, t.getMessage()), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void showCancelConfirmationDialog(final LeaveRequestData request, final int itemPosition) {
         new AlertDialog.Builder(this)
-                .setTitle("🚨 REVOKE LEAVE REQUEST?")
-                .setMessage("Are you absolutely sure you want to cancel this request for " + request.employeeName + "?\n\n" +
-                        "This action will:\n" +
-                        "1. Delete all assigned entries from Google Calendar.\n" +
-                        "2. Refund " + request.totalDays + " day(s) back to their Sisa cell balance automatically.")
-                .setPositiveButton("YES, REVOKE & REFUND", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.dialog_revoke_title)
+                .setMessage(getString(R.string.dialog_revoke_message, request.employeeName, request.totalDays))
+                .setPositiveButton(R.string.btn_yes_revoke_refund, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         executeCloudCancellation(request.rowNumber, itemPosition);
                     }
                 })
-                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton(R.string.btn_no, (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
     private void executeCloudCancellation(final int rowNumber, final int itemPosition) {
-        tvProgressMessage.setText("Revoking request & refunding...");
+        tvProgressMessage.setText(R.string.msg_revoking_refunding);
         progressOverlay.setVisibility(View.VISIBLE);
 
         LeaveRequest cancelPackage = new LeaveRequest("cancel", rowNumber);
@@ -132,18 +129,18 @@ public class CancelPortalActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
-                    Toast.makeText(CancelPortalActivity.this, "🎉 Request Revoked! Balances refunded successfully.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_request_revoked), Toast.LENGTH_LONG).show();
                     historyList.remove(itemPosition);
                     listAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(CancelPortalActivity.this, "Server rejected cancellation: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_server_rejected_cancellation, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
-                Toast.makeText(CancelPortalActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -159,7 +159,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
         // 3. Initialize the Material Range Picker with the constraints AND pre-selection data
         com.google.android.material.datepicker.MaterialDatePicker.Builder<Pair<Long, Long>> pickerBuilder =
                 MaterialDatePicker.Builder.dateRangePicker()
-                        .setTitleText("Modify Allocation Dates Timeline")
+                        .setTitleText(R.string.label_modify_allocation_dates_title)
                         .setCalendarConstraints(constraintsBuilder.build());
 
         if (existingSelectionMs != null) {
@@ -201,8 +201,8 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
                 // 💡 FORCE MUTATION: If a weekend exists, automatically overwrite type to PDO
                 if (containsWeekend) {
-                    request.setLeaveType("PDO");
-                    Toast.makeText(this, "ℹ️ Weekend detected! Leave type forced to PDO.", Toast.LENGTH_SHORT).show();
+                    request.setLeaveType(getString(R.string.pdo));
+                    Toast.makeText(this, getString(R.string.toast_weekend_detected_pdo), Toast.LENGTH_SHORT).show();
                 }
 
                 // Tell your layout adapter engine to instantly repaint this modified row entry frame
@@ -220,7 +220,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
     private void sendBatchItemsSequentially(final int index) {
         if (index >= batchList.size()) {
-            Toast.makeText(ReviewQueueActivity.this, "🎉 All " + successUploadCount + " requests submitted to Supervisor!", Toast.LENGTH_LONG).show();
+            Toast.makeText(ReviewQueueActivity.this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
             batchList.clear(); // Clear the local list
             queueManager.clearQueue(); // Clear the saved persistence
             finish();
@@ -237,11 +237,8 @@ public class ReviewQueueActivity extends AppCompatActivity {
                     successUploadCount++;
 
                     // 💡 NEW WORKFLOW: Fire a CallMeBot notification for this successful item
-                    String messageContent = "🔔 *New Leave Request Submitted!*\n\n" +
-                            "👤 *Employee:* " + item.getEmployeeName() + "\n" +
-                            "📅 *Dates:* " + item.getTargetDate() + "\n" +
-                            "⏱️ *Duration:* " + item.getTotalDays() + " Day(s)\n" +
-                            "📝 *Type:* " + item.getLeaveType();
+                    String messageContent = getString(R.string.whatsapp_message_format,
+                            item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
 
                     // Replace with your registered international phone number and your exact CallMeBot API key
                     callMeBotApi.sendWhatsAppMessage("+628998366182", messageContent, "YOUR_API_KEY_HERE")
@@ -259,7 +256,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
                     // Continue the sequential loop to the next batch item card
                     sendBatchItemsSequentially(index + 1);
                 } else {
-                    Toast.makeText(ReviewQueueActivity.this, "Failed uploading row position: " + index, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReviewQueueActivity.this, getString(R.string.toast_upload_failed_pos, index), Toast.LENGTH_SHORT).show();
                     btnFinalSubmitAll.setEnabled(true);
                     updateSubmitButtonText();
                 }
@@ -267,7 +264,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(ReviewQueueActivity.this, "Upload loop failure: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ReviewQueueActivity.this, getString(R.string.toast_upload_loop_failure, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnFinalSubmitAll.setEnabled(true);
                 updateSubmitButtonText();
             }

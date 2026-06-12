@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else if (inputCode.equals("superadmin")) {
                         fetchDataAndNavigateToSuperAdmin();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Incorrect Head of Division Passcode!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_kadiv_passcode), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                         Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
                         startActivity(intent);
                     } else {
-                        Toast.makeText(LoginActivity.this, "Incorrect Supervisor Passcode!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_spv_passcode), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -102,9 +102,9 @@ public class LoginActivity extends AppCompatActivity {
         TextView tvCreditPlaceholder = findViewById(R.id.tvCreditPlaceholder);
         tvCreditPlaceholder.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("App Credits")
-                    .setMessage("Created by Someone\nDeveloped by wanwa\nBased on Idea of Galeri Rasullloh")
-                    .setPositiveButton("Close", null)
+                    .setTitle(R.string.dialog_credits_title)
+                    .setMessage(R.string.dialog_credits_message)
+                    .setPositiveButton(R.string.btn_close, null)
                     .show();
         });
     }
@@ -117,7 +117,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void fetchDataAndNavigateToSuperAdmin() {
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Synchronizing full staff directory... Please wait.");
+        progressDialog.setMessage(getString(R.string.msg_sync_staff_directory));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -134,21 +134,21 @@ public class LoginActivity extends AppCompatActivity {
                     intent.putExtra("FULL_EMPLOYEE_LIST", fullList);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(LoginActivity.this, "Server sync failed. Please try again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.toast_server_sync_failed), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchDataAndNavigateToKadiv(String filterClass) {
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Synchronizing roster & balances... Please wait.");
+        progressDialog.setMessage(getString(R.string.msg_sync_roster_balances));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -179,27 +179,27 @@ public class LoginActivity extends AppCompatActivity {
                                 intent.putExtra("PRE_FETCHED_NAMES", nameList);
                                 startActivity(intent);
                             } else {
-                                Toast.makeText(LoginActivity.this, "Failed loading staff roster names.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, getString(R.string.toast_failed_loading_staff), Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<List<String>> call2, Throwable t2) {
                             if (progressDialog.isShowing()) progressDialog.dismiss();
-                            Toast.makeText(LoginActivity.this, "Network error path 2: " + t2.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t2.getMessage()), Toast.LENGTH_SHORT).show();
                         }
                     });
 
                 } else {
                     if (progressDialog.isShowing()) progressDialog.dismiss();
-                    Toast.makeText(LoginActivity.this, "Server balance synchronization failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.toast_balance_sync_failed_generic), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, "Network error path 1: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

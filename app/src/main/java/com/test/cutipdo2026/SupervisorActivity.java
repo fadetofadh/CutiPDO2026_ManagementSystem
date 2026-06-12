@@ -93,7 +93,7 @@ public class SupervisorActivity extends AppCompatActivity {
                         lvPendingRequests.setAdapter(listAdapter);
                     }
                 } else {
-                    Toast.makeText(SupervisorActivity.this, "Server error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SupervisorActivity.this, getString(R.string.toast_server_error_code_supervisor, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -101,37 +101,38 @@ public class SupervisorActivity extends AppCompatActivity {
             public void onFailure(Call<List<LeaveRequestData>> call, Throwable t) {
                 pbSupervisorLoader.setVisibility(View.GONE);
                 tvNoData.setVisibility(View.VISIBLE);
-                Toast.makeText(SupervisorActivity.this, "Failed to load list queue: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(SupervisorActivity.this, getString(R.string.toast_load_list_failed, t.getMessage()), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void showDecisionDialog(final LeaveRequestData request, final int itemPosition) {
         new AlertDialog.Builder(SupervisorActivity.this)
-                .setTitle("Review Leave Request")
-                .setMessage("Employee: " + request.employeeName +
-                        "\nType: " + request.leaveType +
-                        "\nDuration: " + request.totalDays + " Day(s)" +
-                        "\nDates: " + request.getFormattedDate() +
-                        "\nReason: " + (request.description != null ? request.description : "-"))
-                .setPositiveButton("APPROVE ✅", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.dialog_review_leave_title)
+                .setMessage(getString(R.string.dialog_review_leave_msg_format,
+                        request.employeeName,
+                        request.leaveType,
+                        request.totalDays,
+                        request.getFormattedDate(),
+                        (request.description != null ? request.description : "-")))
+                .setPositiveButton(R.string.btn_approve, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         executeCloudAction(request.rowNumber, itemPosition, "approve");
                     }
                 })
-                .setNegativeButton("DECLINE ❌", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.btn_decline, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         executeCloudAction(request.rowNumber, itemPosition, "decline");
                     }
                 })
-                .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setNeutralButton(R.string.btn_cancel, (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
     private void executeCloudAction(final int rowNumber, final int itemPosition, final String action) {
-        String processingMessage = action.equals("approve") ? "Approving request..." : "Declining request...";
+        String processingMessage = action.equals("approve") ? getString(R.string.msg_approving_request) : getString(R.string.msg_declining_request);
         tvProgressMessage.setText(processingMessage);
         progressOverlay.setVisibility(View.VISIBLE);
 
@@ -143,8 +144,8 @@ public class SupervisorActivity extends AppCompatActivity {
                 progressOverlay.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     String successMessage = action.equals("approve")
-                            ? "✅ Row " + rowNumber + " Approved & Calendar Logged!"
-                            : "❌ Row " + rowNumber + " Successfully Declined.";
+                            ? getString(R.string.toast_approve_success, rowNumber)
+                            : getString(R.string.toast_decline_success, rowNumber);
 
                     Toast.makeText(SupervisorActivity.this, successMessage, Toast.LENGTH_LONG).show();
 
@@ -156,14 +157,14 @@ public class SupervisorActivity extends AppCompatActivity {
                         lvPendingRequests.setVisibility(View.GONE);
                     }
                 } else {
-                    Toast.makeText(SupervisorActivity.this, "Server rejected action: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SupervisorActivity.this, getString(R.string.toast_server_rejected_action, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
-                Toast.makeText(SupervisorActivity.this, "Sync Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SupervisorActivity.this, getString(R.string.toast_sync_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -15,7 +15,7 @@
             android:id="@+id/tvCancelTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="REVOKE &amp; CANCEL PORTAL"
+            android:text="@string/revoke_cancel_portal_title"
             android:textSize="22sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tvCancelTitle"
-            android:text="⚠️ Long-press any request to cancel it and refund balances."
+            android:text="@string/cancel_portal_subtitle"
             android:textSize="12sp"
             android:gravity="center"
             android:textColor="#C53030"
@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Processing..."
+                android:text="@string/msg_processing"
                 android:textColor="#333333"
                 android:textSize="16sp" />
         </LinearLayout>

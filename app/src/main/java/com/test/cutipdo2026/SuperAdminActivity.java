@@ -82,12 +82,12 @@ public class SuperAdminActivity extends AppCompatActivity {
             String reason = etDescription.getText().toString().trim();
 
             if (selectedNames.isEmpty()) {
-                Toast.makeText(this, "Please select at least one employee!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.toast_select_at_least_one_employee), Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (reason.isEmpty()) {
-                Toast.makeText(this, "Please enter a description/reason!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.toast_enter_description), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -112,7 +112,7 @@ public class SuperAdminActivity extends AppCompatActivity {
 
     private void submitBatchPdo(List<String> names, String reason) {
         ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Adding PDO to selected employees...");
+        progressDialog.setMessage(getString(R.string.msg_adding_pdo));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -125,7 +125,7 @@ public class SuperAdminActivity extends AppCompatActivity {
                     count[0]++;
                     if (count[0] == names.size()) {
                         progressDialog.dismiss();
-                        Toast.makeText(SuperAdminActivity.this, "Successfully added PDO to all selected staff!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(SuperAdminActivity.this, getString(R.string.toast_pdo_added_success), Toast.LENGTH_LONG).show();
                         finish();
                     }
                 }
@@ -135,7 +135,7 @@ public class SuperAdminActivity extends AppCompatActivity {
                     count[0]++;
                     if (count[0] == names.size()) {
                         progressDialog.dismiss();
-                        Toast.makeText(SuperAdminActivity.this, "Batch process finished with some errors.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SuperAdminActivity.this, getString(R.string.toast_batch_finished_with_errors), Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 }
@@ -144,7 +144,7 @@ public class SuperAdminActivity extends AppCompatActivity {
     }
 
     private void updateDaysDisplay() {
-        String dayText = pdoToAdd + (pdoToAdd == 1 ? " day" : " days");
+        String dayText = pdoToAdd == 1 ? getString(R.string.days_count_format, pdoToAdd) : getString(R.string.days_count_format_plural, pdoToAdd);
         tvDaysValue.setText(dayText);
     }
 }

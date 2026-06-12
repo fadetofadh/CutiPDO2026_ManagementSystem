@@ -21,4 +21,134 @@
     <string name="btn_submit_all_count">SUBMIT ALL TO SUPERVISOR (%1$d)</string>
     <string name="msg_item_removed">Item removed from batch.</string>
     <string name="duration_placeholder">Duration: %1$d Day(s)</string>
+    <string name="check_leave_balance">CHECK LEAVE BALANCE</string>
+    <string name="select_name_to_check_balance">Select your name to check your remaining allowance</string>
+    <string name="employee_name">Employee Name</string>
+    <string name="prompt_select_employee_name">-- Select Employee Name --</string>
+    <string name="cuti">CUTI</string>
+    <string name="pdo">PDO</string>
+    <string name="days_left">Days Left</string>
+    <string name="back_to_portal">BACK TO PORTAL</string>
+    <string name="zero">0</string>
+
+    <!-- Cancel Portal -->
+    <string name="revoke_cancel_portal_title">REVOKE &amp; CANCEL PORTAL</string>
+    <string name="cancel_portal_subtitle">⚠️ Long-press any request to cancel it and refund balances.</string>
+    <string name="msg_processing">Processing&#8230;</string>
+
+    <!-- Login -->
+    <string name="portal_gateway">PORTAL GATEWAY</string>
+    <string name="select_your_role">Select Your Role</string>
+    <string name="kadiv_head_div">KADIV (Head Div)</string>
+    <string name="spv_supervisor">SPV (Supervisor)</string>
+    <string name="system_passcode">System Passcode</string>
+    <string name="verify_enter">VERIFY &amp; ENTER</string>
+    <string name="hint_enter_password">Enter Password</string>
+    <string name="placeholder_text">teks place for when i need something</string>
+
+    <!-- Main Activity -->
+    <string name="label_select_leave_dates">Select Leave Dates:</string>
+    <string name="duration_zero">Duration: 0 Day(s)</string>
+    <string name="label_reason_of_leaving">Reason of leaving:</string>
+    <string name="hint_select_date_range">Click to select date range&#8230;</string>
+    <string name="hint_enter_reason">Enter reason of leaving here&#8230;</string>
+
+    <!-- Review Queue -->
+    <string name="review_batch_requests">REVIEW BATCH REQUESTS</string>
+    <string name="review_queue_hint">💡 Slide any item left to edit or remove details before sending</string>
+    <string name="submit_all_to_supervisor_zero">SUBMIT ALL TO SUPERVISOR (0)</string>
+
+    <!-- Splash -->
+    <string name="splash_title">CUTI &amp; PDO</string>
+    <string name="splash_subtitle">MANAGEMENT SYSTEM</string>
+
+    <!-- Super Admin -->
+    <string name="add_pdo_title">ADD PDO</string>
+    <string name="select_employee_pdo_hint">select employee to add more PDO</string>
+    <string name="minus">-</string>
+    <string name="add_label">add: </string>
+    <string name="days_count_format">%1$d day</string>
+    <string name="days_count_format_plural">%1$d days</string>
+    <string name="plus">+</string>
+    <string name="hint_description_pdo">Description for reason addition of PDO</string>
+    <string name="btn_submit">SUBMIT</string>
+    <string name="super_admin_spv_portal">Super Admin (SPV) Portal</string>
+
+    <!-- Supervisor -->
+    <string name="supervisor_approval_panel">SUPERVISOR APPROVAL PANEL</string>
+    <string name="no_pending_requests">No pending leave requests found.</string>
+
+    <!-- Placeholders / Tools -->
+    <string name="placeholder_employee_category">Employee Name - Category</string>
+    <string name="placeholder_dates_duration">Dates: 2026-06-11 to 2026-06-12 (2 Days)</string>
+    <string name="placeholder_class">Class</string>
+
+    <!-- Toasts & Dialogs -->
+    <string name="toast_no_approved_requests">No approved requests available to revoke.</string>
+    <string name="toast_server_error_code">Server response error code: %1$d</string>
+    <string name="toast_network_failure">Network Link Failure: %1$s</string>
+    <string name="toast_request_revoked">🎉 Request Revoked! Balances refunded successfully.</string>
+    <string name="toast_server_rejected_cancellation">Server rejected cancellation: %1$d</string>
+    <string name="toast_network_error">Network Error: %1$s</string>
+    <string name="dialog_revoke_title">🚨 REVOKE LEAVE REQUEST?</string>
+    <string name="dialog_revoke_message">Are you absolutely sure you want to cancel this request for %1$s?\n\nThis action will:\n1. Delete all assigned entries from Google Calendar.\n2. Refund %2$d day(s) back to their Sisa cell balance automatically.</string>
+    <string name="btn_yes_revoke_refund">YES, REVOKE &amp; REFUND</string>
+    <string name="btn_no">No</string>
+    <string name="btn_close">Close</string>
+    <string name="msg_revoking_refunding">Revoking request &amp; refunding&#8230;</string>
+
+    <string name="toast_balance_sync_failed">Server balance database sync failed.</string>
+    <string name="msg_downloading_balances">Downloading current live balances&#8230; Please wait.</string>
+
+    <string name="toast_incorrect_kadiv_passcode">Incorrect Head of Division Passcode!</string>
+    <string name="toast_incorrect_spv_passcode">Incorrect Supervisor Passcode!</string>
+    <string name="toast_server_sync_failed">Server sync failed. Please try again.</string>
+    <string name="toast_failed_loading_staff">Failed loading staff roster names.</string>
+    <string name="toast_balance_sync_failed_generic">Server balance synchronization failed.</string>
+    <string name="dialog_credits_title">App Credits</string>
+    <string name="dialog_credits_message">Created by Someone\nDeveloped by wanwa\nBased on Idea of Galeri Rasullloh</string>
+    <string name="msg_sync_staff_directory">Synchronizing full staff directory&#8230; Please wait.</string>
+    <string name="msg_sync_roster_balances">Synchronizing roster &amp; balances&#8230; Please wait.</string>
+
+    <string name="label_cuti_pdo">Cuti &#8212; PDO</string>
+    <string name="label_insufficient_balance">Insufficient Balance</string>
+    <string name="alert_insufficient_balance_msg">This employee has insufficient balance for a %1$d-day leave.\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="alert_insufficient_balance_weekend_msg">This employee has insufficient balance for a %1$d-day leave (Weekend included).\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="btn_ok">OK</string>
+    <string name="label_select_leave_dates_title">Select Leave Dates</string>
+    <string name="label_modify_allocation_dates_title">Modify Allocation Dates Timeline</string>
+    <string name="whatsapp_message_format">🔔 *New Leave Request Submitted!*\n\n👤 *Employee:* %1$s\n📅 *Dates:* %2$s\n⏱️ *Duration:* %3$d Day(s)\n📝 *Type:* %4$s</string>
+
+    <string name="toast_select_leave_type">Please select a valid Leave Type option!</string>
+    <string name="toast_select_employee_dates">Please select an employee and valid date range!</string>
+    <string name="toast_insufficient_cuti">❌ Insufficient Cuti balance! (Available: %1$.1f)</string>
+    <string name="toast_insufficient_pdo">❌ Insufficient PDO balance! (Available: %1$.1f)</string>
+    <string name="toast_added_to_batch">Added to batch queue! Items: %1$d</string>
+    <string name="toast_batch_empty">Your batch queue list is empty!</string>
+    <string name="toast_weekend_detected_cuti">ℹ️ Weekend detected but PDO balance empty. Automatically using Cuti.</string>
+
+    <string name="toast_weekend_detected_pdo">ℹ️ Weekend detected! Leave type forced to PDO.</string>
+    <string name="toast_requests_submitted">🎉 All %1$d requests submitted to Supervisor!</string>
+    <string name="toast_upload_failed_pos">Failed uploading row position: %1$d</string>
+    <string name="toast_upload_loop_failure">Upload loop failure: %1$s</string>
+
+    <string name="toast_select_at_least_one_employee">Please select at least one employee!</string>
+    <string name="toast_enter_description">Please enter a description/reason!</string>
+    <string name="toast_pdo_added_success">Successfully added PDO to all selected staff!</string>
+    <string name="toast_batch_finished_with_errors">Batch process finished with some errors.</string>
+    <string name="msg_adding_pdo">Adding PDO to selected employees&#8230;</string>
+
+    <string name="toast_server_error_code_supervisor">Server error code: %1$d</string>
+    <string name="toast_load_list_failed">Failed to load list queue: %1$s</string>
+    <string name="toast_server_rejected_action">Server rejected action: %1$d</string>
+    <string name="toast_sync_error">Sync Error: %1$s</string>
+    <string name="dialog_review_leave_title">Review Leave Request</string>
+    <string name="dialog_review_leave_msg_format">Employee: %1$s\nType: %2$s\nDuration: %3$d Day(s)\nDates: %4$s\nReason: %5$s</string>
+    <string name="btn_approve">APPROVE ✅</string>
+    <string name="btn_decline">DECLINE ❌</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="msg_approving_request">Approving request&#8230;</string>
+    <string name="msg_declining_request">Declining request&#8230;</string>
+    <string name="toast_approve_success">✅ Row %1$d Approved &amp; Calendar Logged!</string>
+    <string name="toast_decline_success">❌ Row %1$d Successfully Declined.</string>
 </resources>

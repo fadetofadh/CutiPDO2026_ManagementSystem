@@ -13,7 +13,7 @@
         android:textSize="17sp"
         android:textStyle="bold"
         android:textColor="#2D3748"
-        android:text="Employee Name - Category"/>
+        android:text="@string/placeholder_employee_category"/>
 
     <TextView
         android:id="@+id/tvSupervisorRowSubtitle"
@@ -23,7 +23,7 @@
         android:layout_marginBottom="12dp"
         android:textSize="14sp"
         android:textColor="#4A5568"
-        android:text="Dates: 2026-06-11 to 2026-06-12 (2 Days)"/>
+        android:text="@string/placeholder_dates_duration"/>
 
     <View
         android:layout_width="match_parent"

@@ -66,7 +66,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
 
         // 💡 NEW: Show loader immediately when activity layout inflation finishes
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Downloading current live balances... Please wait.");
+        progressDialog.setMessage(getString(R.string.msg_downloading_balances));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -77,7 +77,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedName = employeeList.get(position);
 
-                if (selectedName.equals("-- Select Employee Name --")) {
+                if (selectedName.equals(getString(R.string.prompt_select_employee_name))) {
                     layoutBalanceCards.setVisibility(View.INVISIBLE);
                 } else {
                     EmployeeBalance balance = balanceMap.get(selectedName);
@@ -98,7 +98,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
 
     private void fetchLiveBalances() {
         employeeList.clear();
-        employeeList.add("-- Select Employee Name --");
+        employeeList.add(getString(R.string.prompt_select_employee_name));
         employeeAdapter.notifyDataSetChanged();
 
         googleSheetsApi.getBalances("balances", null).enqueue(new Callback<List<EmployeeBalance>>() {
@@ -114,14 +114,14 @@ public class CheckBalanceActivity extends AppCompatActivity {
                     }
                     employeeAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(CheckBalanceActivity.this, "Server balance database sync failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CheckBalanceActivity.this, getString(R.string.toast_balance_sync_failed), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
-                Toast.makeText(CheckBalanceActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CheckBalanceActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -86,14 +86,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean isEnabled(int position) {
                 if (position >= leaveTypeList.size()) return true;
-                return !leaveTypeList.get(position).equals("Cuti -- PDO");
+                return !leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo));
             }
 
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text = (TextView) view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals("Cuti -- PDO")) {
+                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView text = (TextView) view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals("Cuti -- PDO")) {
+                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> preFetchedNames = (ArrayList<String>) getIntent().getSerializableExtra("PRE_FETCHED_NAMES");
 
         employeeList.clear();
-        employeeList.add("-- Select Employee Name --");
+        employeeList.add(getString(R.string.prompt_select_employee_name));
 
         if (preFetchedBalances != null) {
             for (EmployeeBalance b : preFetchedBalances) {
@@ -146,30 +146,30 @@ public class MainActivity extends AppCompatActivity {
         btnAddToBatch.setOnClickListener(v -> {
             String empName = spEmployeeName.getSelectedItem().toString();
 
-            if (spLeaveType.getSelectedItem() == null || spLeaveType.getSelectedItem().toString().equals("Cuti -- PDO")) {
-                Toast.makeText(MainActivity.this, "Please select a valid Leave Type option!", Toast.LENGTH_SHORT).show();
+            if (spLeaveType.getSelectedItem() == null || spLeaveType.getSelectedItem().toString().equals(getString(R.string.label_cuti_pdo))) {
+                Toast.makeText(MainActivity.this, getString(R.string.toast_select_leave_type), Toast.LENGTH_SHORT).show();
                 return;
             }
             String leaveType = spLeaveType.getSelectedItem().toString();
             String description = etLeaveDescription.getText().toString().trim();
 
-            if (empName.equals("-- Select Employee Name --") || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
-                Toast.makeText(MainActivity.this, "Please select an employee and valid date range!", Toast.LENGTH_SHORT).show();
+            if (empName.equals(getString(R.string.prompt_select_employee_name)) || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
+                Toast.makeText(MainActivity.this, getString(R.string.toast_select_employee_dates), Toast.LENGTH_SHORT).show();
                 return;
             }
 
             EmployeeBalance balance = balanceMap.get(empName);
             if (balance != null) {
-                if (leaveType.equals("Cuti") && balance.cutiBalance < calculatedDays) {
-                    Toast.makeText(MainActivity.this, "❌ Insufficient Cuti balance! (Available: " + balance.cutiBalance + ")", Toast.LENGTH_LONG).show();
+                if (leaveType.equals(getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_cuti, balance.cutiBalance), Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (leaveType.equals("PDO") && balance.pdoBalance < calculatedDays) {
-                    Toast.makeText(MainActivity.this, "❌ Insufficient PDO balance! (Available: " + balance.pdoBalance + ")", Toast.LENGTH_LONG).show();
+                if (leaveType.equals(getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_pdo, balance.pdoBalance), Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                if (leaveType.equals("Cuti")) balance.cutiBalance -= calculatedDays;
+                if (leaveType.equals(getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
                 else balance.pdoBalance -= calculatedDays;
             }
 
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             batchQueue.add(newRequest);
             queueManager.saveQueue(batchQueue);
 
-            Toast.makeText(MainActivity.this, "Added to batch queue! Items: " + batchQueue.size(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
 
             selectedDateRangeString = "";
             calculatedDays = 0;
@@ -185,13 +185,13 @@ public class MainActivity extends AppCompatActivity {
             currentEndMs = 0;
             etSelectedDates.setText("");
             etLeaveDescription.setText("");
-            tvTotalDaysDisplay.setText("Duration: 0 Day(s)");
+            tvTotalDaysDisplay.setText(R.string.duration_zero);
             resetLeaveTypeOptions();
         });
 
         btnReviewSubmit.setOnClickListener(v -> {
             if (batchQueue.isEmpty()) {
-                Toast.makeText(MainActivity.this, "Your batch queue list is empty!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.toast_batch_empty), Toast.LENGTH_SHORT).show();
                 return;
             }
             Intent intent = new Intent(MainActivity.this, ReviewQueueActivity.class);
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         MaterialDatePicker<Pair<Long, Long>> dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
-                .setTitleText("Select Leave Dates")
+                .setTitleText(R.string.label_select_leave_dates_title)
                 .setCalendarConstraints(constraintsBuilder.build())
                 .build();
 
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 etSelectedDates.setText(selectedDateRangeString);
-                tvTotalDaysDisplay.setText("Duration: " + calculatedDays + " Day(s)");
+                tvTotalDaysDisplay.setText(getString(R.string.duration_placeholder, calculatedDays));
 
                 evaluateWeekendRestrictions();
             }
@@ -301,18 +301,18 @@ public class MainActivity extends AppCompatActivity {
             leaveTypeList.clear();
             if (balance != null) {
                 if (balance.pdoBalance >= calculatedDays) {
-                    leaveTypeList.add("PDO");
+                    leaveTypeList.add(getString(R.string.pdo));
                 } else if (balance.cutiBalance >= calculatedDays) {
-                    leaveTypeList.add("Cuti");
-                    Toast.makeText(this, "ℹ️ Weekend detected but PDO balance empty. Automatically using Cuti.", Toast.LENGTH_SHORT).show();
+                    leaveTypeList.add(getString(R.string.cuti));
+                    Toast.makeText(this, getString(R.string.toast_weekend_detected_cuti), Toast.LENGTH_SHORT).show();
                 } else {
-                    showNoBalanceAlert("Insufficient Balance",
-                            String.format(Locale.getDefault(), "This employee has insufficient balance for a %d-day leave (Weekend included).\n\nAvailable:\nCuti: %d\nPDO: %d",
+                    showNoBalanceAlert(getString(R.string.label_insufficient_balance),
+                            getString(R.string.alert_insufficient_balance_weekend_msg,
                                     calculatedDays, balance.cutiBalance, balance.pdoBalance));
                     return;
                 }
             } else {
-                leaveTypeList.add("PDO");
+                leaveTypeList.add(getString(R.string.pdo));
             }
             leaveTypeAdapter.notifyDataSetChanged();
             spLeaveType.setSelection(0);
@@ -329,14 +329,14 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(title)
                 .setMessage(message)
                 .setCancelable(false)
-                .setPositiveButton("OK", (dialog, which) -> {
+                .setPositiveButton(R.string.btn_ok, (dialog, which) -> {
                     isShowingAlert = false;
                     selectedDateRangeString = "";
                     calculatedDays = 0;
                     currentStartMs = 0;
                     currentEndMs = 0;
                     etSelectedDates.setText("");
-                    tvTotalDaysDisplay.setText("Duration: 0 Day(s)");
+                    tvTotalDaysDisplay.setText(R.string.duration_zero);
                     resetLeaveTypeOptions();
                 })
                 .show();
@@ -346,10 +346,10 @@ public class MainActivity extends AppCompatActivity {
         leaveTypeList.clear();
         String selectedEmployee = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "";
 
-        if (currentStartMs == 0 || currentEndMs == 0 || selectedEmployee.equals("-- Select Employee Name --")) {
-            leaveTypeList.add("Cuti -- PDO");
-            leaveTypeList.add("Cuti");
-            leaveTypeList.add("PDO");
+        if (currentStartMs == 0 || currentEndMs == 0 || selectedEmployee.equals(getString(R.string.prompt_select_employee_name))) {
+            leaveTypeList.add(getString(R.string.label_cuti_pdo));
+            leaveTypeList.add(getString(R.string.cuti));
+            leaveTypeList.add(getString(R.string.pdo));
             leaveTypeAdapter.notifyDataSetChanged();
             spLeaveType.setSelection(0);
             return;
@@ -358,32 +358,32 @@ public class MainActivity extends AppCompatActivity {
         EmployeeBalance balance = balanceMap.get(selectedEmployee);
         if (balance != null) {
             if (balance.cutiBalance < calculatedDays && balance.pdoBalance < calculatedDays) {
-                leaveTypeList.add("Insufficient Balance");
+                leaveTypeList.add(getString(R.string.label_insufficient_balance));
                 leaveTypeAdapter.notifyDataSetChanged();
 
-                if (!selectedEmployee.equals("-- Select Employee Name --")) {
-                    showNoBalanceAlert("Insufficient Balance",
-                            String.format(Locale.getDefault(), "This employee has insufficient balance for a %d-day leave.\n\nAvailable:\nCuti: %d\nPDO: %d",
+                if (!selectedEmployee.equals(getString(R.string.prompt_select_employee_name))) {
+                    showNoBalanceAlert(getString(R.string.label_insufficient_balance),
+                            getString(R.string.alert_insufficient_balance_msg,
                                     calculatedDays, balance.cutiBalance, balance.pdoBalance));
                 }
                 return;
             }
 
             if (balance.cutiBalance >= calculatedDays) {
-                leaveTypeList.add("Cuti");
+                leaveTypeList.add(getString(R.string.cuti));
             }
             if (balance.pdoBalance >= calculatedDays) {
-                leaveTypeList.add("PDO");
+                leaveTypeList.add(getString(R.string.pdo));
             }
         } else {
-            leaveTypeList.add("Cuti");
-            leaveTypeList.add("PDO");
+            leaveTypeList.add(getString(R.string.cuti));
+            leaveTypeList.add(getString(R.string.pdo));
         }
 
         leaveTypeAdapter.notifyDataSetChanged();
 
         spLeaveType.post(() -> {
-            if (leaveTypeList.size() == 2 && leaveTypeList.get(0).equals("Cuti -- PDO")) {
+            if (leaveTypeList.size() == 2 && leaveTypeList.get(0).equals(getString(R.string.label_cuti_pdo))) {
                 spLeaveType.setSelection(1);
             } else {
                 spLeaveType.setSelection(0);

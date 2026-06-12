@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="REVIEW BATCH REQUESTS"
+        android:text="@string/review_batch_requests"
         android:textSize="22sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -20,7 +20,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="💡 Slide any item left to edit or remove details before sending"
+        android:text="@string/review_queue_hint"
         android:textSize="13sp"
         android:gravity="center"
         android:layout_marginBottom="20dp"
@@ -45,7 +45,7 @@
         android:id="@+id/btnFinalSubmitAll"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="SUBMIT ALL TO SUPERVISOR (0)"
+        android:text="@string/submit_all_to_supervisor_zero"
         android:textSize="16sp"
         android:textStyle="bold"
         android:backgroundTint="#008577"/>

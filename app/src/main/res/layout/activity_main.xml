@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Employee:"
+            android:text="@string/label_select_employee"
             android:textSize="16sp"
             android:textColor="#333333"/>
 
@@ -27,7 +27,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select Leave Dates:"
+            android:text="@string/label_select_leave_dates"
             android:textSize="16sp"
             android:textColor="#333333"/>
 
@@ -39,7 +39,7 @@
             android:layout_marginBottom="15dp"
             android:focusable="false"
             android:clickable="true"
-            android:hint="Click to select date range..."
+            android:hint="@string/hint_select_date_range"
             android:drawableEnd="@android:drawable/ic_menu_my_calendar"
             android:padding="12dp"
             android:background="@android:drawable/editbox_background_normal"/>
@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:text="Duration: 0 Day(s)"
+            android:text="@string/duration_zero"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#2D3748"
@@ -59,7 +59,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Leave Type Option:"
+            android:text="@string/label_leave_type"
             android:textSize="16sp"
             android:textColor="#333333"/>
 
@@ -73,7 +73,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reason of leaving:"
+            android:text="@string/label_reason_of_leaving"
             android:textSize="16sp"
             android:textColor="#333333"/>
 
@@ -85,7 +85,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/bg_description_input"
             android:gravity="top|start"
-            android:hint="Enter reason of leaving here..."
+            android:hint="@string/hint_enter_reason"
             android:inputType="textMultiLine"
             android:minLines="3"
             android:textColor="#333333"
@@ -103,7 +103,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Add"
+                android:text="@string/btn_add"
                 android:backgroundTint="#1E88E5"
                 android:textColor="#FFFFFF"
                 android:layout_marginEnd="4dp"/>
@@ -113,7 +113,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Review"
+                android:text="@string/btn_review"
                 android:backgroundTint="#4CAF50"
                 android:textColor="#FFFFFF"
                 android:layout_marginStart="4dp"/>
@@ -123,7 +123,7 @@
             android:id="@+id/btnCancelPortal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cancel Completed Requests"
+            android:text="@string/btn_cancel_completed"
             android:backgroundTint="#E53E3E"
             android:textColor="#FFFFFF"/>
 
