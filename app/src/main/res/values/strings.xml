@@ -67,6 +67,7 @@
     <string name="select_employee_pdo_hint">select employee to add more PDO</string>
     <string name="minus">-</string>
     <string name="add_label">add: </string>
+    <string name="one_day">1 day</string>
     <string name="days_count_format">%1$d day</string>
     <string name="days_count_format_plural">%1$d days</string>
     <string name="plus">+</string>

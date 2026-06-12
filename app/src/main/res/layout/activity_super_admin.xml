@@ -110,6 +110,7 @@
         android:background="@drawable/bg_description_input"
         android:gravity="top|start"
         android:hint="@string/hint_description_pdo"
+        android:autofillHints="none"
         android:inputType="textMultiLine"
         android:minLines="3"
         android:textColor="#333333"

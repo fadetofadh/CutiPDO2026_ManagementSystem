@@ -7,11 +7,14 @@
     tools:context=".LoginActivity">
 
     <ScrollView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/tvCreditPlaceholder"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="488dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,7 +35,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="10dp"
+                android:maxWidth="488dp"
                 android:text="@string/select_your_role"
                 android:textColor="#555555"
                 android:textStyle="bold" />
@@ -41,17 +46,20 @@
                 android:id="@+id/radioGroupRole"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="16dp"
                 android:gravity="center_horizontal"
+                android:maxWidth="488dp"
                 android:orientation="horizontal">
 
                 <RadioButton
                     android:id="@+id/rbKadiv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="20dp"
+                    android:layout_marginEnd="20dp"
                     android:checked="true"
                     android:text="@string/kadiv_head_div"
+                    android:textColor="#555555"
                     android:textSize="15sp" />
 
                 <RadioButton
@@ -59,6 +67,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/spv_supervisor"
+                    android:textColor="#555555"
                     android:textSize="15sp" />
 
             </RadioGroup>
@@ -66,7 +75,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="5dp"
+                android:maxWidth="488dp"
                 android:text="@string/system_passcode"
                 android:textColor="#555555"
                 android:textStyle="bold" />
@@ -75,25 +86,36 @@
                 android:id="@+id/etPasscode"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginBottom="32dp"
                 android:background="@android:drawable/editbox_background_normal"
                 android:hint="@string/hint_enter_password"
+                android:maxWidth="488dp"
+                android:textColorHint="#757575"
+                android:autofillHints="password"
                 android:inputType="textPassword"
-                android:paddingLeft="10dp" />
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp" />
 
             <Button
                 android:id="@+id/btnLogin"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="55dp"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="250dp"
+                android:maxWidth="320dp"
                 android:backgroundTint="#008577"
                 android:text="@string/verify_enter"
                 android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btnCheckBalancePortal"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="55dp"
                 android:layout_marginTop="12dp"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="250dp"
+                android:maxWidth="320dp"
                 android:backgroundTint="#4A5568"
                 android:text="@string/btn_check_balance_portal"
                 android:textSize="16sp"
@@ -110,9 +132,12 @@
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
+        android:gravity="center"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:padding="8dp"
         android:text="@string/placeholder_text"
-        android:textColor="#999999"
+        android:textColor="#555555"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

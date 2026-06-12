@@ -40,6 +40,7 @@
             android:focusable="false"
             android:clickable="true"
             android:hint="@string/hint_select_date_range"
+            android:autofillHints="none"
             android:drawableEnd="@android:drawable/ic_menu_my_calendar"
             android:padding="12dp"
             android:background="@android:drawable/editbox_background_normal"/>
@@ -86,6 +87,7 @@
             android:background="@drawable/bg_description_input"
             android:gravity="top|start"
             android:hint="@string/hint_enter_reason"
+            android:autofillHints="none"
             android:inputType="textMultiLine"
             android:minLines="3"
             android:textColor="#333333"
