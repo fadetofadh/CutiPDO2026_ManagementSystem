@@ -10,12 +10,13 @@ public class LeaveRequest {
     private String description;
 
     // Constructor for Division Head submission
-    public LeaveRequest(String action, String employeeName, String targetDate, int totalDays, String leaveType) {
+    public LeaveRequest(String action, String employeeName, String targetDate, int totalDays, String leaveType, String description) {
         this.action = action;
         this.employeeName = employeeName;
         this.targetDate = targetDate;
         this.totalDays = totalDays;
         this.leaveType = leaveType;
+        this.description = description;
     }
 
     // Constructor for SuperAdmin PDO addition

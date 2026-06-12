@@ -228,7 +228,7 @@ public class ReviewQueueActivity extends AppCompatActivity {
         }
 
         QueuedRequest item = batchList.get(index);
-        LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
+        LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType(), item.getDescription());
 
         googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<>() {
             @Override

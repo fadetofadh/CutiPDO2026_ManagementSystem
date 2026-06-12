@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -68,6 +69,27 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reason of leaving:"
+            android:textSize="16sp"
+            android:textColor="#333333"/>
+
+        <EditText
+            android:id="@+id/etLeaveDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_description_input"
+            android:gravity="top|start"
+            android:hint="Enter reason of leaving here..."
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:textColor="#333333"
+            android:textColorHint="#999999" />
 
         <LinearLayout
             android:layout_width="match_parent"

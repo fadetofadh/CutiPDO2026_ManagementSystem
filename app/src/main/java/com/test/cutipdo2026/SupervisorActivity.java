@@ -112,7 +112,8 @@ public class SupervisorActivity extends AppCompatActivity {
                 .setMessage("Employee: " + request.employeeName +
                         "\nType: " + request.leaveType +
                         "\nDuration: " + request.totalDays + " Day(s)" +
-                        "\nDates: " + request.getFormattedDate())
+                        "\nDates: " + request.getFormattedDate() +
+                        "\nReason: " + (request.description != null ? request.description : "-"))
                 .setPositiveButton("APPROVE ✅", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -184,7 +185,7 @@ public class SupervisorActivity extends AppCompatActivity {
                 TextView tvSubtitle = convertView.findViewById(R.id.tvSupervisorRowSubtitle);
 
                 tvTitle.setText(item.employeeName + " - " + item.leaveType);
-                tvSubtitle.setText("Dates: " + item.getFormattedDate() + " (" + item.totalDays + " Days)");
+                tvSubtitle.setText("Dates: " + item.getFormattedDate() + " (" + item.totalDays + " Days)\nReason: " + (item.description != null ? item.description : "-"));
             }
             return convertView;
         }

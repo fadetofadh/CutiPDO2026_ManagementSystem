@@ -46,7 +46,7 @@ public class ReviewQueueAdapter extends RecyclerView.Adapter<ReviewQueueAdapter.
         binderHelper.bind(holder.swipeLayout, item.getEmployeeName() + position);
 
         holder.tvRowTitle.setText(item.getEmployeeName() + " - " + item.getLeaveType());
-        holder.tvRowSubtitle.setText("Dates: " + item.getTargetDate() + " (" + item.getTotalDays() + " Days)");
+        holder.tvRowSubtitle.setText("Dates: " + item.getTargetDate() + " (" + item.getTotalDays() + " Days)\nReason: " + item.getDescription());
 
         // Route underlying bottom click triggers to your custom activity actions callback routines
         holder.btnEditRow.setOnClickListener(v -> {

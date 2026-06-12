@@ -29,7 +29,7 @@ import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText etSelectedDates;
+    private EditText etSelectedDates, etLeaveDescription;
     private Button btnAddToBatch, btnReviewSubmit, btnCancelPortal;
     private TextView tvTotalDaysDisplay;
     private Spinner spEmployeeName, spLeaveType;
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         spEmployeeName = findViewById(R.id.spEmployeeName);
         spLeaveType = findViewById(R.id.spLeaveType);
         etSelectedDates = findViewById(R.id.etSelectedDates);
+        etLeaveDescription = findViewById(R.id.etLeaveDescription);
         tvTotalDaysDisplay = findViewById(R.id.tvTotalDaysDisplay);
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
         btnReviewSubmit = findViewById(R.id.btnReviewSubmit);
@@ -150,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             String leaveType = spLeaveType.getSelectedItem().toString();
+            String description = etLeaveDescription.getText().toString().trim();
 
             if (empName.equals("-- Select Employee Name --") || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
                 Toast.makeText(MainActivity.this, "Please select an employee and valid date range!", Toast.LENGTH_SHORT).show();
@@ -171,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                 else balance.pdoBalance -= calculatedDays;
             }
 
-            QueuedRequest newRequest = new QueuedRequest(empName, selectedDateRangeString, calculatedDays, leaveType);
+            QueuedRequest newRequest = new QueuedRequest(empName, selectedDateRangeString, calculatedDays, leaveType, description);
             batchQueue.add(newRequest);
             queueManager.saveQueue(batchQueue);
 
@@ -182,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
             currentStartMs = 0;
             currentEndMs = 0;
             etSelectedDates.setText("");
+            etLeaveDescription.setText("");
             tvTotalDaysDisplay.setText("Duration: 0 Day(s)");
             resetLeaveTypeOptions();
         });

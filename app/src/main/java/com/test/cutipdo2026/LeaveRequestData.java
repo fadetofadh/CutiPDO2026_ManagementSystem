@@ -6,6 +6,7 @@ public class LeaveRequestData {
     public Object targetDate; // Using Object to handle both String and Long (from GSON)
     public int totalDays;
     public String leaveType;
+    public String description;
 
     /**
      * Helper to safely get the date as a formatted String.

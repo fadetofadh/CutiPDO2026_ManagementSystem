@@ -7,12 +7,14 @@ public class QueuedRequest implements Serializable {
     private String targetDate;
     private int totalDays;
     private String leaveType;
+    private String description;
 
-    public QueuedRequest(String employeeName, String targetDate, int totalDays, String leaveType) {
+    public QueuedRequest(String employeeName, String targetDate, int totalDays, String leaveType, String description) {
         this.employeeName = employeeName;
         this.targetDate = targetDate;
         this.totalDays = totalDays;
         this.leaveType = leaveType;
+        this.description = description;
     }
 
     // Getters and Setters so we can read and edit these fields later on our review screen
@@ -27,6 +29,9 @@ public class QueuedRequest implements Serializable {
 
     public String getLeaveType() { return leaveType; }
     public void setLeaveType(String leaveType) { this.leaveType = leaveType; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     @Override
     public String toString() {
