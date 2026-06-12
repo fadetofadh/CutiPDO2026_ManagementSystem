@@ -1,17 +1,16 @@
 package com.test.cutipdo2026;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -58,13 +57,10 @@ public class CancelPortalActivity extends AppCompatActivity {
 
         loadHistoryLogQueue();
 
-        lvCancelHistory.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                LeaveRequestData selectedItem = historyList.get(position);
-                showCancelConfirmationDialog(selectedItem, position);
-                return true;
-            }
+        lvCancelHistory.setOnItemLongClickListener((parent, view, position, id) -> {
+            LeaveRequestData selectedItem = historyList.get(position);
+            showCancelConfirmationDialog(selectedItem, position);
+            return true;
         });
     }
 
@@ -74,9 +70,9 @@ public class CancelPortalActivity extends AppCompatActivity {
         lvCancelHistory.setVisibility(View.GONE);
 
         // Crucial Fix: We use .getAllRequests("all") to match your custom Retrofit interface mapping!
-        googleSheetsApi.getAllRequests("all").enqueue(new Callback<List<LeaveRequestData>>() {
+        googleSheetsApi.getAllRequests("all").enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<List<LeaveRequestData>> call, Response<List<LeaveRequestData>> response) {
+            public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
                 // 🛡️ Safety Switch: Kill loader instantly before handling any data checks
                 pbCancelLoader.setVisibility(View.GONE);
 
@@ -96,7 +92,7 @@ public class CancelPortalActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<LeaveRequestData>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
                 // 🛡️ Safety Switch: Clear loader on absolute hardware or script network crash
                 pbCancelLoader.setVisibility(View.GONE);
                 Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_failure, t.getMessage()), Toast.LENGTH_LONG).show();
@@ -108,12 +104,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_revoke_title)
                 .setMessage(getString(R.string.dialog_revoke_message, request.employeeName, request.totalDays))
-                .setPositiveButton(R.string.btn_yes_revoke_refund, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        executeCloudCancellation(request.rowNumber, itemPosition);
-                    }
-                })
+                .setPositiveButton(R.string.btn_yes_revoke_refund, (dialog, which) -> executeCloudCancellation(request.rowNumber, itemPosition))
                 .setNegativeButton(R.string.btn_no, (dialog, which) -> dialog.dismiss())
                 .show();
     }
@@ -124,9 +115,9 @@ public class CancelPortalActivity extends AppCompatActivity {
 
         LeaveRequest cancelPackage = new LeaveRequest("cancel", rowNumber);
 
-        googleSheetsApi.sendRequest(cancelPackage).enqueue(new Callback<ResponseBody>() {
+        googleSheetsApi.sendRequest(cancelPackage).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_request_revoked), Toast.LENGTH_LONG).show();
@@ -138,33 +129,33 @@ public class CancelPortalActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
                 Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private class CancelAdapter extends ArrayAdapter<LeaveRequestData> {
+    private static class CancelAdapter extends ArrayAdapter<LeaveRequestData> {
         public CancelAdapter(android.content.Context context, List<LeaveRequestData> items) {
             super(context, 0, items);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_cancel_request, parent, false);
-            }
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            View v = (convertView != null) ? convertView :
+                    LayoutInflater.from(getContext()).inflate(R.layout.item_cancel_request, parent, false);
 
             LeaveRequestData item = getItem(position);
             if (item != null) {
-                TextView tvTitle = convertView.findViewById(R.id.tvCancelRowTitle);
-                TextView tvSubtitle = convertView.findViewById(R.id.tvCancelRowSubtitle);
+                TextView tvTitle = v.findViewById(R.id.tvCancelRowTitle);
+                TextView tvSubtitle = v.findViewById(R.id.tvCancelRowSubtitle);
 
-                tvTitle.setText(item.employeeName + " - " + item.leaveType);
-                tvSubtitle.setText("Dates: " + item.targetDate + " (" + item.totalDays + " Days)");
+                tvTitle.setText(getContext().getString(R.string.item_title_format, item.employeeName, item.leaveType));
+                tvSubtitle.setText(getContext().getString(R.string.item_subtitle_format_simple, item.targetDate, item.totalDays));
             }
-            return convertView;
+            return v;
         }
     }
 }

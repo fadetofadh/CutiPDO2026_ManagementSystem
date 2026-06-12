@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean isEnabled(int position) {
                 if (position >= leaveTypeList.size()) return true;
-                return !leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo));
+                return !Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo));
             }
 
             @Override
@@ -121,7 +122,9 @@ public class MainActivity extends AppCompatActivity {
         // =========================================================================
         // 💡 4. EXTRACT PRE-FETCHED DATABASE DATA BUNDLES INSTANTLY
         // =========================================================================
+        @SuppressWarnings("unchecked")
         ArrayList<EmployeeBalance> preFetchedBalances = (ArrayList<EmployeeBalance>) getIntent().getSerializableExtra("PRE_FETCHED_BALANCES");
+        @SuppressWarnings("unchecked")
         ArrayList<String> preFetchedNames = (ArrayList<String>) getIntent().getSerializableExtra("PRE_FETCHED_NAMES");
 
         employeeList.clear();
@@ -146,30 +149,30 @@ public class MainActivity extends AppCompatActivity {
         btnAddToBatch.setOnClickListener(v -> {
             String empName = spEmployeeName.getSelectedItem().toString();
 
-            if (spLeaveType.getSelectedItem() == null || spLeaveType.getSelectedItem().toString().equals(getString(R.string.label_cuti_pdo))) {
+            if (spLeaveType.getSelectedItem() == null || Objects.equals(spLeaveType.getSelectedItem().toString(), getString(R.string.label_cuti_pdo))) {
                 Toast.makeText(MainActivity.this, getString(R.string.toast_select_leave_type), Toast.LENGTH_SHORT).show();
                 return;
             }
             String leaveType = spLeaveType.getSelectedItem().toString();
             String description = etLeaveDescription.getText().toString().trim();
 
-            if (empName.equals(getString(R.string.prompt_select_employee_name)) || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
+            if (Objects.equals(empName, getString(R.string.prompt_select_employee_name)) || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
                 Toast.makeText(MainActivity.this, getString(R.string.toast_select_employee_dates), Toast.LENGTH_SHORT).show();
                 return;
             }
 
             EmployeeBalance balance = balanceMap.get(empName);
             if (balance != null) {
-                if (leaveType.equals(getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
+                if (Objects.equals(leaveType, getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
                     Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_cuti, balance.cutiBalance), Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (leaveType.equals(getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
+                if (Objects.equals(leaveType, getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
                     Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_pdo, balance.pdoBalance), Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                if (leaveType.equals(getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
+                if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
                 else balance.pdoBalance -= calculatedDays;
             }
 
@@ -261,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
                 String startDateStr = formatter.format(new Date(currentStartMs));
                 String endDateStr = formatter.format(new Date(currentEndMs));
 
-                if (startDateStr.equals(endDateStr)) {
+                if (Objects.equals(startDateStr, endDateStr)) {
                     selectedDateRangeString = startDateStr;
                 } else {
                     selectedDateRangeString = startDateStr + " to " + endDateStr;
@@ -346,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
         leaveTypeList.clear();
         String selectedEmployee = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "";
 
-        if (currentStartMs == 0 || currentEndMs == 0 || selectedEmployee.equals(getString(R.string.prompt_select_employee_name))) {
+        if (currentStartMs == 0 || currentEndMs == 0 || Objects.equals(selectedEmployee, getString(R.string.prompt_select_employee_name))) {
             leaveTypeList.add(getString(R.string.label_cuti_pdo));
             leaveTypeList.add(getString(R.string.cuti));
             leaveTypeList.add(getString(R.string.pdo));
@@ -361,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
                 leaveTypeList.add(getString(R.string.label_insufficient_balance));
                 leaveTypeAdapter.notifyDataSetChanged();
 
-                if (!selectedEmployee.equals(getString(R.string.prompt_select_employee_name))) {
+                if (!Objects.equals(selectedEmployee, getString(R.string.prompt_select_employee_name))) {
                     showNoBalanceAlert(getString(R.string.label_insufficient_balance),
                             getString(R.string.alert_insufficient_balance_msg,
                                     calculatedDays, balance.cutiBalance, balance.pdoBalance));
@@ -383,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
         leaveTypeAdapter.notifyDataSetChanged();
 
         spLeaveType.post(() -> {
-            if (leaveTypeList.size() == 2 && leaveTypeList.get(0).equals(getString(R.string.label_cuti_pdo))) {
+            if (leaveTypeList.size() == 2 && Objects.equals(leaveTypeList.get(0), getString(R.string.label_cuti_pdo))) {
                 spLeaveType.setSelection(1);
             } else {
                 spLeaveType.setSelection(0);

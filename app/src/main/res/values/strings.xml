@@ -84,6 +84,10 @@
     <string name="placeholder_dates_duration">Dates: 2026&#8211;06&#8211;11 to 2026&#8211;06&#8211;12 (2 Days)</string>
     <string name="placeholder_class">Class</string>
 
+    <string name="item_title_format">%1$s &#8211; %2$s</string>
+    <string name="item_subtitle_format">Dates: %1$s (%2$d Days)\nReason: %3$s</string>
+    <string name="item_subtitle_format_simple">Dates: %1$s (%2$d Days)</string>
+
     <!-- Toasts & Dialogs -->
     <string name="toast_no_approved_requests">No approved requests available to revoke.</string>
     <string name="toast_server_error_code">Server response error code: %1$d</string>
@@ -152,4 +156,9 @@
     <string name="msg_declining_request">Declining request&#8230;</string>
     <string name="toast_approve_success">✅ Row %1$d Approved &amp; Calendar Logged!</string>
     <string name="toast_decline_success">❌ Row %1$d Successfully Declined.</string>
+
+    <!-- Content Descriptions -->
+    <string name="desc_edit_icon">Edit this item</string>
+    <string name="desc_delete_icon">Remove this item</string>
+    <string name="desc_calendar_icon">Calendar icon</string>
 </resources>

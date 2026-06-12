@@ -29,6 +29,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_edit"
+                android:contentDescription="@string/desc_edit_icon"
                 app:tint="#FFFFFF"/>
         </LinearLayout>
 
@@ -48,6 +49,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_delete"
+                android:contentDescription="@string/desc_delete_icon"
                 app:tint="#FFFFFF"/>
         </LinearLayout>
     </RelativeLayout>

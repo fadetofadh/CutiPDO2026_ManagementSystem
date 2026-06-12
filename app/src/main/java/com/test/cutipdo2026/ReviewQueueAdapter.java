@@ -45,8 +45,8 @@ public class ReviewQueueAdapter extends RecyclerView.Adapter<ReviewQueueAdapter.
         // Bind the sliding animation state to this item's unique name memory slot
         binderHelper.bind(holder.swipeLayout, item.getEmployeeName() + position);
 
-        holder.tvRowTitle.setText(item.getEmployeeName() + " - " + item.getLeaveType());
-        holder.tvRowSubtitle.setText("Dates: " + item.getTargetDate() + " (" + item.getTotalDays() + " Days)\nReason: " + item.getDescription());
+        holder.tvRowTitle.setText(holder.itemView.getContext().getString(R.string.item_title_format, item.getEmployeeName(), item.getLeaveType()));
+        holder.tvRowSubtitle.setText(holder.itemView.getContext().getString(R.string.item_subtitle_format, item.getTargetDate(), item.getTotalDays(), item.getDescription()));
 
         // Route underlying bottom click triggers to your custom activity actions callback routines
         holder.btnEditRow.setOnClickListener(v -> {

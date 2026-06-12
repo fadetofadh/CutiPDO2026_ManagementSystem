@@ -1,17 +1,16 @@
 package com.test.cutipdo2026;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -60,12 +59,9 @@ public class SupervisorActivity extends AppCompatActivity {
 
         fetchPendingQueue();
 
-        lvPendingRequests.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LeaveRequestData selectedItem = pendingList.get(position);
-                showDecisionDialog(selectedItem, position);
-            }
+        lvPendingRequests.setOnItemClickListener((parent, view, position, id) -> {
+            LeaveRequestData selectedItem = pendingList.get(position);
+            showDecisionDialog(selectedItem, position);
         });
     }
 
@@ -74,9 +70,9 @@ public class SupervisorActivity extends AppCompatActivity {
         tvNoData.setVisibility(View.GONE);
         lvPendingRequests.setVisibility(View.GONE);
 
-        googleSheetsApi.getPendingRequests("pending").enqueue(new Callback<List<LeaveRequestData>>() {
+        googleSheetsApi.getPendingRequests("pending").enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<List<LeaveRequestData>> call, Response<List<LeaveRequestData>> response) {
+            public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
                 pbSupervisorLoader.setVisibility(View.GONE);
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -98,7 +94,7 @@ public class SupervisorActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<LeaveRequestData>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
                 pbSupervisorLoader.setVisibility(View.GONE);
                 tvNoData.setVisibility(View.VISIBLE);
                 Toast.makeText(SupervisorActivity.this, getString(R.string.toast_load_list_failed, t.getMessage()), Toast.LENGTH_LONG).show();
@@ -115,18 +111,8 @@ public class SupervisorActivity extends AppCompatActivity {
                         request.totalDays,
                         request.getFormattedDate(),
                         (request.description != null ? request.description : "-")))
-                .setPositiveButton(R.string.btn_approve, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        executeCloudAction(request.rowNumber, itemPosition, "approve");
-                    }
-                })
-                .setNegativeButton(R.string.btn_decline, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        executeCloudAction(request.rowNumber, itemPosition, "decline");
-                    }
-                })
+                .setPositiveButton(R.string.btn_approve, (dialog, which) -> executeCloudAction(request.rowNumber, itemPosition, "approve"))
+                .setNegativeButton(R.string.btn_decline, (dialog, which) -> executeCloudAction(request.rowNumber, itemPosition, "decline"))
                 .setNeutralButton(R.string.btn_cancel, (dialog, which) -> dialog.dismiss())
                 .show();
     }
@@ -138,9 +124,9 @@ public class SupervisorActivity extends AppCompatActivity {
 
         LeaveRequest decisionPackage = new LeaveRequest(action, rowNumber);
 
-        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<ResponseBody>() {
+        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
                 if (response.isSuccessful()) {
                     String successMessage = action.equals("approve")
@@ -162,33 +148,33 @@ public class SupervisorActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
                 Toast.makeText(SupervisorActivity.this, getString(R.string.toast_sync_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private class SupervisorAdapter extends ArrayAdapter<LeaveRequestData> {
+    private static class SupervisorAdapter extends ArrayAdapter<LeaveRequestData> {
         public SupervisorAdapter(android.content.Context context, List<LeaveRequestData> items) {
             super(context, 0, items);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_supervisor_request, parent, false);
-            }
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            View v = (convertView != null) ? convertView :
+                    LayoutInflater.from(getContext()).inflate(R.layout.item_supervisor_request, parent, false);
 
             LeaveRequestData item = getItem(position);
             if (item != null) {
-                TextView tvTitle = convertView.findViewById(R.id.tvSupervisorRowTitle);
-                TextView tvSubtitle = convertView.findViewById(R.id.tvSupervisorRowSubtitle);
+                TextView tvTitle = v.findViewById(R.id.tvSupervisorRowTitle);
+                TextView tvSubtitle = v.findViewById(R.id.tvSupervisorRowSubtitle);
 
-                tvTitle.setText(item.employeeName + " - " + item.leaveType);
-                tvSubtitle.setText("Dates: " + item.getFormattedDate() + " (" + item.totalDays + " Days)\nReason: " + (item.description != null ? item.description : "-"));
+                tvTitle.setText(getContext().getString(R.string.item_title_format, item.employeeName, item.leaveType));
+                tvSubtitle.setText(getContext().getString(R.string.item_subtitle_format, item.getFormattedDate(), item.totalDays, (item.description != null ? item.description : "-")));
             }
-            return convertView;
+            return v;
         }
     }
 }

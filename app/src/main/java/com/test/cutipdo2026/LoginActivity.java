@@ -9,10 +9,13 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +46,14 @@ public class LoginActivity extends AppCompatActivity {
         etPasscode = findViewById(R.id.etPasscode);
         btnLogin = findViewById(R.id.btnLogin);
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Instead of going back to Splash (which re-launches Login), move app to background
+                moveTaskToBack(true);
+            }
+        });
+
         okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
@@ -56,39 +67,36 @@ public class LoginActivity extends AppCompatActivity {
 
         googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String inputCode = etPasscode.getText().toString().trim();
+        btnLogin.setOnClickListener(v -> {
+            String inputCode = etPasscode.getText().toString().trim();
 
-                // Verification Path A: Head of Division Portal (KADIV)
-                if (rbKadiv.isChecked()) {
-                    if (inputCode.equals("teknis")) {
-                        fetchDataAndNavigateToKadiv("Teknis");
-                    } else if (inputCode.equals("guide")) {
-                        fetchDataAndNavigateToKadiv("Guide");
-                    } else if (inputCode.equals("haka")) {
-                        fetchDataAndNavigateToKadiv("HK");
-                    } else if (inputCode.equals("superadmin")) {
-                        fetchDataAndNavigateToSuperAdmin();
-                    } else {
-                        Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_kadiv_passcode), Toast.LENGTH_SHORT).show();
-                    }
+            // Verification Path A: Head of Division Portal (KADIV)
+            if (rbKadiv.isChecked()) {
+                if (Objects.equals(inputCode, "teknis")) {
+                    fetchDataAndNavigateToKadiv("Teknis");
+                } else if (Objects.equals(inputCode, "guide")) {
+                    fetchDataAndNavigateToKadiv("Guide");
+                } else if (Objects.equals(inputCode, "haka")) {
+                    fetchDataAndNavigateToKadiv("HK");
+                } else if (Objects.equals(inputCode, "superadmin")) {
+                    fetchDataAndNavigateToSuperAdmin();
+                } else {
+                    Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_kadiv_passcode), Toast.LENGTH_SHORT).show();
                 }
+            }
 
-                // Verification Path B: Supervisor Dashboard (SPV)
-                else if (rbSpv.isChecked()) {
-                    if (inputCode.equals("spv")) {
-                        etPasscode.setText("");
-                        Intent intent = new Intent(LoginActivity.this, SupervisorActivity.class);
-                        startActivity(intent);
-                    } else if (inputCode.equals("superadmin")) {
-                        etPasscode.setText("");
-                        Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_spv_passcode), Toast.LENGTH_SHORT).show();
-                    }
+            // Verification Path B: Supervisor Dashboard (SPV)
+            else if (rbSpv.isChecked()) {
+                if (Objects.equals(inputCode, "spv")) {
+                    etPasscode.setText("");
+                    Intent intent = new Intent(LoginActivity.this, SupervisorActivity.class);
+                    startActivity(intent);
+                } else if (Objects.equals(inputCode, "superadmin")) {
+                    etPasscode.setText("");
+                    Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_spv_passcode), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -109,12 +117,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        // Instead of going back to Splash (which re-launches Login), move app to background
-        moveTaskToBack(true);
-    }
-
     private void fetchDataAndNavigateToSuperAdmin() {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.msg_sync_staff_directory));
@@ -122,12 +124,13 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.show();
 
         // Fetch all balances (filterClass = null)
-        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<List<EmployeeBalance>>() {
+        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
+            public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
 
                 if (response.isSuccessful() && response.body() != null) {
+                    @SuppressWarnings("unchecked")
                     ArrayList<EmployeeBalance> fullList = new ArrayList<>(response.body());
                     etPasscode.setText("");
                     Intent intent = new Intent(LoginActivity.this, SuperAdminActivity.class);
@@ -139,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
                 Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
@@ -153,24 +156,22 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.show();
 
         // Step 1: Download balances data
-        googleSheetsApi.getBalances("balances", filterClass).enqueue(new Callback<List<EmployeeBalance>>() {
+        googleSheetsApi.getBalances("balances", filterClass).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
+            public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 if (response.isSuccessful() && response.body() != null) {
 
                     // Explicitly construct an concrete ArrayList container to avoid internal class parcelable crashes
-                    ArrayList<EmployeeBalance> balanceList = new ArrayList<>();
-                    balanceList.addAll(response.body());
+                    ArrayList<EmployeeBalance> balanceList = new ArrayList<>(response.body());
 
                     // Step 2: Download Employee Names roster sequentially
-                    googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<List<String>>() {
+                    googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(Call<List<String>> call2, Response<List<String>> response2) {
+                        public void onResponse(@NonNull Call<List<String>> call2, @NonNull Response<List<String>> response2) {
                             if (progressDialog.isShowing()) progressDialog.dismiss();
 
                             if (response2.isSuccessful() && response2.body() != null) {
-                                ArrayList<String> nameList = new ArrayList<>();
-                                nameList.addAll(response2.body());
+                                ArrayList<String> nameList = new ArrayList<>(response2.body());
 
                                 etPasscode.setText("");
 
@@ -184,7 +185,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onFailure(Call<List<String>> call2, Throwable t2) {
+                        public void onFailure(@NonNull Call<List<String>> call2, @NonNull Throwable t2) {
                             if (progressDialog.isShowing()) progressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t2.getMessage()), Toast.LENGTH_SHORT).show();
                         }
@@ -197,7 +198,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
                 Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }

@@ -119,7 +119,7 @@ public class SuperAdminActivity extends AppCompatActivity {
         final int[] count = {0};
         for (String name : names) {
             LeaveRequest request = new LeaveRequest("add_pdo", name, pdoToAdd, "PDO", reason);
-            googleSheetsApi.sendRequest(request).enqueue(new Callback<ResponseBody>() {
+            googleSheetsApi.sendRequest(request).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     count[0]++;

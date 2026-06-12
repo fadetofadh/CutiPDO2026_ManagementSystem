@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,9 +102,9 @@ public class CheckBalanceActivity extends AppCompatActivity {
         employeeList.add(getString(R.string.prompt_select_employee_name));
         employeeAdapter.notifyDataSetChanged();
 
-        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<List<EmployeeBalance>>() {
+        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
+            public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 // Dismiss loading overlay dialogue smoothly
                 if (progressDialog.isShowing()) progressDialog.dismiss();
 
@@ -119,7 +120,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
                 Toast.makeText(CheckBalanceActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
