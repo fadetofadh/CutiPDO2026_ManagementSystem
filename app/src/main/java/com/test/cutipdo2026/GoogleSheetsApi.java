@@ -12,11 +12,17 @@ public interface GoogleSheetsApi {
 
     // Pulls the list of employees for the KADIV spinner dropdown
     @GET("exec")
-    Call<List<String>> getEmployees(@Query("type") String type);
+    Call<List<String>> getEmployees(
+            @Query("type") String type,
+            @Query("filterClass") String filterClass
+    );
 
     // Pulls employee balances
     @GET("exec")
-    Call<List<EmployeeBalance>> getBalances(@Query("type") String type);
+    Call<List<EmployeeBalance>> getBalances(
+            @Query("type") String type,
+            @Query("filterClass") String filterClass
+    );
 
     // 🌟 THE FIX: This adds the missing getPendingRequests method that SupervisorActivity is looking for!
     @GET("exec")

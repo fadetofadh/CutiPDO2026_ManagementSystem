@@ -106,15 +106,19 @@ public class ReviewQueueActivity extends AppCompatActivity {
     }
 
     private void openInlineDatePicker(QueuedRequest request, final int position) {
+        long today = MaterialDatePicker.todayInUtcMilliseconds();
         // 1. Build the identical Monday-start and Monday/Tuesday blocking rule constraints
         com.google.android.material.datepicker.CalendarConstraints.Builder constraintsBuilder =
                 new com.google.android.material.datepicker.CalendarConstraints.Builder();
 
         constraintsBuilder.setFirstDayOfWeek(Calendar.MONDAY); // Force layout grid row to start on Monday
+        constraintsBuilder.setStart(today);
+        constraintsBuilder.setOpenAt(today);
 
         constraintsBuilder.setValidator(new com.google.android.material.datepicker.CalendarConstraints.DateValidator() {
             @Override
             public boolean isValid(long date) {
+                if (date < today) return false;
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 cal.setTimeInMillis(date);
                 int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);

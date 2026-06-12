@@ -101,7 +101,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
         employeeList.add("-- Select Employee Name --");
         employeeAdapter.notifyDataSetChanged();
 
-        googleSheetsApi.getBalances("balances").enqueue(new Callback<List<EmployeeBalance>>() {
+        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<List<EmployeeBalance>>() {
             @Override
             public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
                 // Dismiss loading overlay dialogue smoothly

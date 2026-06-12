@@ -49,6 +49,14 @@
             android:name=".CheckBalanceActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".SuperAdminActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SuperAdminSPVActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

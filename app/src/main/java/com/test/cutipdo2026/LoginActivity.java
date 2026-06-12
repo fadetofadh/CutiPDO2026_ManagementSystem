@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -62,8 +63,14 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Verification Path A: Head of Division Portal (KADIV)
                 if (rbKadiv.isChecked()) {
-                    if (inputCode.equals("kadiv")) {
-                        fetchDataAndNavigateToKadiv();
+                    if (inputCode.equals("teknis")) {
+                        fetchDataAndNavigateToKadiv("Teknis");
+                    } else if (inputCode.equals("guide")) {
+                        fetchDataAndNavigateToKadiv("Guide");
+                    } else if (inputCode.equals("haka")) {
+                        fetchDataAndNavigateToKadiv("HK");
+                    } else if (inputCode.equals("superadmin")) {
+                        fetchDataAndNavigateToSuperAdmin();
                     } else {
                         Toast.makeText(LoginActivity.this, "Incorrect Head of Division Passcode!", Toast.LENGTH_SHORT).show();
                     }
@@ -74,6 +81,10 @@ public class LoginActivity extends AppCompatActivity {
                     if (inputCode.equals("spv")) {
                         etPasscode.setText("");
                         Intent intent = new Intent(LoginActivity.this, SupervisorActivity.class);
+                        startActivity(intent);
+                    } else if (inputCode.equals("superadmin")) {
+                        etPasscode.setText("");
+                        Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
                         startActivity(intent);
                     } else {
                         Toast.makeText(LoginActivity.this, "Incorrect Supervisor Passcode!", Toast.LENGTH_SHORT).show();
@@ -87,6 +98,15 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CheckBalanceActivity.class);
             startActivity(intent);
         });
+
+        TextView tvCreditPlaceholder = findViewById(R.id.tvCreditPlaceholder);
+        tvCreditPlaceholder.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("App Credits")
+                    .setMessage("Created by Someone\nDeveloped by wanwa\nBased on Idea of Galeri Rasullloh")
+                    .setPositiveButton("Close", null)
+                    .show();
+        });
     }
 
     @Override
@@ -95,14 +115,45 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    private void fetchDataAndNavigateToKadiv() {
+    private void fetchDataAndNavigateToSuperAdmin() {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Synchronizing full staff directory... Please wait.");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        // Fetch all balances (filterClass = null)
+        googleSheetsApi.getBalances("balances", null).enqueue(new Callback<List<EmployeeBalance>>() {
+            @Override
+            public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    ArrayList<EmployeeBalance> fullList = new ArrayList<>(response.body());
+                    etPasscode.setText("");
+                    Intent intent = new Intent(LoginActivity.this, SuperAdminActivity.class);
+                    intent.putExtra("FULL_EMPLOYEE_LIST", fullList);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Server sync failed. Please try again.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<EmployeeBalance>> call, Throwable t) {
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchDataAndNavigateToKadiv(String filterClass) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Synchronizing roster & balances... Please wait.");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
         // Step 1: Download balances data
-        googleSheetsApi.getBalances("balances").enqueue(new Callback<List<EmployeeBalance>>() {
+        googleSheetsApi.getBalances("balances", filterClass).enqueue(new Callback<List<EmployeeBalance>>() {
             @Override
             public void onResponse(Call<List<EmployeeBalance>> call, Response<List<EmployeeBalance>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -112,7 +163,7 @@ public class LoginActivity extends AppCompatActivity {
                     balanceList.addAll(response.body());
 
                     // Step 2: Download Employee Names roster sequentially
-                    googleSheetsApi.getEmployees("employees").enqueue(new Callback<List<String>>() {
+                    googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<List<String>>() {
                         @Override
                         public void onResponse(Call<List<String>> call2, Response<List<String>> response2) {
                             if (progressDialog.isShowing()) progressDialog.dismiss();

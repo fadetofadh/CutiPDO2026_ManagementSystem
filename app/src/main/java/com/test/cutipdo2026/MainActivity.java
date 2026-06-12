@@ -216,12 +216,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showStrictDatePicker() {
+        long today = MaterialDatePicker.todayInUtcMilliseconds();
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
         constraintsBuilder.setFirstDayOfWeek(Calendar.MONDAY);
+        constraintsBuilder.setStart(today);
+        constraintsBuilder.setOpenAt(today);
 
         constraintsBuilder.setValidator(new CalendarConstraints.DateValidator() {
             @Override
             public boolean isValid(long date) {
+                if (date < today) return false;
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 cal.setTimeInMillis(date);
                 int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);

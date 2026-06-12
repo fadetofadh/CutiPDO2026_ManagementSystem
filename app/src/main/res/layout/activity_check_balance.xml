@@ -1,135 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal"
     android:background="#F7FAFC"
-    tools:context=".CheckBalanceActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CHECK LEAVE BALANCE"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#2D3748"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="8dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select your name to check your remaining allowance"
-        android:textSize="14sp"
-        android:textColor="#718096"
-        android:gravity="center"
-        android:layout_marginBottom="32dp"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Employee Name"
-        android:textStyle="bold"
-        android:textColor="#4A5568"
-        android:layout_marginBottom="8dp"/>
-
-    <Spinner
-        android:id="@+id/spBalanceEmployeeName"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@android:drawable/btn_dropdown"
-        android:spinnerMode="dropdown"
-        android:layout_marginBottom="40dp"/>
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/layoutBalanceCards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:visibility="invisible"
-        android:layout_marginBottom="40dp">
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp"
+        tools:context=".CheckBalanceActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp"
+            android:text="CHECK LEAVE BALANCE"
+            android:textColor="#2D3748"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:gravity="center"
+            android:text="Select your name to check your remaining allowance"
+            android:textColor="#718096"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Employee Name"
+            android:textColor="#4A5568"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spBalanceEmployeeName"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="40dp"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown" />
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/layoutBalanceCards"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="#EBF8FF"
-            android:padding="16dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:elevation="2dp">
-            <TextView
-                android:layout_width="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="CUTI"
-                android:textStyle="bold"
-                android:textColor="#2B6CB0"
-                android:textSize="14sp"/>
-            <TextView
-                android:id="@+id/tvCutiBalanceAmount"
-                android:layout_width="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:background="#EBF8FF"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CUTI"
+                    android:textColor="#2B6CB0"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvCutiBalanceAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="0"
+                    android:textColor="#2B6CB0"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days Left"
+                    android:textColor="#4A5568"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="0"
-                android:textStyle="bold"
-                android:textColor="#2B6CB0"
-                android:textSize="36sp"
-                android:layout_marginTop="8dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Days Left"
-                android:textColor="#4A5568"
-                android:textSize="12sp"/>
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="#F0FDF4"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PDO"
+                    android:textColor="#166534"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPdoBalanceAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="0"
+                    android:textColor="#166534"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days Left"
+                    android:textColor="#4A5568"
+                    android:textSize="12sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="#F0FDF4"
-            android:padding="16dp"
-            android:layout_marginStart="8dp"
-            android:gravity="center"
-            android:elevation="2dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="PDO"
-                android:textStyle="bold"
-                android:textColor="#166534"
-                android:textSize="14sp"/>
-            <TextView
-                android:id="@+id/tvPdoBalanceAmount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textStyle="bold"
-                android:textColor="#166534"
-                android:textSize="36sp"
-                android:layout_marginTop="8dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Days Left"
-                android:textColor="#4A5568"
-                android:textSize="12sp"/>
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnBackToLogin"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#4A5568"
+            android:text="BACK TO PORTAL"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnBackToLogin"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:text="BACK TO PORTAL"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:backgroundTint="#4A5568"
-        android:layout_marginTop="24dp"/>
-
-</LinearLayout>
+</ScrollView>
