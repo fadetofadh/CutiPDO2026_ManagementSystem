@@ -20,30 +20,45 @@
                 android:id="@+id/layoutHeaderSpv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:orientation="vertical"
                 android:layout_marginBottom="15dp">
 
-                <TextView
-                    android:id="@+id/tvHeaderTitle"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/supervisor_approval_panel"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvHeaderTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/supervisor_approval_panel"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                    <TextView
+                        android:id="@+id/tvClearSelectionSpv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clear Marks"
+                        android:textColor="#E53E3E"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:padding="4dp"
+                        android:visibility="gone" />
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tvClearSelectionSpv"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvSupervisorSubtitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Clear Marks"
-                    android:textColor="#E53E3E"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:padding="4dp"
-                    android:visibility="gone" />
+                    android:layout_marginTop="4dp"
+                    android:text="@string/supervisor_portal_subtitle"
+                    android:textColor="#666666"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -61,7 +76,7 @@
                 android:layout_height="60dp"
                 android:layout_alignParentBottom="true"
                 android:backgroundTint="#4CAF50"
-                android:text="APPROVE SELECTED (0)"
+                android:text="@string/btn_approve_selected_count"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:visibility="gone" />

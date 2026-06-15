@@ -1,170 +1,180 @@
 <resources>
-    <string name="app_name">CutiPDO2026</string>
+    <string name="app_name">PCS</string>
     <string-array name="leave_types_array">
         <item>Cuti</item>
         <item>PDO</item>
     </string-array>
     <string-array name="roles_array">
-        <item>Select Your Portal Role&#8230;</item>
-        <item>Head of Division (KADIV)</item>
+        <item>Pilih Peran Portal Anda&#8230;</item>
+        <item>Kepala Divisi (KADIV)</item>
         <item>Supervisor (SPV)</item>
     </string-array>
-    <string name="kadiv_portal_title">HEAD OF DIVISION PORTAL</string>
-    <string name="btn_add_request">ADD LEAVE REQUEST</string>
-    <string name="btn_cancel_request">CANCEL COMPLETED REQUEST</string>
+    <string name="kadiv_portal_title">PORTAL KEPALA DIVISI</string>
+    <string name="btn_add_request">PENGAJUAN CUTI &amp; PDO</string>
+    <string name="btn_cancel_request">PEMBATALAN CUTI &amp; PDO</string>
 
-    <string name="spv_portal_title">SUPERVISOR PORTAL</string>
-    <string name="btn_approve_request">APPROVE PENDING REQUESTS</string>
-    <string name="label_select_employee">Select Employee:</string>
-    <string name="label_leave_type">Leave Type Option:</string>
-    <string name="btn_select_start_date">Select Start Date</string>
-    <string name="btn_select_end_date">Select End Date</string>
-    <string name="btn_add">Add</string>
-    <string name="btn_review">Review</string>
-    <string name="btn_cancel_completed">Cancel Completed Requests</string>
-    <string name="btn_check_balance_portal">CHECK BALANCE PORTAL</string>
-    <string name="msg_uploading">UPLOADING BATCH PACKAGES&#8230;</string>
-    <string name="btn_submit_all_count">SUBMIT ALL TO SUPERVISOR (%1$d)</string>
-    <string name="msg_item_removed">Item removed from batch.</string>
-    <string name="duration_placeholder">Duration: %1$d Day(s)</string>
-    <string name="check_leave_balance">CHECK LEAVE BALANCE</string>
-    <string name="select_name_to_check_balance">Select your name to check your remaining allowance</string>
-    <string name="employee_name">Employee Name</string>
-    <string name="prompt_select_employee_name">&#8211; Select Employee Name &#8211;</string>
+    <string name="spv_portal_title">PORTAL SUPERVISOR</string>
+    <string name="btn_approve_request">SETUJUI PENGAJUAN CUTI &amp; PDO</string>
+    <string name="label_select_employee">Pilih Karyawan:</string>
+    <string name="label_leave_type">Jenis Perizinan:</string>
+    <string name="btn_select_start_date">Pilih Tanggal Mulai</string>
+    <string name="btn_select_end_date">Pilih Tanggal Selesai</string>
+    <string name="btn_add">Tambah</string>
+    <string name="btn_review">Tinjau</string>
+    <string name="btn_cancel_completed">Batalkan Pengajuan Selesai</string>
+    <string name="btn_check_balance_portal">PORTAL CEK KUOTA</string>
+    <string name="msg_uploading">MENGUNGGAH PAKET BATCH&#8230;</string>
+    <string name="btn_submit_all_count">KIRIM SEMUA KE SUPERVISOR (%1$d)</string>
+    <string name="msg_item_removed">Item dihapus dari batch.</string>
+    <string name="duration_placeholder">Durasi: %1$d Hari</string>
+    <string name="check_leave_balance">CEK SISA KUOTA</string>
+    <string name="select_name_to_check_balance">Portal untuk melihat sisa kuota PDO dan Cuti</string>
+    <string name="employee_name">Nama Karyawan</string>
+    <string name="prompt_select_employee_name">&#8211; Pilih Nama Karyawan &#8211;</string>
     <string name="cuti">CUTI</string>
     <string name="pdo">PDO</string>
-    <string name="days_left">Days Left</string>
-    <string name="back_to_portal">BACK TO PORTAL</string>
+    <string name="days_left">Hari Lagi</string>
+    <string name="back_to_portal">KEMBALI KE HALAMAN AWAL</string>
     <string name="zero">0</string>
+    <string name="tap_for_log">Tap untuk detail</string>
 
     <!-- Cancel Portal -->
-    <string name="revoke_cancel_portal_title">REVOKE &amp; CANCEL PORTAL</string>
-    <string name="cancel_portal_subtitle">⚠️ Long-press any request to cancel it and refund balances.</string>
-    <string name="msg_processing">Processing&#8230;</string>
+    <string name="revoke_cancel_portal_title">PEMBATALAN PENGAJUAN</string>
+    <string name="cancel_portal_subtitle">⚠️ Tap dan tahan untuk melakukan pembatalan pengajuan.</string>
+    <string name="msg_processing">Memproses&#8230;</string>
+    <string name="btn_cancel_selected_count">BATALKAN PILIHAN (%1$d)</string>
+    <string name="msg_batch_revoking">Membatalkan Batch (%1$d/%2$d)&#8230;</string>
 
     <!-- Login -->
-    <string name="portal_gateway">PORTAL GATEWAY</string>
-    <string name="select_your_role">Select Your Role</string>
-    <string name="kadiv_head_div">KADIV (Head Div)</string>
+    <string name="portal_gateway">Sistem Cuti dan PDO</string>
+    <string name="select_your_role">Pilih Sesuai Jabatanmu</string>
+    <string name="kadiv_head_div">KADIV (Kepala Divisi)</string>
     <string name="spv_supervisor">SPV (Supervisor)</string>
-    <string name="system_passcode">System Passcode</string>
-    <string name="verify_enter">VERIFY &amp; ENTER</string>
-    <string name="hint_enter_password">Enter Password</string>
-    <string name="placeholder_text">teks place for when i need something</string>
+    <string name="system_passcode">Kata Sandi Sesuai Kredensial</string>
+    <string name="verify_enter">VERIFIKASI &amp; MASUK</string>
+    <string name="hint_enter_password">Masukkan Kata Sandi</string>
+    <string name="placeholder_text">Hak Cipta 2026 | Galeri Rasululloh</string>
 
     <!-- Main Activity -->
-    <string name="label_select_leave_dates">Select Leave Dates:</string>
-    <string name="duration_zero">Duration: 0 Day(s)</string>
-    <string name="label_reason_of_leaving">Reason of leaving:</string>
-    <string name="hint_select_date_range">Click to select date range&#8230;</string>
-    <string name="hint_enter_reason">Enter reason of leaving here&#8230;</string>
+    <string name="label_select_leave_dates">Pilih Tanggal Izin:</string>
+    <string name="duration_zero">Durasi: 0 Hari</string>
+    <string name="label_reason_of_leaving">Keterangan:</string>
+    <string name="hint_select_date_range">Tap untuk menentukan tanggal&#8230;</string>
+    <string name="hint_enter_reason">Ketik keterangan disini&#8230;</string>
 
     <!-- Review Queue -->
-    <string name="review_batch_requests">REVIEW BATCH REQUESTS</string>
-    <string name="review_queue_hint">💡 Slide any item left to edit or remove details before sending</string>
-    <string name="submit_all_to_supervisor_zero">SUBMIT ALL TO SUPERVISOR (0)</string>
+    <string name="review_batch_requests">TINJAU PENGAJUAN BATCH</string>
+    <string name="review_queue_hint">💡 Geser item ke kiri untuk mengedit atau menghapus sebelum mengirim</string>
+    <string name="submit_all_to_supervisor_zero">KIRIM SEMUA KE SUPERVISOR (0)</string>
 
     <!-- Splash -->
     <string name="splash_title">CUTI &amp; PDO</string>
-    <string name="splash_subtitle">MANAGEMENT SYSTEM</string>
+    <string name="splash_subtitle">SISTEM MANAJEMEN</string>
 
     <!-- Super Admin -->
-    <string name="add_pdo_title">ADD PDO</string>
-    <string name="select_employee_pdo_hint">select employee to add more PDO</string>
+    <string name="add_pdo_title">TAMBAH PDO</string>
+    <string name="select_employee_pdo_hint">pilih karyawan untuk menambah PDO</string>
     <string name="minus">-</string>
-    <string name="add_label">add: </string>
-    <string name="one_day">1 day</string>
-    <string name="days_count_format">%1$d day</string>
-    <string name="days_count_format_plural">%1$d days</string>
+    <string name="add_label">tambah:&#160;</string>
+    <string name="one_day">1 hari</string>
+    <string name="days_count_format">%1$d hari</string>
+    <string name="days_count_format_plural">%1$d hari</string>
     <string name="plus">+</string>
-    <string name="hint_description_pdo">Description for reason addition of PDO</string>
-    <string name="btn_submit">SUBMIT</string>
-    <string name="super_admin_spv_portal">Super Admin (SPV) Portal</string>
+    <string name="hint_description_pdo">Keterangan untuk alasan penambahan PDO</string>
+    <string name="btn_submit">KIRIM</string>
+    <string name="super_admin_spv_portal">Portal Super Admin (SPV)</string>
 
     <!-- Supervisor -->
-    <string name="supervisor_approval_panel">SUPERVISOR APPROVAL PANEL</string>
-    <string name="no_pending_requests">No pending leave requests found.</string>
+    <string name="supervisor_approval_panel">PANEL PERSETUJUAN SUPERVISOR</string>
+    <string name="supervisor_portal_subtitle">💡 Tap dan tahan atau geser untuk menyetujui.</string>
+    <string name="no_pending_requests">Tidak ditemukan pengajuan yang menunggu persetujuan</string>
+    <string name="btn_approve_selected_count">SETUJUI PILIHAN (%1$d)</string>
+    <string name="msg_batch_approving">Menyetujui Batch (%1$d/%2$d)&#8230;</string>
 
     <!-- Placeholders / Tools -->
-    <string name="placeholder_employee_category">Employee Name &#8211; Category</string>
-    <string name="placeholder_dates_duration">Dates: 2026&#8211;06&#8211;11 to 2026&#8211;06&#8211;12 (2 Days)</string>
-    <string name="placeholder_class">Class</string>
+    <string name="placeholder_employee_category">Nama Karyawan &#8211; Kategori</string>
+    <string name="placeholder_dates_duration">Tanggal: 2026&#8211;06&#8211;11 sampai 2026&#8211;06&#8211;12 (2 Hari)</string>
+    <string name="placeholder_class">Kelas</string>
+
+    <string name="log_no_history">Tidak ditemukan riwayat untuk %1$s (%2$s)</string>
+    <string name="log_dates_format">Tanggal: %1$s</string>
+    <string name="log_days_format">Hari: %1$d</string>
 
     <string name="item_title_format">%1$s &#8211; %2$s</string>
-    <string name="item_subtitle_format">Dates: %1$s (%2$d Days)\nReason: %3$s</string>
-    <string name="item_subtitle_format_simple">Dates: %1$s (%2$d Days)</string>
+    <string name="item_subtitle_format">Tanggal: %1$s (%2$d Hari)\nKeterangan: %3$s</string>
+    <string name="item_subtitle_format_simple">Tanggal: %1$s (%2$d Hari)</string>
 
     <!-- Toasts & Dialogs -->
-    <string name="toast_no_approved_requests">No approved requests available to revoke.</string>
-    <string name="toast_server_error_code">Server response error code: %1$d</string>
-    <string name="toast_network_failure">Network Link Failure: %1$s</string>
-    <string name="toast_request_revoked">🎉 Request Revoked! Balances refunded successfully.</string>
-    <string name="toast_server_rejected_cancellation">Server rejected cancellation: %1$d</string>
-    <string name="toast_network_error">Network Error: %1$s</string>
-    <string name="dialog_revoke_title">🚨 REVOKE LEAVE REQUEST?</string>
-    <string name="dialog_revoke_message">Are you absolutely sure you want to cancel this request for %1$s?\n\nThis action will:\n1. Delete all assigned entries from Google Calendar.\n2. Refund %2$d day(s) back to their Sisa cell balance automatically.</string>
-    <string name="btn_yes_revoke_refund">YES, REVOKE &amp; REFUND</string>
-    <string name="btn_no">No</string>
-    <string name="btn_close">Close</string>
-    <string name="msg_revoking_refunding">Revoking request &amp; refunding&#8230;</string>
+    <string name="toast_no_approved_requests">Tidak ada pengajuan yang disetujui untuk dibatalkan.</string>
+    <string name="toast_server_error_code">Kode kesalahan respons server: %1$d</string>
+    <string name="toast_network_failure">Kegagalan Jaringan: %1$s</string>
+    <string name="toast_request_revoked">🎉 Pengajuan Dibatalkan! Kuota Terpakai Telah Dikembalikan</string>
+    <string name="toast_server_rejected_cancellation">Server menolak pembatalan: %1$d</string>
+    <string name="toast_network_error">Kesalahan Jaringan: %1$s</string>
+    <string name="dialog_revoke_title">🚨 BATALKAN PENGAJUAN IZIN?</string>
+    <string name="dialog_revoke_message">Apakah Anda yakin ingin membatalkan pengajuan untuk %1$s?\n\nTindakan ini akan:\n1. Menghapus semua entri dari Google Calendar.\n2. Mengembalikan %2$d hari ke saldo Sisa secara otomatis.</string>
+    <string name="btn_yes_revoke_refund">YA, BATALKAN &amp; KEMBALIKAN</string>
+    <string name="btn_no">Tidak</string>
+    <string name="btn_close">Tutup</string>
+    <string name="msg_revoking_refunding">Membatalkan pengajuan &amp; mengembalikan kuota&#8230;</string>
 
-    <string name="toast_balance_sync_failed">Server balance database sync failed.</string>
-    <string name="msg_downloading_balances">Downloading current live balances&#8230; Please wait.</string>
+    <string name="toast_balance_sync_failed">Sinkronisasi basis data saldo server gagal.</string>
+    <string name="msg_downloading_balances">Mengunduh saldo terbaru&#8230; Mohon tunggu.</string>
 
-    <string name="toast_incorrect_kadiv_passcode">Incorrect Head of Division Passcode!</string>
-    <string name="toast_incorrect_spv_passcode">Incorrect Supervisor Passcode!</string>
-    <string name="toast_server_sync_failed">Server sync failed. Please try again.</string>
-    <string name="toast_failed_loading_staff">Failed loading staff roster names.</string>
-    <string name="toast_balance_sync_failed_generic">Server balance synchronization failed.</string>
-    <string name="dialog_credits_title">App Credits</string>
-    <string name="dialog_credits_message">Created by Someone\nDeveloped by wanwa\nBased on Idea of Galeri Rasullloh</string>
-    <string name="msg_sync_staff_directory">Synchronizing full staff directory&#8230; Please wait.</string>
-    <string name="msg_sync_roster_balances">Synchronizing roster &amp; balances&#8230; Please wait.</string>
+    <string name="toast_incorrect_kadiv_passcode">Kata Sandi Kepala Divisi Salah!</string>
+    <string name="toast_incorrect_spv_passcode">Kata Sandi Supervisor Salah!</string>
+    <string name="toast_server_sync_failed">Sinkronisasi server gagal. Silakan coba lagi.</string>
+    <string name="toast_failed_loading_staff">Gagal memuat daftar nama staf.</string>
+    <string name="toast_balance_sync_failed_generic">Sinkronisasi saldo server gagal.</string>
+    <string name="dialog_credits_title">Kredit Aplikasi</string>
+    <string name="dialog_credits_message">Dibuat oleh Seseorang\nDikembangkan oleh wanwa\nBerdasarkan Ide dari Galeri Rasullloh</string>
+    <string name="msg_sync_staff_directory">Sinkronisasi direktori staf lengkap&#8230; Mohon tunggu.</string>
+    <string name="msg_sync_roster_balances">Sinkronisasi daftar &amp; saldo&#8230; Mohon tunggu.</string>
 
     <string name="label_cuti_pdo">Cuti &#8212; PDO</string>
-    <string name="label_insufficient_balance">Insufficient Balance</string>
-    <string name="alert_insufficient_balance_msg">This employee has insufficient balance for a %1$d&#8211;day leave.\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
-    <string name="alert_insufficient_balance_weekend_msg">This employee has insufficient balance for a %1$d&#8211;day leave (Weekend included).\n\nAvailable:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="label_insufficient_balance">Saldo Tidak Cukup</string>
+    <string name="alert_insufficient_balance_msg">Karyawan ini tidak memiliki saldo yang cukup untuk izin selama %1$d hari.\n\nTersedia:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="alert_insufficient_balance_weekend_msg">Karyawan ini tidak memiliki saldo yang cukup untuk izin selama %1$d hari (Termasuk akhir pekan).\n\nTersedia:\nCuti: %2$.1f\nPDO: %3$.1f</string>
     <string name="btn_ok">OK</string>
-    <string name="label_select_leave_dates_title">Select Leave Dates</string>
-    <string name="label_modify_allocation_dates_title">Modify Allocation Dates Timeline</string>
-    <string name="whatsapp_message_format">🔔 *New Leave Request Submitted!*\n\n👤 *Employee:* %1$s\n📅 *Dates:* %2$s\n⏱️ *Duration:* %3$d Day(s)\n📝 *Type:* %4$s</string>
+    <string name="label_select_leave_dates_title">Pilih Tanggal Izin</string>
+    <string name="label_modify_allocation_dates_title">Ubah Timeline Tanggal Alokasi</string>
+    <string name="whatsapp_message_format">🔔 *Pengajuan Izin Baru Terkirim!*\n\n👤 *Karyawan:* %1$s\n📅 *Tanggal:* %2$s\n⏱️ *Durasi:* %3$d Hari\n📝 *Jenis:* %4$s</string>
 
-    <string name="toast_select_leave_type">Please select a valid Leave Type option!</string>
-    <string name="toast_select_employee_dates">Please select an employee and valid date range!</string>
-    <string name="toast_insufficient_cuti">❌ Insufficient Cuti balance! (Available: %1$.1f)</string>
-    <string name="toast_insufficient_pdo">❌ Insufficient PDO balance! (Available: %1$.1f)</string>
-    <string name="toast_added_to_batch">Added to batch queue! Items: %1$d</string>
-    <string name="toast_batch_empty">Your batch queue list is empty!</string>
-    <string name="toast_weekend_detected_cuti">ℹ️ Weekend detected but PDO balance empty. Automatically using Cuti.</string>
+    <string name="toast_select_leave_type">Silakan pilih opsi Jenis Izin yang valid!</string>
+    <string name="toast_select_employee_dates">Silakan pilih karyawan dan rentang tanggal yang valid!</string>
+    <string name="toast_insufficient_cuti">❌ Saldo Cuti tidak cukup! (Tersedia: %1$.1f)</string>
+    <string name="toast_insufficient_pdo">❌ Saldo PDO tidak cukup! (Tersedia: %1$.1f)</string>
+    <string name="toast_added_to_batch">Ditambahkan ke antrean batch! Item: %1$d</string>
+    <string name="toast_batch_empty">Antrean batch Anda kosong!</string>
+    <string name="toast_weekend_detected_cuti">ℹ️ Akhir pekan terdeteksi tetapi saldo PDO kosong. Otomatis menggunakan Cuti.</string>
 
-    <string name="toast_weekend_detected_pdo">ℹ️ Weekend detected! Leave type forced to PDO.</string>
-    <string name="toast_requests_submitted">🎉 All %1$d requests submitted to Supervisor!</string>
-    <string name="toast_upload_failed_pos">Failed uploading row position: %1$d</string>
-    <string name="toast_upload_loop_failure">Upload loop failure: %1$s</string>
+    <string name="toast_weekend_detected_pdo">ℹ️ Akhir pekan terdeteksi! Jenis izin dipaksa ke PDO.</string>
+    <string name="toast_requests_submitted">🎉 Semua %1$d pengajuan telah dikirim ke Supervisor!</string>
+    <string name="toast_upload_failed_pos">Gagal mengunggah posisi baris: %1$d</string>
+    <string name="toast_upload_loop_failure">Kegagalan unggah: %1$s</string>
 
-    <string name="toast_select_at_least_one_employee">Please select at least one employee!</string>
-    <string name="toast_enter_description">Please enter a description/reason!</string>
-    <string name="toast_pdo_added_success">Successfully added PDO to all selected staff!</string>
-    <string name="toast_batch_finished_with_errors">Batch process finished with some errors.</string>
-    <string name="msg_adding_pdo">Adding PDO to selected employees&#8230;</string>
+    <string name="toast_select_at_least_one_employee">Silakan pilih setidaknya satu karyawan!</string>
+    <string name="toast_enter_description">Silakan masukkan deskripsi/alasan!</string>
+    <string name="toast_pdo_added_success">Berhasil menambahkan PDO ke semua staf terpilih!</string>
+    <string name="toast_batch_finished_with_errors">Proses batch selesai dengan beberapa kesalahan.</string>
+    <string name="msg_adding_pdo">Menambahkan PDO ke karyawan terpilih&#8230;</string>
 
-    <string name="toast_server_error_code_supervisor">Server error code: %1$d</string>
-    <string name="toast_load_list_failed">Failed to load list queue: %1$s</string>
-    <string name="toast_server_rejected_action">Server rejected action: %1$d</string>
-    <string name="toast_sync_error">Sync Error: %1$s</string>
-    <string name="dialog_review_leave_title">Review Leave Request</string>
-    <string name="dialog_review_leave_msg_format">Employee: %1$s\nType: %2$s\nDuration: %3$d Day(s)\nDates: %4$s\nReason: %5$s</string>
-    <string name="btn_approve">APPROVE ✅</string>
-    <string name="btn_decline">DECLINE ❌</string>
-    <string name="btn_cancel">Cancel</string>
-    <string name="msg_approving_request">Approving request&#8230;</string>
-    <string name="msg_declining_request">Declining request&#8230;</string>
-    <string name="toast_approve_success">✅ Row %1$d Approved &amp; Calendar Logged!</string>
-    <string name="toast_decline_success">❌ Row %1$d Successfully Declined.</string>
+    <string name="toast_server_error_code_supervisor">Kode kesalahan server: %1$d</string>
+    <string name="toast_load_list_failed">Gagal memuat daftar antrean: %1$s</string>
+    <string name="toast_server_rejected_action">Server menolak tindakan: %1$d</string>
+    <string name="toast_sync_error">Kesalahan Sinkronisasi: %1$s</string>
+    <string name="dialog_review_leave_title">Tinjau Pengajuan Izin</string>
+    <string name="dialog_review_leave_msg_format">Karyawan: %1$s\nJenis Izin: %2$s\nSelama: %3$d Hari\nTanggal: %4$s\nKeterangan: %5$s</string>
+    <string name="btn_approve">SETUJUI ✅</string>
+    <string name="btn_decline">TOLAK ❌</string>
+    <string name="btn_cancel">Batal</string>
+    <string name="msg_approving_request">Menyetujui pengajuan&#8230;</string>
+    <string name="msg_declining_request">Menolak pengajuan&#8230;</string>
+    <string name="toast_approve_success">✅ Baris %1$d Disetujui &amp; Dicatat di Kalender!</string>
+    <string name="toast_decline_success">❌ Baris %1$d Berhasil Ditolak.</string>
 
     <!-- Content Descriptions -->
-    <string name="desc_edit_icon">Edit this item</string>
-    <string name="desc_delete_icon">Remove this item</string>
-    <string name="desc_calendar_icon">Calendar icon</string>
+    <string name="desc_edit_icon">Edit item ini</string>
+    <string name="desc_delete_icon">Hapus item ini</string>
+    <string name="desc_calendar_icon">Ikon kalender</string>
 </resources>

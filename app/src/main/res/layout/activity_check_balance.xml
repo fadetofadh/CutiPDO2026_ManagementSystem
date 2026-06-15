@@ -115,7 +115,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Tap for Log"
+                            android:text="@string/tap_for_log"
                             android:textColor="#3182CE"
                             android:textSize="10sp" />
                     </LinearLayout>
@@ -171,7 +171,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Tap for Log"
+                            android:text="@string/tap_for_log"
                             android:textColor="#15803D"
                             android:textSize="10sp" />
                     </LinearLayout>

@@ -79,7 +79,10 @@ public class CancelPortalActivity extends AppCompatActivity {
         rvCancelHistory.setVisibility(View.GONE);
         tvNoHistory.setVisibility(View.GONE);
 
-        googleSheetsApi.getAllRequests("all", filterClass).enqueue(new Callback<>() {
+        // 💡 Cache Buster: Ensures we get the freshest data from Google Sheets
+        String cb = String.valueOf(System.currentTimeMillis());
+
+        googleSheetsApi.getAllRequests("all", filterClass, cb).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
                 pbCancelLoader.setVisibility(View.GONE);
@@ -185,7 +188,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         }
         tvClearSelectionCancel.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
         btnBatchCancel.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
-        btnBatchCancel.setText("CANCEL SELECTED (" + markedCount + ")");
+        btnBatchCancel.setText(getString(R.string.btn_cancel_selected_count, markedCount));
     }
 
     private void showBatchCancelConfirmation(final List<LeaveRequestData> items) {
@@ -217,7 +220,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         }
 
         LeaveRequestData item = items.get(index);
-        tvProgressMessage.setText("Batch Revoking (" + (index + 1) + "/" + items.size() + ")...");
+        tvProgressMessage.setText(getString(R.string.msg_batch_revoking, (index + 1), items.size()));
         progressOverlay.setVisibility(View.VISIBLE);
         swipeRefreshCancel.setEnabled(false);
 

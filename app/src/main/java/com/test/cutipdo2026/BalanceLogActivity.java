@@ -76,7 +76,11 @@ public class BalanceLogActivity extends AppCompatActivity {
         }
         tvNoLogData.setVisibility(View.GONE);
 
-        googleSheetsApi.getAllRequests("all", null).enqueue(new Callback<List<LeaveRequestData>>() {
+        // 💡 Cache Buster: Ensures you see LIVE data every time you refresh
+        String cb = String.valueOf(System.currentTimeMillis());
+
+        // 🛡️ Passing "all" for filterClass to bypass server-side department filtering
+        googleSheetsApi.getAllRequests("all", "all", cb).enqueue(new Callback<List<LeaveRequestData>>() {
             @Override
             public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
                 pbLogLoader.setVisibility(View.GONE);
@@ -85,20 +89,22 @@ public class BalanceLogActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     logList.clear();
                     for (LeaveRequestData data : response.body()) {
-                        if (data.employeeName.equalsIgnoreCase(employeeName) && 
-                            data.leaveType.equalsIgnoreCase(leaveType)) {
+                        // 🛡️ Safe Filtering: Match Name and Leave Type exactly
+                        if (data.employeeName != null && data.employeeName.trim().equalsIgnoreCase(employeeName.trim()) && 
+                            data.leaveType != null && data.leaveType.trim().equalsIgnoreCase(leaveType.trim())) {
                             logList.add(data);
                         }
                     }
 
                     if (logList.isEmpty()) {
                         tvNoLogData.setVisibility(View.VISIBLE);
+                        tvNoLogData.setText(getString(R.string.log_no_history, employeeName, leaveType));
                     } else {
                         tvNoLogData.setVisibility(View.GONE);
                     }
                     logAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(BalanceLogActivity.this, "Failed to load logs", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BalanceLogActivity.this, "Server error or no data found.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -106,7 +112,7 @@ public class BalanceLogActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
                 pbLogLoader.setVisibility(View.GONE);
                 swipeRefreshLog.setRefreshing(false);
-                Toast.makeText(BalanceLogActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BalanceLogActivity.this, "Connection Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -127,46 +133,26 @@ public class BalanceLogActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
             LeaveRequestData item = items.get(position);
             
-            // 1. Bold text: Action Type (ADD, SUBMIT, DIRECT)
-            String action = item.actionType != null ? item.actionType.toUpperCase() : "ACTIVITY";
-            holder.tvLogDate.setText(action);
-            
-            // 2. Top Right: Approval ID (badge)
-            String id = item.approvalId != null && !item.approvalId.isEmpty() ? item.approvalId : "-";
-            holder.tvLogAction.setText(id);
-            
-            // 3. Keep Dates: ...
-            holder.tvLogLeaveDates.setText("Dates: " + item.getFormattedDate());
-            
-            // 4. Keep Days and Reason
-            holder.tvLogDays.setText("Days: " + item.totalDays);
-            
-            String cleanDesc = item.description != null ? item.description : "-";
-            if (cleanDesc.startsWith("[REFUNDED] ")) {
-                cleanDesc = cleanDesc.substring("[REFUNDED] ".length());
-            }
-            holder.tvLogDescription.setText(cleanDesc);
+            holder.tvLogDate.setText(item.actionType != null ? item.actionType.toUpperCase() : "ACTIVITY");
+            holder.tvLogAction.setText(item.approvalId != null && !item.approvalId.isEmpty() ? item.approvalId : "-");
+            holder.tvLogLeaveDates.setText(holder.itemView.getContext().getString(R.string.log_dates_format, item.getFormattedDate()));
+            holder.tvLogDays.setText(holder.itemView.getContext().getString(R.string.log_days_format, item.totalDays));
+            holder.tvLogDescription.setText(item.description != null ? item.description : "-");
 
-            // 🎨 Dynamic Color Styling based on STATUS
             String status = item.status != null ? item.status : "";
             if (status.equalsIgnoreCase("Approved")) {
-                // Approved: Green Theme
-                holder.tvLogAction.setBackgroundColor(Color.parseColor("#C6F6D5")); // Light Green bg
-                holder.tvLogAction.setTextColor(Color.parseColor("#2F855A"));     // Dark Green text
+                holder.tvLogAction.setBackgroundColor(Color.parseColor("#C6F6D5")); 
+                holder.tvLogAction.setTextColor(Color.parseColor("#2F855A"));     
             } else if (status.equalsIgnoreCase("Pending")) {
-                // Pending: Orange/Blue Theme
-                holder.tvLogAction.setBackgroundColor(Color.parseColor("#FEEBC8")); // Light Orange bg
-                holder.tvLogAction.setTextColor(Color.parseColor("#C05621"));     // Dark Orange text
+                holder.tvLogAction.setBackgroundColor(Color.parseColor("#FEEBC8")); 
+                holder.tvLogAction.setTextColor(Color.parseColor("#C05621"));     
             } else if (status.equalsIgnoreCase("System")) {
-                // System (Additions): Blue Theme
-                holder.tvLogAction.setBackgroundColor(Color.parseColor("#BEE3F8")); // Light Blue bg
-                holder.tvLogAction.setTextColor(Color.parseColor("#2B6CB0"));     // Dark Blue text
+                holder.tvLogAction.setBackgroundColor(Color.parseColor("#BEE3F8")); 
+                holder.tvLogAction.setTextColor(Color.parseColor("#2B6CB0"));     
             } else if (status.equalsIgnoreCase("Cancelled") || status.equalsIgnoreCase("Declined")) {
-                // Cancelled/Declined: Red Theme
-                holder.tvLogAction.setBackgroundColor(Color.parseColor("#FED7D7")); // Light Red bg
-                holder.tvLogAction.setTextColor(Color.parseColor("#C53030"));     // Dark Red text
+                holder.tvLogAction.setBackgroundColor(Color.parseColor("#FED7D7")); 
+                holder.tvLogAction.setTextColor(Color.parseColor("#C53030"));     
             } else {
-                // Default
                 holder.tvLogAction.setBackgroundColor(Color.parseColor("#EDF2F7"));
                 holder.tvLogAction.setTextColor(Color.parseColor("#4A5568"));
             }

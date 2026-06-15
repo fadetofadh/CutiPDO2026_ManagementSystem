@@ -191,7 +191,7 @@ public class SupervisorActivity extends AppCompatActivity {
         }
         tvClearSelectionSpv.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
         btnBatchActionSpv.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
-        btnBatchActionSpv.setText("APPROVE SELECTED (" + markedCount + ")");
+        btnBatchActionSpv.setText(getString(R.string.btn_approve_selected_count, markedCount));
     }
 
     private void processBatchApproval(final List<LeaveRequestData> items, final int index) {
@@ -204,7 +204,7 @@ public class SupervisorActivity extends AppCompatActivity {
         }
 
         LeaveRequestData item = items.get(index);
-        tvProgressMessage.setText("Batch Approving (" + (index + 1) + "/" + items.size() + ")...");
+        tvProgressMessage.setText(getString(R.string.msg_batch_approving, (index + 1), items.size()));
         progressOverlay.setVisibility(View.VISIBLE);
         swipeRefreshSupervisor.setEnabled(false); // 🔒 Disable refresh while processing
 

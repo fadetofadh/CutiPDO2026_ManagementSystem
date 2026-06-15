@@ -35,7 +35,8 @@ public interface GoogleSheetsApi {
     @GET("exec")
     Call<List<LeaveRequestData>> getAllRequests(
             @Query("type") String type,
-            @Query("filterClass") String filterClass
+            @Query("filterClass") String filterClass,
+            @Query("cb") String cacheBuster
     );
 
     // Sends your leave request batches out to the Apps Script backend
