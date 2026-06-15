@@ -43,7 +43,7 @@
                         android:id="@+id/tvClearSelectionSpv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Clear Marks"
+                        android:text="@string/label_clear_marks"
                         android:textColor="#E53E3E"
                         android:textSize="12sp"
                         android:textStyle="bold"

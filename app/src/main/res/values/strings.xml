@@ -171,6 +171,25 @@
     <string name="toast_approve_success">✅ Baris %1$d Disetujui &amp; Dicatat di Kalender!</string>
     <string name="toast_decline_success">❌ Baris %1$d Berhasil Ditolak.</string>
 
+    <string name="leave_log_title">Log Izin</string>
+    <string name="no_history_found">Tidak ditemukan riwayat untuk kategori ini.</string>
+    <string name="label_clear_marks">Hapus Tanda</string>
+    <string name="toast_edit_coming_soon">Fitur edit segera hadir!</string>
+    <string name="dialog_confirm_revoke_title">🚨 KONFIRMASI PEMBATALAN</string>
+    <string name="dialog_batch_cancel_title">🚨 KONFIRMASI PEMBATALAN BATCH</string>
+    <string name="toast_batch_cancel_complete">Pembatalan batch selesai!</string>
+    <string name="toast_select_employee_first">Silakan pilih karyawan terlebih dahulu</string>
+    <string name="toast_roster_empty_relogin">Data daftar karyawan kosong. Silakan masuk kembali.</string>
+    <string name="toast_complete_all_fields">Silakan lengkapi semua bidang</string>
+    <string name="toast_request_approved_logged">Pengajuan Disetujui &amp; Dicatat!</string>
+    <string name="toast_batch_approve_complete">Persetujuan batch selesai!</string>
+    <string name="toast_server_error_no_data">Kesalahan server atau data tidak ditemukan.</string>
+    <string name="toast_quick_submit_coming_soon">Fitur Pengiriman Cepat segera hadir!</string>
+    <string name="dialog_batch_cancel_msg">Anda akan membatalkan pengajuan berikut:\n\n%1$s\nTindakan ini akan menghapus acara kalender dan mengembalikan saldo sisa. Lanjutkan?</string>
+    <string name="btn_yes_cancel_all">YA, BATALKAN SEMUA</string>
+    <string name="dialog_confirm_revoke_message">Karyawan: %1$s\nTanggal: %2$s\nDurasi: %3$d Hari\n\nTindakan ini akan menghapus entri kalender dan mengembalikan saldo. Lanjutkan?</string>
+    <string name="btn_yes_revoke">YA, BATALKAN</string>
+
     <!-- Content Descriptions -->
     <string name="desc_edit_icon">Edit item ini</string>
     <string name="desc_delete_icon">Hapus item ini</string>

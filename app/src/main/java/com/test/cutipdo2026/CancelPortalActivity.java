@@ -101,22 +101,22 @@ public class CancelPortalActivity extends AppCompatActivity {
                         listAdapter = new UniversalRequestAdapter(historyList, new UniversalRequestAdapter.OnItemActionListener() {
                             @Override
                             public void onEditSelected(LeaveRequestData request, int position) {
-                                Toast.makeText(CancelPortalActivity.this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_edit_coming_soon), Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onDeleteSelected(int position) {
                                 LeaveRequestData item = historyList.get(position);
-                                String detail = String.format("Employee: %s\nDates: %s\nDuration: %d Day(s)\n\nThis will delete calendar entries and refund balance. Proceed?", 
+                                String detail = getString(R.string.dialog_confirm_revoke_message, 
                                     item.employeeName, item.getFormattedDate(), item.totalDays);
                                 
                                 new AlertDialog.Builder(CancelPortalActivity.this)
-                                    .setTitle("🚨 CONFIRM INDIVIDUAL REVOKE")
+                                    .setTitle(R.string.dialog_confirm_revoke_title)
                                     .setMessage(detail)
-                                    .setPositiveButton("YES, REVOKE", (dialog, which) -> {
+                                    .setPositiveButton(R.string.btn_yes_revoke, (dialog, which) -> {
                                         executeCloudCancellation(item.rowNumber, position);
                                     })
-                                    .setNegativeButton("NO", null)
+                                    .setNegativeButton(R.string.btn_no, null)
                                     .show();
                             }
 
@@ -193,20 +193,18 @@ public class CancelPortalActivity extends AppCompatActivity {
 
     private void showBatchCancelConfirmation(final List<LeaveRequestData> items) {
         StringBuilder summary = new StringBuilder();
-        summary.append("You are about to cancel the following requests:\n\n");
         for (LeaveRequestData item : items) {
-            summary.append("• ").append(item.employeeName).append(" (").append(item.totalDays).append(" Days)\n");
+            summary.append("• ").append(item.employeeName).append(" (").append(item.totalDays).append(" Hari)\n");
             summary.append("  ").append(item.getFormattedDate()).append("\n\n");
         }
-        summary.append("This will delete calendar events and refund sisa balances. Proceed?");
 
         new AlertDialog.Builder(this)
-                .setTitle("🚨 BATCH CANCEL CONFIRMATION")
-                .setMessage(summary.toString())
-                .setPositiveButton("YES, CANCEL ALL", (dialog, which) -> {
+                .setTitle(R.string.dialog_batch_cancel_title)
+                .setMessage(getString(R.string.dialog_batch_cancel_msg, summary.toString()))
+                .setPositiveButton(R.string.btn_yes_cancel_all, (dialog, which) -> {
                     processBatchCancellation(items, 0);
                 })
-                .setNegativeButton("NO", null)
+                .setNegativeButton(R.string.btn_no, null)
                 .show();
     }
 
@@ -214,7 +212,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
             swipeRefreshCancel.setEnabled(true);
-            Toast.makeText(this, "Batch cancellation complete!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_batch_cancel_complete), Toast.LENGTH_SHORT).show();
             loadHistoryLogQueue();
             return;
         }

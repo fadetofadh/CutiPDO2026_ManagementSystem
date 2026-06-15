@@ -29,7 +29,7 @@
             android:layout_toEndOf="@id/btnBackFromLog"
             android:layout_centerVertical="true"
             android:layout_marginStart="16dp"
-            android:text="Leave Log"
+            android:text="@string/leave_log_title"
             android:textColor="#2D3748"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="No history found for this category."
+                android:text="@string/no_history_found"
                 android:textColor="#A0AEC0"
                 android:textSize="16sp"
                 android:visibility="gone" />
