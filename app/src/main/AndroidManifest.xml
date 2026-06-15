@@ -57,6 +57,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".BalanceLogActivity"
+            android:exported="false"
+            android:label="Leave History Log" />
+
+        <activity
             android:name=".SuperAdminActivity"
             android:exported="false" />
 

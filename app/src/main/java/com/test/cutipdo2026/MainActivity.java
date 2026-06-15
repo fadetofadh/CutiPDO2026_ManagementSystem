@@ -325,8 +325,7 @@ public class MainActivity extends AppCompatActivity {
 
             btnSubmitToSpv.setEnabled(false);
             btnSubmitToSpv.setText(getString(R.string.msg_uploading));
-            rvBatchQueue.setAlpha(0.5f);
-            rvBatchQueue.setEnabled(false);
+            setUiEnabled(false); // 🔒 Lock the entire form and list
 
             successUploadCount = 0;
             sendSelectedItemsSequentially(itemsToSend, 0);
@@ -432,6 +431,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setUiEnabled(boolean enabled) {
+        float alpha = enabled ? 1.0f : 0.5f;
+        spEmployeeName.setEnabled(enabled);
+        etSelectedDates.setEnabled(enabled);
+        etLeaveDescription.setEnabled(enabled);
+        spLeaveType.setEnabled(enabled);
+        btnAddToBatch.setEnabled(enabled);
+        rvBatchQueue.setEnabled(enabled);
+        rvBatchQueue.setAlpha(alpha);
+        
+        // Form containers/labels alpha for visual feedback
+        findViewById(R.id.spEmployeeName).setAlpha(alpha);
+        findViewById(R.id.etSelectedDates).setAlpha(alpha);
+        findViewById(R.id.etLeaveDescription).setAlpha(alpha);
+        findViewById(R.id.spLeaveType).setAlpha(alpha);
+    }
+
     private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index) {
         if (index >= items.size()) {
             Toast.makeText(this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
@@ -446,8 +462,7 @@ public class MainActivity extends AppCompatActivity {
             updateQueueUi();
 
             btnSubmitToSpv.setEnabled(true);
-            rvBatchQueue.setAlpha(1.0f);
-            rvBatchQueue.setEnabled(true);
+            setUiEnabled(true); // 🔓 Unlock everything
             return;
         }
 
@@ -478,6 +493,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, getString(R.string.toast_upload_failed_pos, index), Toast.LENGTH_SHORT).show();
                     btnSubmitToSpv.setEnabled(true);
+                    setUiEnabled(true); // 🔓 Unlock on error
                     updateQueueUi();
                 }
             }
@@ -486,6 +502,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Toast.makeText(MainActivity.this, getString(R.string.toast_upload_loop_failure, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnSubmitToSpv.setEnabled(true);
+                setUiEnabled(true); // 🔓 Unlock on failure
                 updateQueueUi();
             }
         });

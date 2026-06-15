@@ -197,6 +197,7 @@ public class SupervisorActivity extends AppCompatActivity {
     private void processBatchApproval(final List<LeaveRequestData> items, final int index) {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
+            swipeRefreshSupervisor.setEnabled(true); // 🔓 Re-enable refresh
             Toast.makeText(this, "Batch approval complete!", Toast.LENGTH_SHORT).show();
             fetchPendingQueue(); // Refresh list
             return;
@@ -205,6 +206,7 @@ public class SupervisorActivity extends AppCompatActivity {
         LeaveRequestData item = items.get(index);
         tvProgressMessage.setText("Batch Approving (" + (index + 1) + "/" + items.size() + ")...");
         progressOverlay.setVisibility(View.VISIBLE);
+        swipeRefreshSupervisor.setEnabled(false); // 🔒 Disable refresh while processing
 
         // 💡 FIX: use "approve" action which triggers approveLeaveRequest() in script for calendar logging
         LeaveRequest decisionPackage = new LeaveRequest("approve", item.rowNumber);
@@ -228,6 +230,7 @@ public class SupervisorActivity extends AppCompatActivity {
         String processingMessage = action.equals("approve") ? getString(R.string.msg_approving_request) : getString(R.string.msg_declining_request);
         tvProgressMessage.setText(processingMessage);
         progressOverlay.setVisibility(View.VISIBLE);
+        swipeRefreshSupervisor.setEnabled(false); // 🔒 Lock UI interaction
 
         LeaveRequest decisionPackage = new LeaveRequest(action, rowNumber);
 
@@ -235,6 +238,7 @@ public class SupervisorActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
+                swipeRefreshSupervisor.setEnabled(true); // 🔓 Unlock
                 if (response.isSuccessful()) {
                     String successMessage = action.equals("approve")
                             ? getString(R.string.toast_approve_success, rowNumber)
@@ -258,6 +262,7 @@ public class SupervisorActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
+                swipeRefreshSupervisor.setEnabled(true); // 🔓 Unlock
                 Toast.makeText(SupervisorActivity.this, getString(R.string.toast_sync_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

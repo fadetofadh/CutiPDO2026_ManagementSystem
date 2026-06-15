@@ -7,6 +7,9 @@ public class LeaveRequestData {
     public int totalDays;
     public String leaveType;
     public String description;
+    public String status;    // Col G: Pending, Approved, System, Cancelled
+    public String actionType; // Col B: Submit, Add, Direct
+    public String approvalId; // Col I: Calendar IDs or Approval Reference
 
     // UI States
     public boolean isExpanded = false;

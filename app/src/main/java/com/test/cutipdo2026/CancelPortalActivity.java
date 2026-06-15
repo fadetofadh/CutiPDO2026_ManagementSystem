@@ -28,7 +28,7 @@ public class CancelPortalActivity extends AppCompatActivity {
     private RecyclerView rvCancelHistory;
     private ProgressBar pbCancelLoader;
     private FrameLayout progressOverlay;
-    private TextView tvProgressMessage, tvClearSelectionCancel;
+    private TextView tvProgressMessage, tvClearSelectionCancel, tvNoHistory;
     private Button btnBatchCancel;
     private SwipeRefreshLayout swipeRefreshCancel;
     private GoogleSheetsApi googleSheetsApi;
@@ -48,6 +48,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         progressOverlay = findViewById(R.id.progressOverlay);
         tvProgressMessage = findViewById(R.id.tvProgressMessage);
         tvClearSelectionCancel = findViewById(R.id.tvClearSelectionCancel);
+        tvNoHistory = findViewById(R.id.tvNoHistory);
         btnBatchCancel = findViewById(R.id.btnBatchCancel);
         swipeRefreshCancel = findViewById(R.id.swipeRefreshCancel);
 
@@ -76,12 +77,11 @@ public class CancelPortalActivity extends AppCompatActivity {
             pbCancelLoader.setVisibility(View.VISIBLE);
         }
         rvCancelHistory.setVisibility(View.GONE);
+        tvNoHistory.setVisibility(View.GONE);
 
-        // Crucial Fix: Use filterClass to only show requests matching the logged-in category
         googleSheetsApi.getAllRequests("all", filterClass).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
-                // 🛡️ Safety Switch: Kill loader instantly before handling any data checks
                 pbCancelLoader.setVisibility(View.GONE);
                 swipeRefreshCancel.setRefreshing(false);
 
@@ -89,10 +89,11 @@ public class CancelPortalActivity extends AppCompatActivity {
                     historyList = response.body();
 
                     if (historyList.isEmpty()) {
-                        Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_no_approved_requests), Toast.LENGTH_LONG).show();
-                        // 💡 Automatically go back if list is empty
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> finish(), 1500);
+                        tvNoHistory.setVisibility(View.VISIBLE);
+                        rvCancelHistory.setVisibility(View.GONE);
+                        updateClearButtonVisibility();
                     } else {
+                        tvNoHistory.setVisibility(View.GONE);
                         rvCancelHistory.setVisibility(View.VISIBLE);
                         listAdapter = new UniversalRequestAdapter(historyList, new UniversalRequestAdapter.OnItemActionListener() {
                             @Override
@@ -118,11 +119,10 @@ public class CancelPortalActivity extends AppCompatActivity {
 
                             @Override
                             public void onApproveQuick(int position) {
-                                // No quick approve in cancel portal
                                 listAdapter.notifyItemChanged(position);
                             }
                         });
-                        listAdapter.setSwipeLocked(true); // 🔒 Disable the swipe-reveal (Edit/Delete) drawer
+                        listAdapter.setSwipeLocked(true);
                         rvCancelHistory.setAdapter(listAdapter);
 
                         tvClearSelectionCancel.setOnClickListener(v -> {
@@ -145,7 +145,6 @@ public class CancelPortalActivity extends AppCompatActivity {
                             public void onChanged() {
                                 updateClearButtonVisibility();
                             }
-
                             @Override
                             public void onItemRangeChanged(int positionStart, int itemCount) {
                                 updateClearButtonVisibility();
@@ -157,13 +156,11 @@ public class CancelPortalActivity extends AppCompatActivity {
                             public void onApprove(int position) {
                                 listAdapter.onApproveQuick(position);
                             }
-
                             @Override
                             public boolean canSwipe(int position) {
-                                return false; // 🔒 Disable swipe right/left in cancel portal
+                                return false;
                             }
-                        }, CancelPortalActivity.this, 0)) // 0 means no directions allowed for swipe
-                                .attachToRecyclerView(rvCancelHistory);
+                        }, CancelPortalActivity.this, 0)).attachToRecyclerView(rvCancelHistory);
                     }
                 } else {
                     Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_server_error_code, response.code()), Toast.LENGTH_LONG).show();
@@ -172,7 +169,6 @@ public class CancelPortalActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
-                // 🛡️ Safety Switch: Clear loader on absolute hardware or script network crash
                 pbCancelLoader.setVisibility(View.GONE);
                 swipeRefreshCancel.setRefreshing(false);
                 Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_failure, t.getMessage()), Toast.LENGTH_LONG).show();
@@ -214,14 +210,16 @@ public class CancelPortalActivity extends AppCompatActivity {
     private void processBatchCancellation(final List<LeaveRequestData> items, final int index) {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
+            swipeRefreshCancel.setEnabled(true);
             Toast.makeText(this, "Batch cancellation complete!", Toast.LENGTH_SHORT).show();
-            loadHistoryLogQueue(); // Refresh
+            loadHistoryLogQueue();
             return;
         }
 
         LeaveRequestData item = items.get(index);
         tvProgressMessage.setText("Batch Revoking (" + (index + 1) + "/" + items.size() + ")...");
         progressOverlay.setVisibility(View.VISIBLE);
+        swipeRefreshCancel.setEnabled(false);
 
         LeaveRequest cancelPackage = new LeaveRequest("cancel", item.rowNumber);
         googleSheetsApi.sendRequest(cancelPackage).enqueue(new Callback<>() {
@@ -231,7 +229,6 @@ public class CancelPortalActivity extends AppCompatActivity {
                     processBatchCancellation(items, index + 1);
                 }, 500);
             }
-
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 processBatchCancellation(items, index + 1);
@@ -242,6 +239,7 @@ public class CancelPortalActivity extends AppCompatActivity {
     private void executeCloudCancellation(final int rowNumber, final int itemPosition) {
         tvProgressMessage.setText(R.string.msg_revoking_refunding);
         progressOverlay.setVisibility(View.VISIBLE);
+        swipeRefreshCancel.setEnabled(false);
 
         LeaveRequest cancelPackage = new LeaveRequest("cancel", rowNumber);
 
@@ -249,24 +247,26 @@ public class CancelPortalActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
+                swipeRefreshCancel.setEnabled(true);
                 if (response.isSuccessful()) {
                     Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_request_revoked), Toast.LENGTH_LONG).show();
                     historyList.remove(itemPosition);
                     listAdapter.notifyItemRemoved(itemPosition);
                     listAdapter.notifyItemRangeChanged(itemPosition, historyList.size());
 
-                    // 💡 Automatically go back if all requests are revoked
                     if (historyList.isEmpty()) {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> finish(), 1500);
+                        tvNoHistory.setVisibility(View.VISIBLE);
+                        rvCancelHistory.setVisibility(View.GONE);
                     }
+                    updateClearButtonVisibility();
                 } else {
                     Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_server_rejected_cancellation, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
+                swipeRefreshCancel.setEnabled(true);
                 Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

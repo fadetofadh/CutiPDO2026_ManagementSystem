@@ -1,6 +1,7 @@
 package com.test.cutipdo2026;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +32,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
     private TextView tvCutiBalanceAmount, tvPdoBalanceAmount;
     private Button btnBackToLogin;
     private SwipeRefreshLayout swipeRefreshBalance;
+    private MaterialCardView cardCuti, cardPdo;
 
     private GoogleSheetsApi googleSheetsApi;
     private List<String> employeeList = new ArrayList<>();
@@ -50,6 +53,8 @@ public class CheckBalanceActivity extends AppCompatActivity {
         tvPdoBalanceAmount = findViewById(R.id.tvPdoBalanceAmount);
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
         swipeRefreshBalance = findViewById(R.id.swipeRefreshBalance);
+        cardCuti = findViewById(R.id.cardCuti);
+        cardPdo = findViewById(R.id.cardPdo);
 
         swipeRefreshBalance.setOnRefreshListener(this::fetchLiveBalances);
 
@@ -100,6 +105,21 @@ public class CheckBalanceActivity extends AppCompatActivity {
         });
 
         btnBackToLogin.setOnClickListener(v -> finish());
+
+        cardCuti.setOnClickListener(v -> openLog("CUTI"));
+        cardPdo.setOnClickListener(v -> openLog("PDO"));
+    }
+
+    private void openLog(String type) {
+        String selectedName = spBalanceEmployeeName.getSelectedItem().toString();
+        if (selectedName.equals(getString(R.string.prompt_select_employee_name))) {
+            Toast.makeText(this, "Please select an employee first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(this, BalanceLogActivity.class);
+        intent.putExtra("EMPLOYEE_NAME", selectedName);
+        intent.putExtra("LEAVE_TYPE", type);
+        startActivity(intent);
     }
 
     private void fetchLiveBalances() {
