@@ -53,7 +53,7 @@
                 android:layout_below="@id/layoutHeaderCancel"
                 android:text="@string/cancel_portal_subtitle"
                 android:textSize="12sp"
-                android:gravity="left"
+                android:gravity="start"
                 android:textColor="#C53030"
                 android:layout_marginBottom="20dp"/>
 
