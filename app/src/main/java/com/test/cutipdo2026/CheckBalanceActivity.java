@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
     private LinearLayout layoutBalanceCards;
     private TextView tvCutiBalanceAmount, tvPdoBalanceAmount;
     private Button btnBackToLogin;
+    private SwipeRefreshLayout swipeRefreshBalance;
 
     private GoogleSheetsApi googleSheetsApi;
     private List<String> employeeList = new ArrayList<>();
@@ -47,6 +49,9 @@ public class CheckBalanceActivity extends AppCompatActivity {
         tvCutiBalanceAmount = findViewById(R.id.tvCutiBalanceAmount);
         tvPdoBalanceAmount = findViewById(R.id.tvPdoBalanceAmount);
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
+        swipeRefreshBalance = findViewById(R.id.swipeRefreshBalance);
+
+        swipeRefreshBalance.setOnRefreshListener(this::fetchLiveBalances);
 
         employeeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, employeeList);
         employeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -98,6 +103,10 @@ public class CheckBalanceActivity extends AppCompatActivity {
     }
 
     private void fetchLiveBalances() {
+        if (!swipeRefreshBalance.isRefreshing()) {
+            progressDialog.show();
+        }
+
         employeeList.clear();
         employeeList.add(getString(R.string.prompt_select_employee_name));
         employeeAdapter.notifyDataSetChanged();
@@ -107,6 +116,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 // Dismiss loading overlay dialogue smoothly
                 if (progressDialog.isShowing()) progressDialog.dismiss();
+                swipeRefreshBalance.setRefreshing(false);
 
                 if (response.isSuccessful() && response.body() != null) {
                     for (EmployeeBalance b : response.body()) {
@@ -122,6 +132,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
+                swipeRefreshBalance.setRefreshing(false);
                 Toast.makeText(CheckBalanceActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#F7FAFC">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/spv_portal_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#2D3748"
+        android:layout_marginBottom="40dp" />
+
+    <Button
+        android:id="@+id/btnAddRequestSpv"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="@string/btn_add_request"
+        android:textSize="18sp"
+        android:backgroundTint="#1E88E5"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="20dp"
+        android:textAllCaps="true" />
+
+    <Button
+        android:id="@+id/btnCancelRequestSpv"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="@string/btn_cancel_request"
+        android:textSize="18sp"
+        android:backgroundTint="#E53E3E"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="20dp"
+        android:textAllCaps="true" />
+
+    <Button
+        android:id="@+id/btnApproveRequest"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="@string/btn_approve_request"
+        android:textSize="18sp"
+        android:backgroundTint="#4CAF50"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="true" />
+
+    <Button
+        android:id="@+id/btnBackToLoginSpv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="@string/back_to_portal"
+        style="?android:attr/borderlessButtonStyle"
+        android:textColor="#4A5568" />
+
+</LinearLayout>

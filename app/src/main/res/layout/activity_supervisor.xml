@@ -5,50 +5,86 @@
     android:layout_height="match_parent"
     tools:context=".SupervisorActivity">
 
-    <!-- Content Wrapper with Padding -->
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshSupervisor"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="20dp">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tvHeaderTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/supervisor_approval_panel"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="#333333"
-            android:layout_marginBottom="15dp"/>
-
-        <ListView
-            android:id="@+id/lvPendingRequests"
+        <!-- Content Wrapper with Padding -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/tvHeaderTitle"
-            android:divider="#DDDDDD"
-            android:dividerHeight="1dp"
-            android:visibility="gone" />
+            android:padding="20dp">
 
-        <TextView
-            android:id="@+id/tvNoData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_pending_requests"
-            android:textSize="16sp"
-            android:textColor="#888888"
-            android:layout_centerInParent="true"
-            android:visibility="gone" />
+            <RelativeLayout
+                android:id="@+id/layoutHeaderSpv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp">
 
-        <ProgressBar
-            android:id="@+id/pbSupervisorLoader"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:visibility="visible" />
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/tvHeaderTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/supervisor_approval_panel"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <TextView
+                    android:id="@+id/tvClearSelectionSpv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="Clear Marks"
+                    android:textColor="#E53E3E"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPendingRequests"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/layoutHeaderSpv"
+                android:layout_above="@id/btnBatchActionSpv"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnBatchActionSpv"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_alignParentBottom="true"
+                android:backgroundTint="#4CAF50"
+                android:text="APPROVE SELECTED (0)"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvNoData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_pending_requests"
+                android:textSize="16sp"
+                android:textColor="#888888"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/pbSupervisorLoader"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:visibility="visible" />
+        </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- Progress Overlay - Outside the padding to cover the WHOLE screen -->
     <FrameLayout

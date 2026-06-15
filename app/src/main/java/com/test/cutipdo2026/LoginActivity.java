@@ -73,11 +73,11 @@ public class LoginActivity extends AppCompatActivity {
             // Verification Path A: Head of Division Portal (KADIV)
             if (rbKadiv.isChecked()) {
                 if (Objects.equals(inputCode, "teknis")) {
-                    fetchDataAndNavigateToKadiv("Teknis");
+                    fetchDataAndNavigateToKadiv("Teknis", false);
                 } else if (Objects.equals(inputCode, "guide")) {
-                    fetchDataAndNavigateToKadiv("Guide");
+                    fetchDataAndNavigateToKadiv("Guide", false);
                 } else if (Objects.equals(inputCode, "haka")) {
-                    fetchDataAndNavigateToKadiv("HK");
+                    fetchDataAndNavigateToKadiv("HK", false);
                 } else if (Objects.equals(inputCode, "superadmin")) {
                     fetchDataAndNavigateToSuperAdmin();
                 } else {
@@ -88,9 +88,7 @@ public class LoginActivity extends AppCompatActivity {
             // Verification Path B: Supervisor Dashboard (SPV)
             else if (rbSpv.isChecked()) {
                 if (Objects.equals(inputCode, "spv")) {
-                    etPasscode.setText("");
-                    Intent intent = new Intent(LoginActivity.this, SupervisorActivity.class);
-                    startActivity(intent);
+                    fetchDataAndNavigateToKadiv("all", true);
                 } else if (Objects.equals(inputCode, "superadmin")) {
                     etPasscode.setText("");
                     Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
@@ -149,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchDataAndNavigateToKadiv(String filterClass) {
+    private void fetchDataAndNavigateToKadiv(String filterClass, final boolean isSpv) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.msg_sync_roster_balances));
         progressDialog.setCancelable(false);
@@ -175,9 +173,25 @@ public class LoginActivity extends AppCompatActivity {
 
                                 etPasscode.setText("");
 
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                intent.putExtra("PRE_FETCHED_BALANCES", balanceList);
-                                intent.putExtra("PRE_FETCHED_NAMES", nameList);
+                                ArrayList<EmployeeBalance> filteredBalances = balanceList;
+                                ArrayList<String> filteredNames = nameList;
+
+                                if (isSpv) {
+                                    filteredBalances = new ArrayList<>();
+                                    filteredNames = new ArrayList<>();
+                                    for (EmployeeBalance b : balanceList) {
+                                        if (b.empClass != null && b.empClass.equalsIgnoreCase("SPV")) {
+                                            filteredBalances.add(b);
+                                            filteredNames.add(b.name);
+                                        }
+                                    }
+                                }
+
+                                Class<?> targetActivity = isSpv ? SpvPortalActivity.class : KadivPortalActivity.class;
+                                Intent intent = new Intent(LoginActivity.this, targetActivity);
+                                intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
+                                intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
+                                intent.putExtra("FILTER_CLASS", isSpv ? "all" : filterClass);
                                 startActivity(intent);
                             } else {
                                 Toast.makeText(LoginActivity.this, getString(R.string.toast_failed_loading_staff), Toast.LENGTH_SHORT).show();

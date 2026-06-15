@@ -48,4 +48,6 @@ dependencies {
     implementation 'com.github.chthai64:SwipeRevealLayout:1.4.0'
     // Gson for saving the queue to SharedPreferences
     implementation 'com.google.code.gson:gson:2.10.1'
+    // Swipe down to refresh
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }

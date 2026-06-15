@@ -26,11 +26,17 @@ public interface GoogleSheetsApi {
 
     // 🌟 THE FIX: This adds the missing getPendingRequests method that SupervisorActivity is looking for!
     @GET("exec")
-    Call<List<LeaveRequestData>> getPendingRequests(@Query("type") String type);
+    Call<List<LeaveRequestData>> getPendingRequests(
+            @Query("type") String type,
+            @Query("filterClass") String filterClass
+    );
 
     // Pulls approved requests for the KADIV Cancel Portal
     @GET("exec")
-    Call<List<LeaveRequestData>> getAllRequests(@Query("type") String type);
+    Call<List<LeaveRequestData>> getAllRequests(
+            @Query("type") String type,
+            @Query("filterClass") String filterClass
+    );
 
     // Sends your leave request batches out to the Apps Script backend
     @POST("exec")

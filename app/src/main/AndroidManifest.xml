@@ -26,6 +26,18 @@
             android:exported="false"
             android:launchMode="singleTop" />
 
+        <activity
+            android:name=".KadivPortalActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SpvPortalActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SpvRequestActivity"
+            android:exported="false" />
+
         <!-- 3. Division Head form panel template -->
         <activity
             android:name=".MainActivity"
@@ -34,10 +46,6 @@
         <!-- 4. Supervisor review board workspace panel -->
         <activity
             android:name=".SupervisorActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ReviewQueueActivity"
             android:exported="false" />
 
         <activity

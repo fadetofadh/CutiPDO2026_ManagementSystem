@@ -9,6 +9,10 @@ public class QueuedRequest implements Serializable {
     private String leaveType;
     private String description;
 
+    // UI States
+    public boolean isExpanded = false;
+    public boolean isMarked = false;
+
     public QueuedRequest(String employeeName, String targetDate, int totalDays, String leaveType, String description) {
         this.employeeName = employeeName;
         this.targetDate = targetDate;

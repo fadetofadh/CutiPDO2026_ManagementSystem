@@ -5,51 +5,87 @@
     android:layout_height="match_parent"
     tools:context=".CancelPortalActivity">
 
-    <!-- Content Wrapper with Padding -->
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshCancel"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="20dp">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tvCancelTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/revoke_cancel_portal_title"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="#333333"
-            android:layout_marginBottom="5dp"/>
-
-        <TextView
-            android:id="@+id/tvCancelSubtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tvCancelTitle"
-            android:text="@string/cancel_portal_subtitle"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:textColor="#C53030"
-            android:layout_marginBottom="20dp"/>
-
-        <ListView
-            android:id="@+id/lvCancelHistory"
+        <!-- Content Wrapper with Padding -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/tvCancelSubtitle"
-            android:divider="#DDDDDD"
-            android:dividerHeight="1dp"
-            android:visibility="gone"/>
+            android:padding="20dp">
 
-        <ProgressBar
-            android:id="@+id/pbCancelLoader"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:indeterminate="true"
-            android:visibility="visible"/>
-    </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/layoutHeaderCancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
+
+                <TextView
+                    android:id="@+id/tvCancelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/revoke_cancel_portal_title"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <TextView
+                    android:id="@+id/tvClearSelectionCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="Clear Marks"
+                    android:textColor="#E53E3E"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/tvCancelSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/layoutHeaderCancel"
+                android:text="@string/cancel_portal_subtitle"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:textColor="#C53030"
+                android:layout_marginBottom="20dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCancelHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/tvCancelSubtitle"
+                android:layout_above="@id/btnBatchCancel"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btnBatchCancel"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_alignParentBottom="true"
+                android:backgroundTint="#E53E3E"
+                android:text="CANCEL SELECTED (0)"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/pbCancelLoader"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:visibility="visible"/>
+        </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <!-- Progress Overlay - Outside the padding to cover the WHOLE screen -->
     <FrameLayout

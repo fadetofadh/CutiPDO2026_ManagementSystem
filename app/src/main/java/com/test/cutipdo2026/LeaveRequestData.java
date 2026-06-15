@@ -8,6 +8,10 @@ public class LeaveRequestData {
     public String leaveType;
     public String description;
 
+    // UI States
+    public boolean isExpanded = false;
+    public boolean isMarked = false;
+
     /**
      * Helper to safely get the date as a formatted String.
      * Some server responses might send dates as a 'long' timestamp.

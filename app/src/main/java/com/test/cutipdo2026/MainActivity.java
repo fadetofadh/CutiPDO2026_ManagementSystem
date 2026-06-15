@@ -1,6 +1,5 @@
 package com.test.cutipdo2026;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,9 +11,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import java.text.SimpleDateFormat;
@@ -27,25 +29,36 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText etSelectedDates, etLeaveDescription;
-    private Button btnAddToBatch, btnReviewSubmit, btnCancelPortal;
-    private TextView tvTotalDaysDisplay;
+    private Button btnAddToBatch, btnSubmitToSpv;
+    private TextView tvTotalDaysDisplay, tvQueueHeader, tvClearSelection;
     private Spinner spEmployeeName, spLeaveType;
+    private RecyclerView rvBatchQueue;
+    private View layoutQueueHeader;
 
-    private List<String> employeeList = new ArrayList<>();
-    private Map<String, EmployeeBalance> balanceMap = new HashMap<>();
-    private ArrayAdapter<String> employeeAdapter;
+    private final List<String> employeeList = new ArrayList<>();
+    private final Map<String, EmployeeBalance> balanceMap = new HashMap<>();
 
-    private List<String> leaveTypeList = new ArrayList<>();
+    private final List<String> leaveTypeList = new ArrayList<>();
     private ArrayAdapter<String> leaveTypeAdapter;
 
     private ArrayList<QueuedRequest> batchQueue = new ArrayList<>();
+    private ReviewQueueAdapter queueAdapter;
+    private GoogleSheetsApi googleSheetsApi;
+    private CallMeBotApi callMeBotApi;
     private QueueManager queueManager;
     private String selectedDateRangeString = "";
     private int calculatedDays = 0;
+    private int successUploadCount = 0;
 
     private long currentStartMs = 0;
     private long currentEndMs = 0;
@@ -65,12 +78,113 @@ public class MainActivity extends AppCompatActivity {
         etSelectedDates = findViewById(R.id.etSelectedDates);
         etLeaveDescription = findViewById(R.id.etLeaveDescription);
         tvTotalDaysDisplay = findViewById(R.id.tvTotalDaysDisplay);
+        tvQueueHeader = findViewById(R.id.tvQueueHeader);
+        tvClearSelection = findViewById(R.id.tvClearSelection);
+        layoutQueueHeader = findViewById(R.id.layoutQueueHeader);
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
-        btnReviewSubmit = findViewById(R.id.btnReviewSubmit);
-        btnCancelPortal = findViewById(R.id.btnCancelPortal);
+        btnSubmitToSpv = findViewById(R.id.btnSubmitToSpv);
+        rvBatchQueue = findViewById(R.id.rvBatchQueue);
+
+        // Configure APIs
+        okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+
+        Retrofit callMeBotRetrofit = new Retrofit.Builder()
+                .baseUrl("https://api.callmebot.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        callMeBotApi = callMeBotRetrofit.create(CallMeBotApi.class);
+
+        // Setup RecyclerView
+        rvBatchQueue.setLayoutManager(new LinearLayoutManager(this));
+        queueAdapter = new ReviewQueueAdapter(batchQueue, new ReviewQueueAdapter.OnItemActionListener() {
+            @Override
+            public void onEditSelected(QueuedRequest request, int position) {
+                openInlineDatePicker(request, position);
+            }
+
+            @Override
+            public void onDeleteSelected(int position) {
+                if (position >= 0 && position < batchQueue.size()) {
+                    batchQueue.remove(position);
+                    queueManager.saveQueue(batchQueue);
+                    queueAdapter.notifyItemRemoved(position);
+                    queueAdapter.notifyItemRangeChanged(position, batchQueue.size());
+                    updateQueueUi();
+                    Toast.makeText(MainActivity.this, getString(R.string.msg_item_removed), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onApproveQuick(int position) {
+                // KADIV list doesn't have "approve", maybe it means "submit this one"?
+                // For now, just a placeholder.
+            }
+        });
+        rvBatchQueue.setAdapter(queueAdapter);
+
+        tvClearSelection.setOnClickListener(v -> {
+            queueAdapter.clearAllMarks();
+            updateQueueUi();
+        });
+
+        queueAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                updateQueueUi();
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                updateQueueUi();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                updateQueueUi();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                updateQueueUi();
+            }
+        });
+
+        // 💡 Quick Submit disabled per user request to avoid conflicts with selection mode
+        /*
+        new androidx.recyclerview.widget.ItemTouchHelper(new UniversalSwipeCallback(new UniversalSwipeCallback.OnSwipeListener() {
+            @Override
+            public void onApprove(int position) {
+                // Quick action triggered!
+                Toast.makeText(MainActivity.this, "Quick Submit feature coming soon!", Toast.LENGTH_SHORT).show();
+                queueAdapter.notifyItemChanged(position); // Reset view
+            }
+
+            @Override
+            public boolean canSwipe(int position) {
+                // 🔒 Disable swipe-right when item is marked
+                if (position >= 0 && position < batchQueue.size()) {
+                    return !batchQueue.get(position).isMarked;
+                }
+                return true;
+            }
+        }, this, ItemTouchHelper.RIGHT)).attachToRecyclerView(rvBatchQueue);
+        */
+        updateQueueUi();
 
         // 2. Configure Employee Dropdown
-        employeeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, employeeList);
+        ArrayAdapter<String> employeeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, employeeList);
         employeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spEmployeeName.setAdapter(employeeAdapter);
         spEmployeeName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -94,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text = (TextView) view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo))) {
+                if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -106,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView text = (TextView) view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && leaveTypeList.get(position).equals(getString(R.string.label_cuti_pdo))) {
+                if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -142,6 +256,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         employeeAdapter.notifyDataSetChanged();
+
+        // 🔄 Partitioned Access: Filter the local batch queue to only show items for the current department
+        syncAndFilterQueue();
 
         // 5. Setup View Listeners
         etSelectedDates.setOnClickListener(v -> showStrictDatePicker());
@@ -179,6 +296,8 @@ public class MainActivity extends AppCompatActivity {
             QueuedRequest newRequest = new QueuedRequest(empName, selectedDateRangeString, calculatedDays, leaveType, description);
             batchQueue.add(newRequest);
             queueManager.saveQueue(batchQueue);
+            queueAdapter.notifyItemInserted(batchQueue.size() - 1);
+            updateQueueUi();
 
             Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
 
@@ -192,32 +311,208 @@ public class MainActivity extends AppCompatActivity {
             resetLeaveTypeOptions();
         });
 
-        btnReviewSubmit.setOnClickListener(v -> {
-            if (batchQueue.isEmpty()) {
-                Toast.makeText(MainActivity.this, getString(R.string.toast_batch_empty), Toast.LENGTH_SHORT).show();
-                return;
+        btnSubmitToSpv.setOnClickListener(v -> {
+            // Determine which items to send
+            ArrayList<QueuedRequest> itemsToSend = new ArrayList<>();
+            for (QueuedRequest req : batchQueue) {
+                if (req.isMarked) itemsToSend.add(req);
             }
-            Intent intent = new Intent(MainActivity.this, ReviewQueueActivity.class);
-            intent.putExtra("batchDataList", batchQueue);
-            startActivity(intent);
+
+            // If nothing is marked, send everything (default behavior)
+            if (itemsToSend.isEmpty()) {
+                itemsToSend.addAll(batchQueue);
+            }
+
+            btnSubmitToSpv.setEnabled(false);
+            btnSubmitToSpv.setText(getString(R.string.msg_uploading));
+            rvBatchQueue.setAlpha(0.5f);
+            rvBatchQueue.setEnabled(false);
+
+            successUploadCount = 0;
+            sendSelectedItemsSequentially(itemsToSend, 0);
+        });
+    }
+
+    private void updateQueueUi() {
+        if (batchQueue.isEmpty()) {
+            layoutQueueHeader.setVisibility(View.GONE);
+            rvBatchQueue.setVisibility(View.GONE);
+            btnSubmitToSpv.setVisibility(View.GONE);
+        } else {
+            layoutQueueHeader.setVisibility(View.VISIBLE);
+            rvBatchQueue.setVisibility(View.VISIBLE);
+            btnSubmitToSpv.setVisibility(View.VISIBLE);
+
+            // 💡 Dynamic Label: Use marked count if selection mode is active, otherwise use total size
+            int markedCount = 0;
+            for (QueuedRequest req : batchQueue) {
+                if (req.isMarked) markedCount++;
+            }
+
+            int displayCount = (markedCount > 0) ? markedCount : batchQueue.size();
+            btnSubmitToSpv.setText(getString(R.string.btn_submit_all_count, displayCount));
+
+            updateClearButtonVisibility();
+        }
+    }
+
+    private void updateClearButtonVisibility() {
+        boolean hasMarks = false;
+        for (QueuedRequest req : batchQueue) {
+            if (req.isMarked) {
+                hasMarks = true;
+                break;
+            }
+        }
+        tvClearSelection.setVisibility(hasMarks ? View.VISIBLE : View.GONE);
+    }
+
+    private void openInlineDatePicker(QueuedRequest request, final int position) {
+        long today = MaterialDatePicker.todayInUtcMilliseconds();
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
+        constraintsBuilder.setFirstDayOfWeek(Calendar.MONDAY);
+        constraintsBuilder.setStart(today);
+        constraintsBuilder.setOpenAt(today);
+
+        constraintsBuilder.setValidator(new CalendarConstraints.DateValidator() {
+            @Override
+            public boolean isValid(long date) {
+                if (date < today) return false;
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                cal.setTimeInMillis(date);
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+                return dayOfWeek != Calendar.MONDAY && dayOfWeek != Calendar.TUESDAY;
+            }
+            @Override
+            public int describeContents() { return 0; }
+            @Override
+            public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {}
         });
 
-        btnCancelPortal.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, CancelPortalActivity.class);
-            startActivity(intent);
+        MaterialDatePicker<Pair<Long, Long>> rangePicker = MaterialDatePicker.Builder.dateRangePicker()
+                .setTitleText(R.string.label_modify_allocation_dates_title)
+                .setCalendarConstraints(constraintsBuilder.build())
+                .build();
+
+        rangePicker.show(getSupportFragmentManager(), "INLINE_RE_PICKER");
+
+        rangePicker.addOnPositiveButtonClickListener(selection -> {
+            if (selection != null && selection.first != null && selection.second != null) {
+                long diffMs = selection.second - selection.first;
+                int updatedDaysCount = (int) (diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                String startString = format.format(new Date(selection.first));
+                String endString = format.format(new Date(selection.second));
+
+                request.setTargetDate(Objects.equals(startString, endString) ? startString : startString + " to " + endString);
+                request.setTotalDays(updatedDaysCount);
+
+                boolean containsWeekend = false;
+                Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                checkCalendar.setTimeInMillis(selection.first);
+                while (checkCalendar.getTimeInMillis() <= selection.second) {
+                    if (checkCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || checkCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                        containsWeekend = true;
+                        break;
+                    }
+                    checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
+                if (containsWeekend) {
+                    request.setLeaveType(getString(R.string.pdo));
+                    Toast.makeText(this, getString(R.string.toast_weekend_detected_pdo), Toast.LENGTH_SHORT).show();
+                }
+
+                queueManager.saveQueue(batchQueue);
+                queueAdapter.notifyItemChanged(position);
+                updateQueueUi();
+            }
+        });
+    }
+
+    private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index) {
+        if (index >= items.size()) {
+            Toast.makeText(this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
+
+            // 💡 Clean up: Remove only the items that were successfully submitted
+            for (QueuedRequest submittedItem : items) {
+                batchQueue.remove(submittedItem);
+            }
+
+            queueManager.saveQueue(batchQueue);
+            queueAdapter.notifyDataSetChanged();
+            updateQueueUi();
+
+            btnSubmitToSpv.setEnabled(true);
+            rvBatchQueue.setAlpha(1.0f);
+            rvBatchQueue.setEnabled(true);
+            return;
+        }
+
+        QueuedRequest item = items.get(index);
+        LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType(), item.getDescription());
+
+        googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    successUploadCount++;
+                    String messageContent = getString(R.string.whatsapp_message_format,
+                            item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
+
+                    callMeBotApi.sendWhatsAppMessage("+628998366182", messageContent, "9378602")
+                            .enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                    // WhatsApp notification triggered successfully
+                                }
+                                @Override
+                                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                                    // Log failure or ignore
+                                }
+                            });
+
+                    sendSelectedItemsSequentially(items, index + 1);
+                } else {
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_upload_failed_pos, index), Toast.LENGTH_SHORT).show();
+                    btnSubmitToSpv.setEnabled(true);
+                    updateQueueUi();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Toast.makeText(MainActivity.this, getString(R.string.toast_upload_loop_failure, t.getMessage()), Toast.LENGTH_SHORT).show();
+                btnSubmitToSpv.setEnabled(true);
+                updateQueueUi();
+            }
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // 🔄 Sync the local memory queue with the persistent storage
-        // This ensures that if the queue was cleared in ReviewQueueActivity,
-        // MainActivity will also show it as empty.
-        if (queueManager != null) {
+        syncAndFilterQueue();
+    }
+
+    private void syncAndFilterQueue() {
+        if (queueManager != null && !balanceMap.isEmpty()) {
+            ArrayList<QueuedRequest> rawQueue = queueManager.loadQueue();
+            ArrayList<QueuedRequest> filtered = new ArrayList<>();
+            for (QueuedRequest req : rawQueue) {
+                if (balanceMap.containsKey(req.getEmployeeName())) {
+                    filtered.add(req);
+                }
+            }
             batchQueue.clear();
-            batchQueue.addAll(queueManager.loadQueue());
-            Log.d("QUEUE_SYNC", "Queue reloaded onResume. Size: " + batchQueue.size());
+            batchQueue.addAll(filtered);
+            if (queueAdapter != null) {
+                queueAdapter.notifyDataSetChanged();
+            }
+            updateQueueUi();
+            Log.d("QUEUE_SYNC", "Queue filtered onResume. Visible size: " + batchQueue.size());
         }
     }
 

@@ -9,6 +9,12 @@
         <item>Head of Division (KADIV)</item>
         <item>Supervisor (SPV)</item>
     </string-array>
+    <string name="kadiv_portal_title">HEAD OF DIVISION PORTAL</string>
+    <string name="btn_add_request">ADD LEAVE REQUEST</string>
+    <string name="btn_cancel_request">CANCEL COMPLETED REQUEST</string>
+
+    <string name="spv_portal_title">SUPERVISOR PORTAL</string>
+    <string name="btn_approve_request">APPROVE PENDING REQUESTS</string>
     <string name="label_select_employee">Select Employee:</string>
     <string name="label_leave_type">Leave Type Option:</string>
     <string name="btn_select_start_date">Select Start Date</string>
