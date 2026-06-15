@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etSelectedDates, etLeaveDescription;
     private Button btnAddToBatch, btnSubmitToSpv;
-    private TextView tvTotalDaysDisplay, tvQueueHeader, tvClearSelection;
+    private TextView tvTotalDaysDisplay, tvClearSelection;
     private Spinner spEmployeeName, spLeaveType;
     private RecyclerView rvBatchQueue;
     private View layoutQueueHeader;
@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
         etSelectedDates = findViewById(R.id.etSelectedDates);
         etLeaveDescription = findViewById(R.id.etLeaveDescription);
         tvTotalDaysDisplay = findViewById(R.id.tvTotalDaysDisplay);
-        tvQueueHeader = findViewById(R.id.tvQueueHeader);
         tvClearSelection = findViewById(R.id.tvClearSelection);
         layoutQueueHeader = findViewById(R.id.layoutQueueHeader);
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
@@ -124,12 +123,6 @@ public class MainActivity extends AppCompatActivity {
                     updateQueueUi();
                     Toast.makeText(MainActivity.this, getString(R.string.msg_item_removed), Toast.LENGTH_SHORT).show();
                 }
-            }
-
-            @Override
-            public void onApproveQuick(int position) {
-                // KADIV list doesn't have "approve", maybe it means "submit this one"?
-                // For now, just a placeholder.
             }
         });
         rvBatchQueue.setAdapter(queueAdapter);

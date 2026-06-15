@@ -25,13 +25,6 @@ public class ReviewQueueAdapter extends RecyclerView.Adapter<ReviewQueueAdapter.
     public interface OnItemActionListener {
         void onEditSelected(QueuedRequest request, int position);
         void onDeleteSelected(int position);
-        void onApproveQuick(int position);
-    }
-
-    public void onApproveQuick(int position) {
-        if (actionListener != null) {
-            actionListener.onApproveQuick(position);
-        }
     }
 
     public ReviewQueueAdapter(ArrayList<QueuedRequest> batchList, OnItemActionListener actionListener) {

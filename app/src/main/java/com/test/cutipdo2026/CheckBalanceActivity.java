@@ -30,7 +30,6 @@ public class CheckBalanceActivity extends AppCompatActivity {
     private Spinner spBalanceEmployeeName;
     private LinearLayout layoutBalanceCards;
     private TextView tvCutiBalanceAmount, tvPdoBalanceAmount;
-    private Button btnBackToLogin;
     private SwipeRefreshLayout swipeRefreshBalance;
     private MaterialCardView cardCuti, cardPdo;
 
@@ -51,7 +50,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
         layoutBalanceCards = findViewById(R.id.layoutBalanceCards);
         tvCutiBalanceAmount = findViewById(R.id.tvCutiBalanceAmount);
         tvPdoBalanceAmount = findViewById(R.id.tvPdoBalanceAmount);
-        btnBackToLogin = findViewById(R.id.btnBackToLogin);
+        Button btnBackToLogin = findViewById(R.id.btnBackToLogin);
         swipeRefreshBalance = findViewById(R.id.swipeRefreshBalance);
         cardCuti = findViewById(R.id.cardCuti);
         cardPdo = findViewById(R.id.cardPdo);

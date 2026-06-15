@@ -20,8 +20,6 @@
     <string name="btn_select_start_date">Pilih Tanggal Mulai</string>
     <string name="btn_select_end_date">Pilih Tanggal Selesai</string>
     <string name="btn_add">Tambah</string>
-    <string name="btn_review">Tinjau</string>
-    <string name="btn_cancel_completed">Batalkan Pengajuan Selesai</string>
     <string name="btn_check_balance_portal">PORTAL CEK KUOTA</string>
     <string name="msg_uploading">MENGUNGGAH PAKET BATCH&#8230;</string>
     <string name="btn_submit_all_count">KIRIM SEMUA KE SUPERVISOR (%1$d)</string>

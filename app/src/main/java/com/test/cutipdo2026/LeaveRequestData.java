@@ -12,7 +12,6 @@ public class LeaveRequestData {
     public String approvalId; // Col I: Calendar IDs or Approval Reference
 
     // UI States
-    public boolean isExpanded = false;
     public boolean isMarked = false;
 
     /**

@@ -31,8 +31,4 @@ public class QueueManager {
         Type type = new TypeToken<ArrayList<QueuedRequest>>() {}.getType();
         return gson.fromJson(json, type);
     }
-
-    public void clearQueue() {
-        prefs.edit().remove(KEY_QUEUE).apply();
-    }
 }
