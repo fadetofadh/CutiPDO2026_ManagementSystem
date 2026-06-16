@@ -17,6 +17,14 @@ public interface GoogleSheetsApi {
             @Query("cb") String cacheBuster      // Guarantees live sheet tracking bypasses local cache
     );
 
+    // 🔑 NEW: Remote Login Verification
+    @GET("exec")
+    Call<LoginResponse> verifyLogin(
+            @Query("type") String type,          // "login"
+            @Query("passcode") String passcode,
+            @Query("roleType") String roleType   // "KADIV" or "SPV"
+    );
+
     // Pulls the list of employees for the KADIV spinner dropdown
     @GET("exec")
     Call<List<String>> getEmployees(

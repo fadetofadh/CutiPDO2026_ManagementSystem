@@ -71,34 +71,52 @@ public class LoginActivity extends AppCompatActivity {
 
         btnLogin.setOnClickListener(v -> {
             String inputCode = etPasscode.getText().toString().trim();
-
-            // Verification Path A: Head of Division Portal (KADIV)
-            if (rbKadiv.isChecked()) {
-                if (Objects.equals(inputCode, "teknis")) {
-                    fetchDataAndNavigateToKadiv("Teknis", false);
-                } else if (Objects.equals(inputCode, "guide")) {
-                    fetchDataAndNavigateToKadiv("Guide", false);
-                } else if (Objects.equals(inputCode, "haka")) {
-                    fetchDataAndNavigateToKadiv("HK", false);
-                } else if (Objects.equals(inputCode, "superadmin")) {
-                    fetchDataAndNavigateToSuperAdmin();
-                } else {
-                    Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_kadiv_passcode), Toast.LENGTH_SHORT).show();
-                }
+            if (inputCode.isEmpty()) {
+                Toast.makeText(this, "Please enter passcode", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            // Verification Path B: Supervisor Dashboard (SPV)
-            else if (rbSpv.isChecked()) {
-                if (Objects.equals(inputCode, "spv")) {
-                    fetchDataAndNavigateToKadiv("all", true);
-                } else if (Objects.equals(inputCode, "superadmin")) {
-                    etPasscode.setText("");
-                    Intent intent = new Intent(LoginActivity.this, SuperAdminSPVActivity.class);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(LoginActivity.this, getString(R.string.toast_incorrect_spv_passcode), Toast.LENGTH_SHORT).show();
+            String roleType = rbSpv.isChecked() ? "SPV" : "KADIV";
+
+            ProgressDialog loginProgress = new ProgressDialog(this);
+            loginProgress.setMessage("Verifying Credentials...");
+            loginProgress.setCancelable(false);
+            loginProgress.show();
+
+            googleSheetsApi.verifyLogin("login", inputCode, roleType).enqueue(new Callback<LoginResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
+                    if (loginProgress.isShowing()) loginProgress.dismiss();
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        LoginResponse res = response.body();
+                        if ("success".equals(res.getStatus())) {
+                            if ("Super_Admin".equals(res.getRoleName())) {
+                                etPasscode.setText("");
+                                if (roleType.equals("SPV")) {
+                                    startActivity(new Intent(LoginActivity.this, SuperAdminSPVActivity.class));
+                                } else {
+                                    fetchDataAndNavigateToSuperAdmin();
+                                }
+                            } else {
+                                fetchDataAndNavigateToKadiv(res.getFilterClass(), res.isSpv());
+                            }
+                        } else {
+                            // 💡 Show the ACTUAL error message from the server (e.g., "Sheet not found" or "Passcode Salah")
+                            String serverMsg = res.getMessage() != null ? res.getMessage() : "Unknown Error";
+                            Toast.makeText(LoginActivity.this, serverMsg, Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Server Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
+
+                @Override
+                public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
+                    if (loginProgress.isShowing()) loginProgress.dismiss();
+                    Toast.makeText(LoginActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         Button btnCheckBalancePortal = findViewById(R.id.btnCheckBalancePortal);
