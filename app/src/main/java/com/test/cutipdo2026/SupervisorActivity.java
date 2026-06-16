@@ -1,6 +1,8 @@
 package com.test.cutipdo2026;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -8,7 +10,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -112,7 +114,7 @@ public class SupervisorActivity extends AppCompatActivity {
                                 executeCloudAction(pendingList.get(position).rowNumber, position, "approve");
                             }
                         });
-                        listAdapter.setSwipeLocked(true); // 🔒 Use quick-swipe (full row) instead of reveal drawer
+                        listAdapter.setSwipeLocked(true); 
                         rvPendingRequests.setAdapter(listAdapter);
 
                         tvClearSelectionSpv.setOnClickListener(v -> {
@@ -146,13 +148,11 @@ public class SupervisorActivity extends AppCompatActivity {
                         new ItemTouchHelper(new UniversalSwipeCallback(new UniversalSwipeCallback.OnSwipeListener() {
                             @Override
                             public void onApprove(int position) {
-                                // Direct Approval
                                 listAdapter.onApproveQuick(position);
                             }
 
                             @Override
                             public void onDecline(int position) {
-                                // Direct Decline
                                 if (position >= 0 && position < pendingList.size()) {
                                     executeCloudAction(pendingList.get(position).rowNumber, position, "decline");
                                 }
@@ -197,26 +197,22 @@ public class SupervisorActivity extends AppCompatActivity {
     private void processBatchApproval(final List<LeaveRequestData> items, final int index) {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
-            swipeRefreshSupervisor.setEnabled(true); // 🔓 Re-enable refresh
+            swipeRefreshSupervisor.setEnabled(true);
             Toast.makeText(this, getString(R.string.toast_batch_approve_complete), Toast.LENGTH_SHORT).show();
-            fetchPendingQueue(); // Refresh list
+            fetchPendingQueue();
             return;
         }
 
         LeaveRequestData item = items.get(index);
         tvProgressMessage.setText(getString(R.string.msg_batch_approving, (index + 1), items.size()));
         progressOverlay.setVisibility(View.VISIBLE);
-        swipeRefreshSupervisor.setEnabled(false); // 🔒 Disable refresh while processing
+        swipeRefreshSupervisor.setEnabled(false);
 
-        // 💡 FIX: use "approve" action which triggers approveLeaveRequest() in script for calendar logging
         LeaveRequest decisionPackage = new LeaveRequest("approve", item.rowNumber);
-        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<>() {
+        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                // Continue to next regardless of row success to prevent hang
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                    processBatchApproval(items, index + 1);
-                }, 500);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> processBatchApproval(items, index + 1), 500);
             }
 
             @Override
@@ -227,20 +223,20 @@ public class SupervisorActivity extends AppCompatActivity {
     }
 
     private void executeCloudAction(final int rowNumber, final int itemPosition, final String action) {
-        String processingMessage = action.equals("approve") ? getString(R.string.msg_approving_request) : getString(R.string.msg_declining_request);
+        String processingMessage = Objects.equals(action, "approve") ? getString(R.string.msg_approving_request) : getString(R.string.msg_declining_request);
         tvProgressMessage.setText(processingMessage);
         progressOverlay.setVisibility(View.VISIBLE);
-        swipeRefreshSupervisor.setEnabled(false); // 🔒 Lock UI interaction
+        swipeRefreshSupervisor.setEnabled(false);
 
         LeaveRequest decisionPackage = new LeaveRequest(action, rowNumber);
 
-        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<>() {
+        googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 progressOverlay.setVisibility(View.GONE);
-                swipeRefreshSupervisor.setEnabled(true); // 🔓 Unlock
+                swipeRefreshSupervisor.setEnabled(true);
                 if (response.isSuccessful()) {
-                    String successMessage = action.equals("approve")
+                    String successMessage = Objects.equals(action, "approve")
                             ? getString(R.string.toast_approve_success, rowNumber)
                             : getString(R.string.toast_decline_success, rowNumber);
 
@@ -262,7 +258,7 @@ public class SupervisorActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
-                swipeRefreshSupervisor.setEnabled(true); // 🔓 Unlock
+                swipeRefreshSupervisor.setEnabled(true);
                 Toast.makeText(SupervisorActivity.this, getString(R.string.toast_sync_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

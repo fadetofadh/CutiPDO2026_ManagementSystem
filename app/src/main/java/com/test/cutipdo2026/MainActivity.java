@@ -154,26 +154,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 💡 Quick Submit disabled per user request to avoid conflicts with selection mode
-        /*
-        new androidx.recyclerview.widget.ItemTouchHelper(new UniversalSwipeCallback(new UniversalSwipeCallback.OnSwipeListener() {
-            @Override
-            public void onApprove(int position) {
-                // Quick action triggered!
-                Toast.makeText(MainActivity.this, "Quick Submit feature coming soon!", Toast.LENGTH_SHORT).show();
-                queueAdapter.notifyItemChanged(position); // Reset view
-            }
-
-            @Override
-            public boolean canSwipe(int position) {
-                // 🔒 Disable swipe-right when item is marked
-                if (position >= 0 && position < batchQueue.size()) {
-                    return !batchQueue.get(position).isMarked;
-                }
-                return true;
-            }
-        }, this, ItemTouchHelper.RIGHT)).attachToRecyclerView(rvBatchQueue);
-        */
         updateQueueUi();
 
         // 2. Configure Employee Dropdown
@@ -190,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // 3. Configure Leave Type Dropdown
-        leaveTypeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, leaveTypeList) {
+        leaveTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, leaveTypeList) {
             @Override
             public boolean isEnabled(int position) {
                 if (position >= leaveTypeList.size()) return true;
@@ -198,9 +178,10 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            @NonNull
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
@@ -210,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
@@ -462,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
         QueuedRequest item = items.get(index);
         LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType(), item.getDescription());
 
-        googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<>() {
+        googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,13 +26,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class BalanceLogActivity extends AppCompatActivity {
 
     private RecyclerView rvBalanceLog;
-    private TextView tvLogTitle, tvNoLogData;
+    private TextView tvNoLogData;
     private ProgressBar pbLogLoader;
     private SwipeRefreshLayout swipeRefreshLog;
-    private ImageButton btnBackFromLog;
 
     private GoogleSheetsApi googleSheetsApi;
-    private List<LeaveRequestData> logList = new ArrayList<>();
+    private final List<LeaveRequestData> logList = new ArrayList<>();
     private LogAdapter logAdapter;
 
     private String employeeName;
@@ -46,11 +46,11 @@ public class BalanceLogActivity extends AppCompatActivity {
         leaveType = getIntent().getStringExtra("LEAVE_TYPE");
 
         rvBalanceLog = findViewById(R.id.rvBalanceLog);
-        tvLogTitle = findViewById(R.id.tvLogTitle);
+        TextView tvLogTitle = findViewById(R.id.tvLogTitle);
         tvNoLogData = findViewById(R.id.tvNoLogData);
         pbLogLoader = findViewById(R.id.pbLogLoader);
         swipeRefreshLog = findViewById(R.id.swipeRefreshLog);
-        btnBackFromLog = findViewById(R.id.btnBackFromLog);
+        ImageButton btnBackFromLog = findViewById(R.id.btnBackFromLog);
 
         tvLogTitle.setText(getString(R.string.item_title_format, employeeName, leaveType));
 
@@ -77,10 +77,10 @@ public class BalanceLogActivity extends AppCompatActivity {
         tvNoLogData.setVisibility(View.GONE);
 
         // 💡 Cache Buster: Ensures you see LIVE data every time you refresh
-        String cb = String.valueOf(System.currentTimeMillis());
+        String cb = System.currentTimeMillis() + "";
 
         // 🛡️ Passing "all" for filterClass to bypass server-side department filtering
-        googleSheetsApi.getAllRequests("all", "all", cb).enqueue(new Callback<List<LeaveRequestData>>() {
+        googleSheetsApi.getAllRequests("all", "all", cb).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
                 pbLogLoader.setVisibility(View.GONE);
@@ -136,7 +136,7 @@ public class BalanceLogActivity extends AppCompatActivity {
             holder.tvLogDate.setText(item.actionType != null ? item.actionType.toUpperCase() : "ACTIVITY");
 
             // 💡 FIX: Use item.status (Column G) for the top-right label text
-            String status = item.status != null ? item.status : "-";
+            String status = Objects.requireNonNullElse(item.status, "-");
             holder.tvLogAction.setText(status);
 
             holder.tvLogLeaveDates.setText(holder.itemView.getContext().getString(R.string.log_dates_format, item.getFormattedDate()));

@@ -32,7 +32,7 @@ public class CancelPortalActivity extends AppCompatActivity {
     private Button btnBatchCancel;
     private SwipeRefreshLayout swipeRefreshCancel;
     private GoogleSheetsApi googleSheetsApi;
-    private List<LeaveRequestData> historyList = new ArrayList<>();
+    private final List<LeaveRequestData> historyList = new ArrayList<>();
     private UniversalRequestAdapter listAdapter;
     private String filterClass;
 
@@ -80,7 +80,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         tvNoHistory.setVisibility(View.GONE);
 
         // 💡 Cache Buster: Ensures we get the freshest data from Google Sheets
-        String cb = String.valueOf(System.currentTimeMillis());
+        String cb = System.currentTimeMillis() + "";
 
         googleSheetsApi.getAllRequests("all", filterClass, cb).enqueue(new Callback<>() {
             @Override
@@ -122,9 +122,7 @@ public class CancelPortalActivity extends AppCompatActivity {
                                 new AlertDialog.Builder(CancelPortalActivity.this)
                                     .setTitle(R.string.dialog_confirm_revoke_title)
                                     .setMessage(detail)
-                                    .setPositiveButton(R.string.btn_yes_revoke, (dialog, which) -> {
-                                        executeCloudCancellation(item.rowNumber, position);
-                                    })
+                                    .setPositiveButton(R.string.btn_yes_revoke, (dialog, which) -> executeCloudCancellation(item.rowNumber, position))
                                     .setNegativeButton(R.string.btn_no, null)
                                     .show();
                             }
@@ -210,9 +208,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_batch_cancel_title)
                 .setMessage(getString(R.string.dialog_batch_cancel_msg, summary.toString()))
-                .setPositiveButton(R.string.btn_yes_cancel_all, (dialog, which) -> {
-                    processBatchCancellation(items, 0);
-                })
+                .setPositiveButton(R.string.btn_yes_cancel_all, (dialog, which) -> processBatchCancellation(items, 0))
                 .setNegativeButton(R.string.btn_no, null)
                 .show();
     }
@@ -235,9 +231,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         googleSheetsApi.sendRequest(cancelPackage).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                    processBatchCancellation(items, index + 1);
-                }, 500);
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> processBatchCancellation(items, index + 1), 500);
             }
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {

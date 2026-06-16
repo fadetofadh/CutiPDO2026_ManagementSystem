@@ -2,13 +2,10 @@ package com.test.cutipdo2026;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
-import android.os.Looper;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.chauthai.swipereveallayout.SwipeRevealLayout;
@@ -129,14 +126,13 @@ public class ReviewQueueAdapter extends RecyclerView.Adapter<ReviewQueueAdapter.
 
     public static class QueueViewHolder extends RecyclerView.ViewHolder {
         SwipeRevealLayout swipeLayout;
-        LinearLayout actionLayout, surfaceLayout, btnEdit, btnDelete;
+        LinearLayout surfaceLayout, btnEdit, btnDelete;
         TextView tvRowTitle, tvRowSubtitle;
         View indicatorMarked;
 
         QueueViewHolder(View itemView) {
             super(itemView);
             swipeLayout = itemView.findViewById(R.id.swipeLayout);
-            actionLayout = itemView.findViewById(R.id.actionLayout);
             surfaceLayout = itemView.findViewById(R.id.surfaceLayout);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);

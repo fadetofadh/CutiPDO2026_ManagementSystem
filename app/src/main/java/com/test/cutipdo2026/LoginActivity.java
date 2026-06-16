@@ -3,7 +3,6 @@ package com.test.cutipdo2026;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -12,8 +11,6 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.test.cutipdo2026.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +24,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private RadioButton rbKadiv, rbSpv;
+    private RadioButton rbSpv;
     private EditText etPasscode;
-    private Button btnLogin;
     private GoogleSheetsApi googleSheetsApi;
 
     @Override
@@ -43,10 +39,9 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
-        rbKadiv = findViewById(R.id.rbKadiv);
         rbSpv = findViewById(R.id.rbSpv);
         etPasscode = findViewById(R.id.etPasscode);
-        btnLogin = findViewById(R.id.btnLogin);
+        Button btnLogin = findViewById(R.id.btnLogin);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -83,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
             loginProgress.setCancelable(false);
             loginProgress.show();
 
-            googleSheetsApi.verifyLogin("login", inputCode, roleType).enqueue(new Callback<LoginResponse>() {
+            googleSheetsApi.verifyLogin("login", inputCode, roleType).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                     if (loginProgress.isShowing()) loginProgress.dismiss();
@@ -93,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                         if ("success".equals(res.getStatus())) {
                             if ("Super_Admin".equals(res.getRoleName())) {
                                 etPasscode.setText("");
-                                if (roleType.equals("SPV")) {
+                                if (Objects.equals(roleType, "SPV")) {
                                     startActivity(new Intent(LoginActivity.this, SuperAdminSPVActivity.class));
                                 } else {
                                     fetchDataAndNavigateToSuperAdmin();
@@ -102,7 +97,6 @@ public class LoginActivity extends AppCompatActivity {
                                 fetchDataAndNavigateToKadiv(res.getFilterClass(), res.isSpv());
                             }
                         } else {
-                            // 💡 Show the ACTUAL error message from the server (e.g., "Sheet not found" or "Passcode Salah")
                             String serverMsg = res.getMessage() != null ? res.getMessage() : "Unknown Error";
                             Toast.makeText(LoginActivity.this, serverMsg, Toast.LENGTH_LONG).show();
                         }
@@ -126,13 +120,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         TextView tvCreditPlaceholder = findViewById(R.id.tvCreditPlaceholder);
-        tvCreditPlaceholder.setOnClickListener(v -> {
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle(R.string.dialog_credits_title)
-                    .setMessage(getString(R.string.dialog_credits_message, BuildConfig.VERSION_NAME))
-                    .setPositiveButton(R.string.btn_close, null)
-                    .show();
-        });
+        tvCreditPlaceholder.setOnClickListener(v -> new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_credits_title)
+                .setMessage(getString(R.string.dialog_credits_message, BuildConfig.VERSION_NAME))
+                .setPositiveButton(R.string.btn_close, null)
+                .show());
     }
 
     private void fetchDataAndNavigateToSuperAdmin() {
@@ -141,14 +133,12 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        // Fetch all balances (filterClass = null)
         googleSheetsApi.getBalances("balances", null).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
 
                 if (response.isSuccessful() && response.body() != null) {
-                    @SuppressWarnings("unchecked")
                     ArrayList<EmployeeBalance> fullList = new ArrayList<>(response.body());
                     etPasscode.setText("");
                     Intent intent = new Intent(LoginActivity.this, SuperAdminActivity.class);
@@ -173,16 +163,12 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        // Step 1: Download balances data
         googleSheetsApi.getBalances("balances", filterClass).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-
-                    // Explicitly construct an concrete ArrayList container to avoid internal class parcelable crashes
                     ArrayList<EmployeeBalance> balanceList = new ArrayList<>(response.body());
 
-                    // Step 2: Download Employee Names roster sequentially
                     googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<List<String>> call2, @NonNull Response<List<String>> response2) {
@@ -190,7 +176,6 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (response2.isSuccessful() && response2.body() != null) {
                                 ArrayList<String> nameList = new ArrayList<>(response2.body());
-
                                 etPasscode.setText("");
 
                                 ArrayList<EmployeeBalance> filteredBalances = balanceList;
@@ -224,7 +209,6 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t2.getMessage()), Toast.LENGTH_SHORT).show();
                         }
                     });
-
                 } else {
                     if (progressDialog.isShowing()) progressDialog.dismiss();
                     Toast.makeText(LoginActivity.this, getString(R.string.toast_balance_sync_failed_generic), Toast.LENGTH_SHORT).show();

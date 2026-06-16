@@ -1,13 +1,11 @@
 package com.test.cutipdo2026;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.test.cutipdo2026.BuildConfig;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,12 +39,12 @@ public class SplashActivity extends AppCompatActivity {
         // 3. Create the API interface instance
         GoogleSheetsApi api = retrofit.create(GoogleSheetsApi.class);
 
-        String cacheBuster = String.valueOf(System.currentTimeMillis());
+        String cacheBuster = System.currentTimeMillis() + "";
 
         // 4. Run the network call
-        api.checkAppUpdate("checkUpdate", cacheBuster).enqueue(new Callback<UpdateResponse>() {
+        api.checkAppUpdate("checkUpdate", cacheBuster).enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<UpdateResponse> call, Response<UpdateResponse> response) {
+            public void onResponse(@NonNull Call<UpdateResponse> call, @NonNull Response<UpdateResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     int serverVersion = response.body().getLatestVersion();
                     String apkUrl = response.body().getDownloadUrl();
@@ -70,7 +68,7 @@ public class SplashActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<UpdateResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
                 proceedToLogin();
             }
         });
@@ -89,22 +87,16 @@ public class SplashActivity extends AppCompatActivity {
                 .setMessage(getString(R.string.update_message_format, formattedChangelog))
                 .setCancelable(false); // FIXED: Force the user to choose (Update or Later)
 
-        builder.setPositiveButton(R.string.btn_update_now, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl));
-                startActivity(intent);
-                if (isForce) finish();
-            }
+        builder.setPositiveButton(R.string.btn_update_now, (dialog, which) -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl));
+            startActivity(intent);
+            if (isForce) finish();
         });
 
         if (!isForce) {
-            builder.setNegativeButton(R.string.btn_later, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    proceedToLogin();
-                }
+            builder.setNegativeButton(R.string.btn_later, (dialog, which) -> {
+                dialog.dismiss();
+                proceedToLogin();
             });
         }
 
