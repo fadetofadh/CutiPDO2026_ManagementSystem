@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PCS</string>
+    <string name="app_name">PDO &amp; CUTI System</string>
     <string-array name="leave_types_array">
         <item>Cuti</item>
         <item>PDO</item>
