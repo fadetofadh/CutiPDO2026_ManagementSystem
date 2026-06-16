@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeRefreshCalendar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#F7FAFC">
+
+        <TextView
+            android:id="@+id/tvCalendarHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="@string/calendar_title"
+            android:textColor="#2D3748"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@color/white"
+            android:elevation="4dp" />
+
+        <!-- 🔍 Date Search Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:background="#EDF2F7">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectFilterDate"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/btn_check_date"
+                android:textAllCaps="false"
+                android:textColor="#2D3748"
+                app:strokeColor="#CBD5E0"
+                app:icon="@android:drawable/ic_menu_search"
+                app:iconTint="#4A5568"/>
+
+            <ImageButton
+                android:id="@+id/btnClearFilter"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#E53E3E"
+                android:visibility="gone"
+                android:contentDescription="@string/desc_clear_search" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvFilterStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
+            android:text="@string/filter_all"
+            android:textColor="#718096"
+            android:textSize="12sp"
+            android:background="#EDF2F7"
+            android:visibility="visible"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBookedSchedule"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:clipToPadding="false" />
+
+            <ProgressBar
+                android:id="@+id/pbCalendarLoading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvNoSchedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_approved_schedules"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btnBackFromCalendar"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_margin="16dp"
+            android:backgroundTint="#4A5568"
+            android:text="@string/back_to_portal"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -130,6 +130,19 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/btnViewCalendar"
+                android:layout_width="wrap_content"
+                android:layout_height="55dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="250dp"
+                android:maxWidth="320dp"
+                android:backgroundTint="#2D3748"
+                android:text="@string/btn_view_calendar"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
     </ScrollView>
 

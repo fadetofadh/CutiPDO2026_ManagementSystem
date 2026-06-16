@@ -204,4 +204,12 @@
     <string name="label_edit_request">Edit Pengajuan</string>
     <string name="btn_save_changes">Simpan Perubahan</string>
     <string name="msg_changes_saved">Perubahan berhasil disimpan!</string>
+    <string name="btn_view_calendar">CEK KALENDER</string>
+    <string name="calendar_title">JADWAL CUTI &amp; PDO</string>
+    <string name="no_approved_schedules">Tidak ditemukan jadwal yang telah disetujui</string>
+    <string name="btn_check_date">Cari Berdasarkan Tanggal</string>
+    <string name="filter_all">Menampilkan semua jadwal</string>
+    <string name="filter_active">Hasil untuk tanggal: %1$s</string>
+    <string name="desc_clear_search">Hapus pencarian</string>
+    <string name="msg_date_available">✅ Tanggal ini tersedia!</string>
 </resources>

@@ -119,6 +119,12 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        Button btnViewCalendar = findViewById(R.id.btnViewCalendar);
+        btnViewCalendar.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CalendarViewActivity.class);
+            startActivity(intent);
+        });
+
         TextView tvCreditPlaceholder = findViewById(R.id.tvCreditPlaceholder);
         tvCreditPlaceholder.setOnClickListener(v -> new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_credits_title)
