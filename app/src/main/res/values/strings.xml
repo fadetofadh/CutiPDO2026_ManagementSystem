@@ -68,6 +68,12 @@
     <!-- Splash -->
     <string name="splash_title">CUTI &amp; PDO</string>
     <string name="splash_subtitle">SISTEM MANAJEMEN</string>
+    <string name="update_new_build">Versi Baru</string>
+    <string name="update_changelog_default">Peningkatan stabilitas performa.</string>
+    <string name="update_available_title">Pembaruan Tersedia (v%1$s)</string>
+    <string name="update_message_format">Apa yang Baru:\n\n%1$s\n\nApakah Anda ingin menginstal pembaruan sekarang?</string>
+    <string name="btn_update_now">Perbarui Sekarang</string>
+    <string name="btn_later">Nanti</string>
 
     <!-- Super Admin -->
     <string name="add_pdo_title">TAMBAH PDO</string>
@@ -125,7 +131,7 @@
     <string name="toast_failed_loading_staff">Gagal memuat daftar nama staf.</string>
     <string name="toast_balance_sync_failed_generic">Sinkronisasi saldo server gagal.</string>
     <string name="dialog_credits_title">Kredit Aplikasi</string>
-    <string name="dialog_credits_message">Dibuat oleh Seseorang\nDikembangkan oleh wanwa\nBerdasarkan Ide dari Galeri Rasullloh</string>
+    <string name="dialog_credits_message">Versi %1$s\n\nDibuat oleh Seseorang\nDikembangkan oleh wanwa\nBerdasarkan Ide dari Galeri Rasullloh</string>
     <string name="msg_sync_staff_directory">Sinkronisasi direktori staf lengkap&#8230; Mohon tunggu.</string>
     <string name="msg_sync_roster_balances">Sinkronisasi daftar &amp; saldo&#8230; Mohon tunggu.</string>
 

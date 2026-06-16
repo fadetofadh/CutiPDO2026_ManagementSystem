@@ -10,6 +10,13 @@ import retrofit2.http.Query;
 
 public interface GoogleSheetsApi {
 
+    // 🔄 NEW: Connects to the update engine block in your Apps Script via a GET request
+    @GET("exec")
+    Call<UpdateResponse> checkAppUpdate(
+            @Query("type") String type,          // This will pass "checkUpdate"
+            @Query("cb") String cacheBuster      // Guarantees live sheet tracking bypasses local cache
+    );
+
     // Pulls the list of employees for the KADIV spinner dropdown
     @GET("exec")
     Call<List<String>> getEmployees(

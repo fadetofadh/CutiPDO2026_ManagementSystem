@@ -99,7 +99,7 @@ public class SupervisorActivity extends AppCompatActivity {
                         listAdapter = new UniversalRequestAdapter(pendingList, new UniversalRequestAdapter.OnItemActionListener() {
                             @Override
                             public void onEditSelected(LeaveRequestData request, int position) {
-                                Toast.makeText(SupervisorActivity.this, "Edit feature coming soon!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SupervisorActivity.this, getString(R.string.toast_edit_coming_soon), Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
@@ -198,7 +198,7 @@ public class SupervisorActivity extends AppCompatActivity {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
             swipeRefreshSupervisor.setEnabled(true); // 🔓 Re-enable refresh
-            Toast.makeText(this, "Batch approval complete!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_batch_approve_complete), Toast.LENGTH_SHORT).show();
             fetchPendingQueue(); // Refresh list
             return;
         }

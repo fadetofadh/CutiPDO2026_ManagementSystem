@@ -112,7 +112,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
     private void openLog(String type) {
         String selectedName = spBalanceEmployeeName.getSelectedItem().toString();
         if (selectedName.equals(getString(R.string.prompt_select_employee_name))) {
-            Toast.makeText(this, "Please select an employee first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_select_employee_first), Toast.LENGTH_SHORT).show();
             return;
         }
         Intent intent = new Intent(this, BalanceLogActivity.class);

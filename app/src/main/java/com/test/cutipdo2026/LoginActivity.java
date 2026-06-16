@@ -13,6 +13,8 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.test.cutipdo2026.BuildConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -109,7 +111,7 @@ public class LoginActivity extends AppCompatActivity {
         tvCreditPlaceholder.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(this)
                     .setTitle(R.string.dialog_credits_title)
-                    .setMessage(R.string.dialog_credits_message)
+                    .setMessage(getString(R.string.dialog_credits_message, BuildConfig.VERSION_NAME))
                     .setPositiveButton(R.string.btn_close, null)
                     .show();
         });

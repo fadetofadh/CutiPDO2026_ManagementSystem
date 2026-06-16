@@ -52,7 +52,7 @@ public class BalanceLogActivity extends AppCompatActivity {
         swipeRefreshLog = findViewById(R.id.swipeRefreshLog);
         btnBackFromLog = findViewById(R.id.btnBackFromLog);
 
-        tvLogTitle.setText(employeeName + " - " + leaveType + " Log");
+        tvLogTitle.setText(getString(R.string.item_title_format, employeeName, leaveType));
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
@@ -104,7 +104,7 @@ public class BalanceLogActivity extends AppCompatActivity {
                     }
                     logAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(BalanceLogActivity.this, "Server error or no data found.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BalanceLogActivity.this, getString(R.string.toast_server_error_no_data), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -112,7 +112,7 @@ public class BalanceLogActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
                 pbLogLoader.setVisibility(View.GONE);
                 swipeRefreshLog.setRefreshing(false);
-                Toast.makeText(BalanceLogActivity.this, "Connection Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BalanceLogActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -105,7 +105,7 @@ public class SpvRequestActivity extends AppCompatActivity {
             }
         } else {
             employeeList.add(getString(R.string.prompt_select_employee_name));
-            Toast.makeText(this, "Roster data empty. Please re-login.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.toast_roster_empty_relogin), Toast.LENGTH_LONG).show();
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, employeeList);
@@ -260,7 +260,7 @@ public class SpvRequestActivity extends AppCompatActivity {
     private void executeDirectSubmission() {
         String name = spEmployeeNameSpv.getSelectedItem().toString();
         if (Objects.equals(name, getString(R.string.prompt_select_employee_name)) || selectedDateRangeString.isEmpty() || selectedLeaveType.isEmpty()) {
-            Toast.makeText(this, "Please complete all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.toast_complete_all_fields), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -274,7 +274,7 @@ public class SpvRequestActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(SpvRequestActivity.this, "Request Approved & Logged!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_request_approved_logged), Toast.LENGTH_LONG).show();
                     
                     // WhatsApp
                     String msg = getString(R.string.whatsapp_message_format, name, selectedDateRangeString, calculatedDays, selectedLeaveType) + "\n*Status:* APPROVED (Direct)";
@@ -285,14 +285,14 @@ public class SpvRequestActivity extends AppCompatActivity {
 
                     finish();
                 } else {
-                    Toast.makeText(SpvRequestActivity.this, "Submission Failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_server_rejected_action, response.code()), Toast.LENGTH_SHORT).show();
                     btnSubmitDirect.setEnabled(true);
                     btnSubmitDirect.setText(R.string.btn_submit);
                 }
             }
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(SpvRequestActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnSubmitDirect.setEnabled(true);
                 btnSubmitDirect.setText(R.string.btn_submit);
             }
