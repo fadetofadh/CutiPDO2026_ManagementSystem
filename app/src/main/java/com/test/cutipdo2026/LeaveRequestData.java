@@ -1,15 +1,34 @@
 package com.test.cutipdo2026;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LeaveRequestData {
+    @SerializedName("rowNumber")
     public int rowNumber;
+
+    @SerializedName("employeeName")
     public String employeeName;
+
+    @SerializedName("targetDate")
     public Object targetDate; // Using Object to handle both String and Long (from GSON)
+
+    @SerializedName("totalDays")
     public int totalDays;
+
+    @SerializedName("leaveType")
     public String leaveType;
+
+    @SerializedName("description")
     public String description;
+
+    @SerializedName("status")
     public String status;    // Col G: Pending, Approved, System, Cancelled
+
+    @SerializedName("actionType")
     public String actionType; // Col B: Submit, Add, Direct
-    public String approvalId; // Col I: Calendar IDs or Approval Reference
+
+    @SerializedName("calendarEventId")
+    public String calendarEventId; // Col I: Calendar IDs or Approval Reference
 
     // UI States
     public boolean isMarked = false;

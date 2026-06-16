@@ -134,12 +134,15 @@ public class BalanceLogActivity extends AppCompatActivity {
             LeaveRequestData item = items.get(position);
             
             holder.tvLogDate.setText(item.actionType != null ? item.actionType.toUpperCase() : "ACTIVITY");
-            holder.tvLogAction.setText(item.approvalId != null && !item.approvalId.isEmpty() ? item.approvalId : "-");
+
+            // 💡 FIX: Use item.status (Column G) for the top-right label text
+            String status = item.status != null ? item.status : "-";
+            holder.tvLogAction.setText(status);
+
             holder.tvLogLeaveDates.setText(holder.itemView.getContext().getString(R.string.log_dates_format, item.getFormattedDate()));
             holder.tvLogDays.setText(holder.itemView.getContext().getString(R.string.log_days_format, item.totalDays));
             holder.tvLogDescription.setText(item.description != null ? item.description : "-");
 
-            String status = item.status != null ? item.status : "";
             if (status.equalsIgnoreCase("Approved")) {
                 holder.tvLogAction.setBackgroundColor(Color.parseColor("#C6F6D5")); 
                 holder.tvLogAction.setTextColor(Color.parseColor("#2F855A"));     

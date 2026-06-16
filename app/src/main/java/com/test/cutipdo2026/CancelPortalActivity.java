@@ -89,7 +89,16 @@ public class CancelPortalActivity extends AppCompatActivity {
                 swipeRefreshCancel.setRefreshing(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    historyList = response.body();
+                    List<LeaveRequestData> fullList = response.body();
+                    historyList.clear();
+
+                    // 🛡️ FILTER: Only show "Approved" requests for revocation
+                    // This prevents "Pending" or "Cancelled" items from appearing in the Revoke Portal
+                    for (LeaveRequestData data : fullList) {
+                        if (data.status != null && data.status.equalsIgnoreCase("Approved")) {
+                            historyList.add(data);
+                        }
+                    }
 
                     if (historyList.isEmpty()) {
                         tvNoHistory.setVisibility(View.VISIBLE);

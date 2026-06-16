@@ -83,6 +83,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/toast_no_approved_requests"
                 android:textSize="16sp"
+                android:gravity="center"
                 android:textColor="#888888"
                 android:layout_centerInParent="true"
                 android:visibility="gone" />
