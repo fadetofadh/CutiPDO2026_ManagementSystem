@@ -8,6 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.button.MaterialButton;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -341,6 +343,86 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openInlineDatePicker(QueuedRequest request, final int position) {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        final TextView tvDateLabel = new TextView(this);
+        tvDateLabel.setText(R.string.label_select_leave_dates);
+        tvDateLabel.setPadding(0, 0, 0, 10);
+        layout.addView(tvDateLabel);
+
+        final Button btnChangeDate = new MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
+        btnChangeDate.setText(request.getTargetDate());
+        layout.addView(btnChangeDate);
+
+        final TextView tvDescLabel = new TextView(this);
+        tvDescLabel.setText(R.string.label_reason_of_leaving);
+        tvDescLabel.setPadding(0, 30, 0, 10);
+        layout.addView(tvDescLabel);
+
+        final EditText etEditDesc = new EditText(this);
+        etEditDesc.setHint(R.string.hint_enter_reason);
+        etEditDesc.setText(request.getDescription());
+        layout.addView(etEditDesc);
+
+        final String[] tempDate = {request.getTargetDate()};
+        final int[] tempDays = {request.getTotalDays()};
+
+        btnChangeDate.setOnClickListener(v -> {
+            MaterialDatePicker<Pair<Long, Long>> rangePicker = MaterialDatePicker.Builder.dateRangePicker()
+                    .setTitleText(R.string.label_modify_allocation_dates_title)
+                    .setCalendarConstraints(getStrictConstraints())
+                    .build();
+
+            rangePicker.show(getSupportFragmentManager(), "EDIT_DATE_PICKER");
+            rangePicker.addOnPositiveButtonClickListener(selection -> {
+                if (selection != null && selection.first != null && selection.second != null) {
+                    long diffMs = selection.second - selection.first;
+                    tempDays[0] = (int) (diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+                    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    format.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                    String startStr = format.format(new Date(selection.first));
+                    String endStr = format.format(new Date(selection.second));
+
+                    tempDate[0] = Objects.equals(startStr, endStr) ? startStr : startStr + " to " + endStr;
+                    btnChangeDate.setText(tempDate[0]);
+
+                    Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    checkCalendar.setTimeInMillis(selection.first);
+                    while (checkCalendar.getTimeInMillis() <= selection.second) {
+                        int day = checkCalendar.get(Calendar.DAY_OF_WEEK);
+                        if (day == Calendar.SATURDAY || day == Calendar.SUNDAY) {
+                            request.setLeaveType(getString(R.string.pdo));
+                            Toast.makeText(this, getString(R.string.toast_weekend_detected_pdo), Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                    }
+                }
+            });
+        });
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.label_edit_request)
+                .setView(layout)
+                .setPositiveButton(R.string.btn_save_changes, (dialog, which) -> {
+                    request.setTargetDate(tempDate[0]);
+                    request.setTotalDays(tempDays[0]);
+                    request.setDescription(etEditDesc.getText().toString().trim());
+
+                    queueManager.saveQueue(batchQueue);
+                    queueAdapter.notifyItemChanged(position);
+                    updateQueueUi();
+                    Toast.makeText(this, R.string.msg_changes_saved, Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
+
+    private CalendarConstraints getStrictConstraints() {
         long today = MaterialDatePicker.todayInUtcMilliseconds();
         CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
         constraintsBuilder.setFirstDayOfWeek(Calendar.MONDAY);
@@ -361,48 +443,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {}
         });
-
-        MaterialDatePicker<Pair<Long, Long>> rangePicker = MaterialDatePicker.Builder.dateRangePicker()
-                .setTitleText(R.string.label_modify_allocation_dates_title)
-                .setCalendarConstraints(constraintsBuilder.build())
-                .build();
-
-        rangePicker.show(getSupportFragmentManager(), "INLINE_RE_PICKER");
-
-        rangePicker.addOnPositiveButtonClickListener(selection -> {
-            if (selection != null && selection.first != null && selection.second != null) {
-                long diffMs = selection.second - selection.first;
-                int updatedDaysCount = (int) (diffMs / (1000 * 60 * 60 * 24)) + 1;
-
-                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                format.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                String startString = format.format(new Date(selection.first));
-                String endString = format.format(new Date(selection.second));
-
-                request.setTargetDate(Objects.equals(startString, endString) ? startString : startString + " to " + endString);
-                request.setTotalDays(updatedDaysCount);
-
-                boolean containsWeekend = false;
-                Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                checkCalendar.setTimeInMillis(selection.first);
-                while (checkCalendar.getTimeInMillis() <= selection.second) {
-                    if (checkCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || checkCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                        containsWeekend = true;
-                        break;
-                    }
-                    checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                }
-                if (containsWeekend) {
-                    request.setLeaveType(getString(R.string.pdo));
-                    Toast.makeText(this, getString(R.string.toast_weekend_detected_pdo), Toast.LENGTH_SHORT).show();
-                }
-
-                queueManager.saveQueue(batchQueue);
-                queueAdapter.notifyItemChanged(position);
-                updateQueueUi();
-            }
-        });
+        return constraintsBuilder.build();
     }
 
     private void setUiEnabled(boolean enabled) {
@@ -508,30 +549,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showStrictDatePicker() {
-        long today = MaterialDatePicker.todayInUtcMilliseconds();
-        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder();
-        constraintsBuilder.setFirstDayOfWeek(Calendar.MONDAY);
-        constraintsBuilder.setStart(today);
-        constraintsBuilder.setOpenAt(today);
-
-        constraintsBuilder.setValidator(new CalendarConstraints.DateValidator() {
-            @Override
-            public boolean isValid(long date) {
-                if (date < today) return false;
-                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                cal.setTimeInMillis(date);
-                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-                return dayOfWeek != Calendar.MONDAY && dayOfWeek != Calendar.TUESDAY;
-            }
-            @Override
-            public int describeContents() { return 0; }
-            @Override
-            public void writeToParcel(android.os.Parcel dest, int flags) {}
-        });
-
         MaterialDatePicker<Pair<Long, Long>> dateRangePicker = MaterialDatePicker.Builder.dateRangePicker()
                 .setTitleText(R.string.label_select_leave_dates_title)
-                .setCalendarConstraints(constraintsBuilder.build())
+                .setCalendarConstraints(getStrictConstraints())
                 .build();
 
         dateRangePicker.show(getSupportFragmentManager(), "STRICT_DATE_PICKER");

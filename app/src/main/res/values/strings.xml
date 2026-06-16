@@ -200,4 +200,8 @@
     <string name="desc_edit_icon">Edit item ini</string>
     <string name="desc_delete_icon">Hapus item ini</string>
     <string name="desc_calendar_icon">Ikon kalender</string>
+
+    <string name="label_edit_request">Edit Pengajuan</string>
+    <string name="btn_save_changes">Simpan Perubahan</string>
+    <string name="msg_changes_saved">Perubahan berhasil disimpan!</string>
 </resources>
