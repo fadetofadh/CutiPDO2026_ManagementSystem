@@ -71,7 +71,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="15dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgCutiCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="15dp"
+            android:visibility="gone">
+
+            <RadioButton
+                android:id="@+id/rbKhusus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_khusus"
+                android:layout_marginEnd="10dp"/>
+
+            <RadioButton
+                android:id="@+id/rbBersurat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/label_bersurat"/>
+        </RadioGroup>
 
         <TextView
             android:layout_width="wrap_content"

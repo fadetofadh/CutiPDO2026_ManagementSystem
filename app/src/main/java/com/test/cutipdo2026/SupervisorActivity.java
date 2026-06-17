@@ -95,6 +95,9 @@ public class SupervisorActivity extends AppCompatActivity {
                         tvNoData.setVisibility(View.VISIBLE);
                         rvPendingRequests.setVisibility(View.GONE);
                     } else {
+                        // 📉 SORTING: Show newest requests at the top for the Supervisor
+                        ListSorter.sortNewestFirst(pendingList);
+
                         tvNoData.setVisibility(View.GONE);
                         rvPendingRequests.setVisibility(View.VISIBLE);
 

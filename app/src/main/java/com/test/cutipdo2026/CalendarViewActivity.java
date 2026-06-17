@@ -112,6 +112,10 @@ public class CalendarViewActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     fullList = response.body();
+                    
+                    // 📉 SORTING: Use shared utility
+                    ListSorter.sortNewestFirst(fullList);
+
                     applyFilter();
                 } else {
                     Toast.makeText(CalendarViewActivity.this, "Gagal memuat jadwal", Toast.LENGTH_SHORT).show();

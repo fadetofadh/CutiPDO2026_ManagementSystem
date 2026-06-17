@@ -1,6 +1,8 @@
 package com.test.cutipdo2026;
 
 import android.os.Bundle;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnAddToBatch, btnSubmitToSpv;
     private TextView tvTotalDaysDisplay, tvClearSelection;
     private Spinner spEmployeeName, spLeaveType;
+    private RadioGroup rgCutiCategory;
     private RecyclerView rvBatchQueue;
     private View layoutQueueHeader;
 
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         spEmployeeName = findViewById(R.id.spEmployeeName);
         spLeaveType = findViewById(R.id.spLeaveType);
+        rgCutiCategory = findViewById(R.id.rgCutiCategory);
         etSelectedDates = findViewById(R.id.etSelectedDates);
         etLeaveDescription = findViewById(R.id.etLeaveDescription);
         tvTotalDaysDisplay = findViewById(R.id.tvTotalDaysDisplay);
@@ -209,6 +213,63 @@ public class MainActivity extends AppCompatActivity {
 
         resetLeaveTypeOptions();
 
+        // Radio Button Category Logic for "Cuti"
+        spLeaveType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedType = spLeaveType.getSelectedItem().toString();
+                if (selectedType.equalsIgnoreCase(getString(R.string.cuti))) {
+                    rgCutiCategory.setVisibility(View.VISIBLE);
+                } else {
+                    rgCutiCategory.setVisibility(View.GONE);
+                    rgCutiCategory.clearCheck();
+                    
+                    // 💡 Clean up: Remove special tags if switching back to PDO
+                    String currentDesc = etLeaveDescription.getText().toString();
+                    if (currentDesc.equals("[Khusus]") || currentDesc.equals("[Bersurat]")) {
+                        etLeaveDescription.setText("");
+                    }
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        // 💡 Custom behavior: Allow deselecting the radio button
+        for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
+            View rb = rgCutiCategory.getChildAt(i);
+            if (rb instanceof RadioButton) {
+                rb.setOnClickListener(v -> {
+                    RadioButton clickedRb = (RadioButton) v;
+                    // If clicking the ALREADY selected button, uncheck it
+                    if (clickedRb.getTag() != null && (boolean) clickedRb.getTag()) {
+                        rgCutiCategory.clearCheck();
+                        clickedRb.setTag(false);
+                        
+                        // Clear description if it only contained the tag
+                        String desc = etLeaveDescription.getText().toString();
+                        if (desc.equals("[Khusus]") || desc.equals("[Bersurat]")) {
+                            etLeaveDescription.setText("");
+                        }
+                    } else {
+                        // Mark this as selected, unmark others
+                        for (int j = 0; j < rgCutiCategory.getChildCount(); j++) {
+                            rgCutiCategory.getChildAt(j).setTag(false);
+                        }
+                        clickedRb.setTag(true);
+                    }
+                });
+            }
+        }
+
+        rgCutiCategory.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbKhusus) {
+                etLeaveDescription.setText("[Khusus]");
+            } else if (checkedId == R.id.rbBersurat) {
+                etLeaveDescription.setText("[Bersurat]");
+            }
+        });
+
         // =========================================================================
         // 💡 4. EXTRACT PRE-FETCHED DATABASE DATA BUNDLES INSTANTLY
         // =========================================================================
@@ -256,17 +317,22 @@ public class MainActivity extends AppCompatActivity {
 
             EmployeeBalance balance = balanceMap.get(empName);
             if (balance != null) {
-                if (Objects.equals(leaveType, getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
-                    Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_cuti, balance.cutiBalance), Toast.LENGTH_LONG).show();
-                    return;
-                }
-                if (Objects.equals(leaveType, getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
-                    Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_pdo, balance.pdoBalance), Toast.LENGTH_LONG).show();
-                    return;
-                }
+                // 🛡️ NO DEDUCTION RULE: Do not subtract balance if "Khusus" or "Bersurat" is selected
+                boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
 
-                if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
-                else balance.pdoBalance -= calculatedDays;
+                if (!isSpecialCategory) {
+                    if (Objects.equals(leaveType, getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_cuti, balance.cutiBalance), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    if (Objects.equals(leaveType, getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_pdo, balance.pdoBalance), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
+                    else balance.pdoBalance -= calculatedDays;
+                }
             }
 
             QueuedRequest newRequest = new QueuedRequest(empName, selectedDateRangeString, calculatedDays, leaveType, description);
@@ -283,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
             currentEndMs = 0;
             etSelectedDates.setText("");
             etLeaveDescription.setText("");
+            rgCutiCategory.clearCheck();
             tvTotalDaysDisplay.setText(R.string.duration_zero);
             resetLeaveTypeOptions();
         });
@@ -608,23 +675,17 @@ public class MainActivity extends AppCompatActivity {
             EmployeeBalance balance = balanceMap.get(selectedEmployee);
 
             leaveTypeList.clear();
-            if (balance != null) {
-                if (balance.pdoBalance >= calculatedDays) {
-                    leaveTypeList.add(getString(R.string.pdo));
-                } else if (balance.cutiBalance >= calculatedDays) {
-                    leaveTypeList.add(getString(R.string.cuti));
-                    Toast.makeText(this, getString(R.string.toast_weekend_detected_cuti), Toast.LENGTH_SHORT).show();
-                } else {
-                    showNoBalanceAlert(getString(R.string.label_insufficient_balance),
-                            getString(R.string.alert_insufficient_balance_weekend_msg,
-                                    calculatedDays, balance.cutiBalance, balance.pdoBalance));
-                    return;
-                }
-            } else {
-                leaveTypeList.add(getString(R.string.pdo));
-            }
+            // Always allow both PDO and Cuti when a weekend is involved.
+            // PDO is standard for weekends, but Cuti is allowed for Special/Bersurat categories.
+            leaveTypeList.add(getString(R.string.pdo));
+            leaveTypeList.add(getString(R.string.cuti));
+
             leaveTypeAdapter.notifyDataSetChanged();
+            
+            // Default to PDO as it's the standard for weekends
             spLeaveType.setSelection(0);
+
+            Toast.makeText(this, "ℹ️ Akhir pekan terdeteksi! Gunakan 'Cuti' hanya jika ini kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
         } else {
             resetLeaveTypeOptions();
         }

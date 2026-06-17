@@ -79,7 +79,6 @@ public class CancelPortalActivity extends AppCompatActivity {
         rvCancelHistory.setVisibility(View.GONE);
         tvNoHistory.setVisibility(View.GONE);
 
-        // 💡 Cache Buster: Ensures we get the freshest data from Google Sheets
         String cb = System.currentTimeMillis() + "";
 
         googleSheetsApi.getAllRequests("all", filterClass, cb).enqueue(new Callback<>() {
@@ -92,10 +91,11 @@ public class CancelPortalActivity extends AppCompatActivity {
                     List<LeaveRequestData> fullList = response.body();
                     historyList.clear();
 
-                    // 🛡️ FILTER: Only show "Approved" requests for revocation
-                    // This prevents "Pending" or "Cancelled" items from appearing in the Revoke Portal
+                    // 🛡️ FILTER: Only show "Approved" requests that are in the FUTURE (Upcoming)
+                    // This prevents users from cancelling "Past" or "Current" requests to avoid refund abuse.
                     for (LeaveRequestData data : fullList) {
-                        if (data.status != null && data.status.equalsIgnoreCase("Approved")) {
+                        if (data.status != null && data.status.equalsIgnoreCase("Approved") && 
+                            ListSorter.isCancellable(data.getFormattedDate())) {
                             historyList.add(data);
                         }
                     }
@@ -105,6 +105,9 @@ public class CancelPortalActivity extends AppCompatActivity {
                         rvCancelHistory.setVisibility(View.GONE);
                         updateClearButtonVisibility();
                     } else {
+                        // 📉 SORTING: Show newest approved items first in the Cancel Portal
+                        ListSorter.sortNewestFirst(historyList);
+
                         tvNoHistory.setVisibility(View.GONE);
                         rvCancelHistory.setVisibility(View.VISIBLE);
                         listAdapter = new UniversalRequestAdapter(historyList, new UniversalRequestAdapter.OnItemActionListener() {

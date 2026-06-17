@@ -14,8 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -76,10 +80,8 @@ public class BalanceLogActivity extends AppCompatActivity {
         }
         tvNoLogData.setVisibility(View.GONE);
 
-        // 💡 Cache Buster: Ensures you see LIVE data every time you refresh
         String cb = System.currentTimeMillis() + "";
 
-        // 🛡️ Passing "all" for filterClass to bypass server-side department filtering
         googleSheetsApi.getAllRequests("all", "all", cb).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<LeaveRequestData>> call, @NonNull Response<List<LeaveRequestData>> response) {
@@ -89,12 +91,14 @@ public class BalanceLogActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     logList.clear();
                     for (LeaveRequestData data : response.body()) {
-                        // 🛡️ Safe Filtering: Match Name and Leave Type exactly
                         if (data.employeeName != null && data.employeeName.trim().equalsIgnoreCase(employeeName.trim()) && 
                             data.leaveType != null && data.leaveType.trim().equalsIgnoreCase(leaveType.trim())) {
                             logList.add(data);
                         }
                     }
+
+                    // 📉 SORTING: Use shared utility
+                    ListSorter.sortNewestFirst(logList);
 
                     if (logList.isEmpty()) {
                         tvNoLogData.setVisibility(View.VISIBLE);
@@ -133,15 +137,25 @@ public class BalanceLogActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
             LeaveRequestData item = items.get(position);
             
-            holder.tvLogDate.setText(item.actionType != null ? item.actionType.toUpperCase() : "ACTIVITY");
+            // Determine dynamic title (PAST, TODAY, CURRENT, or UPCOMING)
+            String dynamicTitle = getDynamicTitle(item.getFormattedDate());
+            holder.tvLogDate.setText(dynamicTitle);
 
-            // 💡 FIX: Use item.status (Column G) for the top-right label text
             String status = Objects.requireNonNullElse(item.status, "-");
             holder.tvLogAction.setText(status);
 
             holder.tvLogLeaveDates.setText(holder.itemView.getContext().getString(R.string.log_dates_format, item.getFormattedDate()));
             holder.tvLogDays.setText(holder.itemView.getContext().getString(R.string.log_days_format, item.totalDays));
             holder.tvLogDescription.setText(item.description != null ? item.description : "-");
+
+            // Apply specific color for labels
+            if (dynamicTitle.equals("PAST")) {
+                holder.tvLogDate.setTextColor(Color.parseColor("#718096")); // Gray for past
+            } else if (dynamicTitle.equals("TODAY") || dynamicTitle.equals("CURRENT") || dynamicTitle.equals("UPCOMING")) {
+                holder.tvLogDate.setTextColor(Color.parseColor("#2B6CB0")); // Blue for current/future
+            } else {
+                holder.tvLogDate.setTextColor(Color.parseColor("#2D3748")); // Default dark
+            }
 
             if (status.equalsIgnoreCase("Approved")) {
                 holder.tvLogAction.setBackgroundColor(Color.parseColor("#C6F6D5")); 
@@ -158,6 +172,53 @@ public class BalanceLogActivity extends AppCompatActivity {
             } else {
                 holder.tvLogAction.setBackgroundColor(Color.parseColor("#EDF2F7"));
                 holder.tvLogAction.setTextColor(Color.parseColor("#4A5568"));
+            }
+        }
+
+        private String getDynamicTitle(String dateRangeStr) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                Calendar today = Calendar.getInstance();
+                today.set(Calendar.HOUR_OF_DAY, 0);
+                today.set(Calendar.MINUTE, 0);
+                today.set(Calendar.SECOND, 0);
+                today.set(Calendar.MILLISECOND, 0);
+
+                Date startDate;
+                Date endDate = null;
+
+                if (dateRangeStr.contains(" to ")) {
+                    String[] parts = dateRangeStr.split(" to ");
+                    startDate = sdf.parse(parts[0]);
+                    endDate = sdf.parse(parts[1]);
+                } else if (!dateRangeStr.equals("-") && !dateRangeStr.isEmpty()) {
+                    startDate = sdf.parse(dateRangeStr);
+                } else {
+                    return "UPCOMING";
+                }
+
+                if (startDate == null) return "UPCOMING";
+
+                // Check for Today/Current
+                if (endDate != null) {
+                    if (!today.getTime().before(startDate) && !today.getTime().after(endDate)) {
+                        return "CURRENT";
+                    }
+                    if (today.getTime().after(endDate)) {
+                        return "PAST";
+                    }
+                } else {
+                    if (today.getTime().equals(startDate)) {
+                        return "TODAY";
+                    }
+                    if (today.getTime().after(startDate)) {
+                        return "PAST";
+                    }
+                }
+
+                return "UPCOMING";
+            } catch (Exception e) {
+                return "UPCOMING";
             }
         }
 

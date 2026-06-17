@@ -212,4 +212,7 @@
     <string name="filter_active">Hasil untuk tanggal: %1$s</string>
     <string name="desc_clear_search">Hapus pencarian</string>
     <string name="msg_date_available">✅ Tanggal ini tersedia!</string>
+
+    <string name="label_khusus">Khusus</string>
+    <string name="label_bersurat">Bersurat</string>
 </resources>
