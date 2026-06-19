@@ -1,186 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_select_employee"
-            android:textSize="16sp"
-            android:textColor="#333333"/>
-
-        <Spinner
-            android:id="@+id/spEmployeeName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="15dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_select_leave_dates"
-            android:textSize="16sp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etSelectedDates"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="15dp"
-            android:focusable="true"
-            android:focusableInTouchMode="false"
-            android:clickable="true"
-            android:hint="@string/hint_select_date_range"
-            android:autofillHints="none"
-            android:inputType="none"
-            android:drawableEnd="@android:drawable/ic_menu_my_calendar"
-            android:padding="12dp"
-            android:background="@android:drawable/editbox_background_normal"/>
-
-        <TextView
-            android:id="@+id/tvTotalDaysDisplay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="@string/duration_zero"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#2D3748"
-            android:background="#F7FAFC"
-            android:layout_marginBottom="15dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_leave_type"
-            android:textSize="16sp"
-            android:textColor="#333333"/>
-
-        <Spinner
-            android:id="@+id/spLeaveType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="15dp"/>
-
-        <RadioGroup
-            android:id="@+id/rgCutiCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="15dp"
-            android:visibility="gone">
-
-            <RadioButton
-                android:id="@+id/rbKhusus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_khusus"
-                android:layout_marginEnd="10dp"/>
-
-            <RadioButton
-                android:id="@+id/rbBersurat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="@string/label_bersurat"/>
-        </RadioGroup>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_reason_of_leaving"
-            android:textSize="16sp"
-            android:textColor="#333333"/>
-
-        <EditText
-            android:id="@+id/etLeaveDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/bg_description_input"
-            android:gravity="top|start"
-            android:hint="@string/hint_enter_reason"
-            android:autofillHints="none"
-            android:inputType="textMultiLine"
-            android:minLines="3"
-            android:textColor="#333333"
-            android:textColorHint="#999999" />
-
-        <Button
-            android:id="@+id/btnAddToBatch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_add"
-            android:backgroundTint="#1E88E5"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="20dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDDDDD"
-            android:layout_marginBottom="15dp"/>
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/layoutQueueHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone">
+            android:orientation="vertical">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/review_batch_requests"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#4A5568" />
-
-            <TextView
-                android:id="@+id/tvClearSelection"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_clear_marks"
-                android:textColor="#E53E3E"
-                android:textSize="12sp"
+                android:text="@string/label_select_employee"
+                android:textSize="16sp"
+                android:textColor="#333333"/>
+
+            <Spinner
+                android:id="@+id/spEmployeeName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="15dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_select_leave_dates"
+                android:textSize="16sp"
+                android:textColor="#333333"/>
+
+            <EditText
+                android:id="@+id/etSelectedDates"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="15dp"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:hint="@string/hint_select_date_range"
+                android:autofillHints="none"
+                android:inputType="none"
+                android:drawableEnd="@android:drawable/ic_menu_my_calendar"
+                android:padding="12dp"
+                android:background="@android:drawable/editbox_background_normal"/>
+
+            <TextView
+                android:id="@+id/tvTotalDaysDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="@string/duration_zero"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:padding="4dp"
+                android:textColor="#2D3748"
+                android:background="#F7FAFC"
+                android:layout_marginBottom="15dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_leave_type"
+                android:textSize="16sp"
+                android:textColor="#333333"/>
+
+            <Spinner
+                android:id="@+id/spLeaveType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="15dp"/>
+
+            <RadioGroup
+                android:id="@+id/rgCutiCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="15dp"
+                android:visibility="gone">
+
+                <RadioButton
+                    android:id="@+id/rbKhusus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_khusus"
+                    android:layout_marginEnd="10dp"/>
+
+                <RadioButton
+                    android:id="@+id/rbBersurat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/label_bersurat"/>
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_reason_of_leaving"
+                android:textSize="16sp"
+                android:textColor="#333333"/>
+
+            <EditText
+                android:id="@+id/etLeaveDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/bg_description_input"
+                android:gravity="top|start"
+                android:hint="@string/hint_enter_reason"
+                android:autofillHints="none"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:textColor="#333333"
+                android:textColorHint="#999999" />
+
+            <Button
+                android:id="@+id/btnAddToBatch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_add"
+                android:backgroundTint="#1E88E5"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="20dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginBottom="15dp"/>
+
+            <LinearLayout
+                android:id="@+id/layoutQueueHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/review_batch_requests"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#4A5568" />
+
+                <TextView
+                    android:id="@+id/tvClearSelection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_clear_marks"
+                    android:textColor="#E53E3E"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvBatchQueue"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="#F8FAFC"
+                android:layout_marginBottom="15dp"
                 android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnSubmitToSpv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/submit_all_to_supervisor_zero"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"
+                android:layout_marginBottom="15dp"/>
+
         </LinearLayout>
+    </ScrollView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvBatchQueue"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#F8FAFC"
-            android:layout_marginBottom="15dp"
-            android:visibility="gone" />
+    <!-- 💡 Full Screen Progress Overlay -->
+    <FrameLayout
+        android:id="@+id/mainProgressOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
 
-        <Button
-            android:id="@+id/btnSubmitToSpv"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/submit_all_to_supervisor_zero"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"
-            android:visibility="gone"
-            android:layout_marginBottom="15dp"/>
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp"
+            android:background="@android:drawable/dialog_holo_light_frame">
 
-    </LinearLayout>
-</ScrollView>
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/tvMainProgressMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Mengunggah data..."
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

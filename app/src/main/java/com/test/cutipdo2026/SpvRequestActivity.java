@@ -45,7 +45,7 @@ public class SpvRequestActivity extends AppCompatActivity {
     private final Map<String, EmployeeBalance> balanceMap = new HashMap<>();
 
     private GoogleSheetsApi googleSheetsApi;
-    private CallMeBotApi callMeBotApi;
+
 
     private String selectedDateRangeString = "";
     private int calculatedDays = 0;
@@ -76,12 +76,6 @@ public class SpvRequestActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
-
-        Retrofit callMeBotRetrofit = new Retrofit.Builder()
-                .baseUrl("https://api.callmebot.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        callMeBotApi = callMeBotRetrofit.create(CallMeBotApi.class);
 
         // Data setup
         @SuppressWarnings("unchecked")
@@ -276,13 +270,6 @@ public class SpvRequestActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_request_approved_logged), Toast.LENGTH_LONG).show();
                     
-                    // WhatsApp
-                    String msg = getString(R.string.whatsapp_message_format, name, selectedDateRangeString, calculatedDays, selectedLeaveType) + "\n*Status:* APPROVED (Direct)";
-                    callMeBotApi.sendWhatsAppMessage("+628998366182", msg, "9378602").enqueue(new Callback<>() {
-                        @Override public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> res) {}
-                        @Override public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
-                    });
-
                     finish();
                 } else {
                     Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_server_rejected_action, response.code()), Toast.LENGTH_SHORT).show();

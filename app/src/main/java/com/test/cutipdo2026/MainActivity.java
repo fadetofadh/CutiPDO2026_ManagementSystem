@@ -44,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etSelectedDates, etLeaveDescription;
     private Button btnAddToBatch, btnSubmitToSpv;
-    private TextView tvTotalDaysDisplay, tvClearSelection;
+    private TextView tvTotalDaysDisplay, tvClearSelection, tvMainProgressMessage;
     private Spinner spEmployeeName, spLeaveType;
     private RadioGroup rgCutiCategory;
     private RecyclerView rvBatchQueue;
-    private View layoutQueueHeader;
+    private View layoutQueueHeader, mainProgressOverlay;
 
     private final List<String> employeeList = new ArrayList<>();
     private final Map<String, EmployeeBalance> balanceMap = new HashMap<>();
@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<QueuedRequest> batchQueue = new ArrayList<>();
     private ReviewQueueAdapter queueAdapter;
     private GoogleSheetsApi googleSheetsApi;
-    private CallMeBotApi callMeBotApi;
     private QueueManager queueManager;
     private String selectedDateRangeString = "";
     private int calculatedDays = 0;
@@ -89,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
         btnSubmitToSpv = findViewById(R.id.btnSubmitToSpv);
         rvBatchQueue = findViewById(R.id.rvBatchQueue);
+        mainProgressOverlay = findViewById(R.id.mainProgressOverlay);
+        tvMainProgressMessage = findViewById(R.id.tvMainProgressMessage);
 
         // Configure APIs
         okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
@@ -103,13 +104,6 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
-
-        Retrofit callMeBotRetrofit = new Retrofit.Builder()
-                .baseUrl("https://api.callmebot.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        callMeBotApi = callMeBotRetrofit.create(CallMeBotApi.class);
 
         // Setup RecyclerView
         rvBatchQueue.setLayoutManager(new LinearLayoutManager(this));
@@ -179,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
         leaveTypeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, leaveTypeList) {
             @Override
             public boolean isEnabled(int position) {
+                // 💡 BLOCK SELECTION IF DATE NOT SET
+                if (currentStartMs == 0 || currentEndMs == 0) return false;
+
                 if (position >= leaveTypeList.size()) return true;
                 return !Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo));
             }
@@ -188,7 +185,10 @@ public class MainActivity extends AppCompatActivity {
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView text = view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
+                
+                // 💡 Visual feedback: Gray out if date not set or if it's the prompt
+                boolean isPrompt = position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo));
+                if (currentStartMs == 0 || currentEndMs == 0 || isPrompt) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -200,7 +200,9 @@ public class MainActivity extends AppCompatActivity {
             public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView text = view.findViewById(android.R.id.text1);
-                if (position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo))) {
+                
+                boolean isPrompt = position < leaveTypeList.size() && Objects.equals(leaveTypeList.get(position), getString(R.string.label_cuti_pdo));
+                if (currentStartMs == 0 || currentEndMs == 0 || isPrompt) {
                     text.setTextColor(android.graphics.Color.GRAY);
                 } else {
                     text.setTextColor(android.graphics.Color.BLACK);
@@ -350,6 +352,9 @@ public class MainActivity extends AppCompatActivity {
             etSelectedDates.setText("");
             etLeaveDescription.setText("");
             rgCutiCategory.clearCheck();
+            for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
+                rgCutiCategory.getChildAt(i).setTag(false);
+            }
             tvTotalDaysDisplay.setText(R.string.duration_zero);
             resetLeaveTypeOptions();
         });
@@ -369,6 +374,9 @@ public class MainActivity extends AppCompatActivity {
             btnSubmitToSpv.setEnabled(false);
             btnSubmitToSpv.setText(getString(R.string.msg_uploading));
             setUiEnabled(false); // 🔒 Lock the entire form and list
+            
+            mainProgressOverlay.setVisibility(View.VISIBLE);
+            tvMainProgressMessage.setText(getString(R.string.msg_uploading));
 
             successUploadCount = 0;
             sendSelectedItemsSequentially(itemsToSend, 0);
@@ -532,6 +540,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index) {
         if (index >= items.size()) {
+            mainProgressOverlay.setVisibility(View.GONE);
             Toast.makeText(this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
 
             // 💡 Clean up: Remove only the items that were successfully submitted
@@ -549,6 +558,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         QueuedRequest item = items.get(index);
+        tvMainProgressMessage.setText(getString(R.string.msg_batch_approving, (index + 1), items.size()));
+        
         LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType(), item.getDescription());
 
         googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<ResponseBody>() {
@@ -559,20 +570,9 @@ public class MainActivity extends AppCompatActivity {
                     String messageContent = getString(R.string.whatsapp_message_format,
                             item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
 
-                    callMeBotApi.sendWhatsAppMessage("+628998366182", messageContent, "9378602")
-                            .enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                                    // WhatsApp notification triggered successfully
-                                }
-                                @Override
-                                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                                    // Log failure or ignore
-                                }
-                            });
-
                     sendSelectedItemsSequentially(items, index + 1);
                 } else {
+                    mainProgressOverlay.setVisibility(View.GONE);
                     Toast.makeText(MainActivity.this, getString(R.string.toast_upload_failed_pos, index), Toast.LENGTH_SHORT).show();
                     btnSubmitToSpv.setEnabled(true);
                     setUiEnabled(true); // 🔓 Unlock on error
@@ -582,6 +582,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                mainProgressOverlay.setVisibility(View.GONE);
                 Toast.makeText(MainActivity.this, getString(R.string.toast_upload_loop_failure, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnSubmitToSpv.setEnabled(true);
                 setUiEnabled(true); // 🔓 Unlock on failure
@@ -657,6 +658,16 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // 💡 Reset Special Category state when date changes to prevent stale tags
+        rgCutiCategory.clearCheck();
+        for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
+            rgCutiCategory.getChildAt(i).setTag(false);
+        }
+        String currentDesc = etLeaveDescription.getText().toString();
+        if (currentDesc.equals("[Khusus] ") || currentDesc.equals("[Bersurat] ")) {
+            etLeaveDescription.setText("");
+        }
+
         boolean containsWeekend = false;
         Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         checkCalendar.setTimeInMillis(currentStartMs);
@@ -722,42 +733,43 @@ public class MainActivity extends AppCompatActivity {
             leaveTypeList.add(getString(R.string.pdo));
             leaveTypeAdapter.notifyDataSetChanged();
             spLeaveType.setSelection(0);
+            
+            // 💡 Ensure category is hidden if data is reset
+            rgCutiCategory.setVisibility(View.GONE);
             return;
         }
 
         EmployeeBalance balance = balanceMap.get(selectedEmployee);
-        if (balance != null) {
-            if (balance.cutiBalance < calculatedDays && balance.pdoBalance < calculatedDays) {
-                leaveTypeList.add(getString(R.string.label_insufficient_balance));
-                leaveTypeAdapter.notifyDataSetChanged();
-
-                if (!Objects.equals(selectedEmployee, getString(R.string.prompt_select_employee_name))) {
-                    showNoBalanceAlert(getString(R.string.label_insufficient_balance),
-                            getString(R.string.alert_insufficient_balance_msg,
-                                    calculatedDays, balance.cutiBalance, balance.pdoBalance));
-                }
-                return;
-            }
-
-            if (balance.cutiBalance >= calculatedDays) {
-                leaveTypeList.add(getString(R.string.cuti));
-            }
-            if (balance.pdoBalance >= calculatedDays) {
-                leaveTypeList.add(getString(R.string.pdo));
-            }
-        } else {
-            leaveTypeList.add(getString(R.string.cuti));
+        
+        // 💡 Logic Update: Always allow "Cuti" to be shown so special categories can be selected
+        // We only show "Insufficient" if balance is 0 AND it's a weekday (where PDO isn't an option)
+        
+        leaveTypeList.add(getString(R.string.cuti));
+        if (balance != null && balance.pdoBalance >= calculatedDays) {
             leaveTypeList.add(getString(R.string.pdo));
         }
 
         leaveTypeAdapter.notifyDataSetChanged();
 
-        spLeaveType.post(() -> {
-            if (leaveTypeList.size() == 2 && Objects.equals(leaveTypeList.get(0), getString(R.string.label_cuti_pdo))) {
-                spLeaveType.setSelection(1);
-            } else {
-                spLeaveType.setSelection(0);
+        // 💡 Smart Selection: If only Cuti is available, select it.
+        if (leaveTypeList.size() == 1) {
+            spLeaveType.setSelection(0);
+        } else {
+            // Check if we should auto-select based on balance
+            if (balance != null) {
+                if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
+                    spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
+                } else {
+                    // Default to prompt or Cuti
+                    spLeaveType.setSelection(0);
+                }
             }
-        });
+        }
+        
+        // 💡 Trigger UI update for Cuti Category if Cuti is already selected
+        String selectedType = spLeaveType.getSelectedItem().toString();
+        if (selectedType.equalsIgnoreCase(getString(R.string.cuti))) {
+            rgCutiCategory.setVisibility(View.VISIBLE);
+        }
     }
 }
