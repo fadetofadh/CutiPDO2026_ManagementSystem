@@ -24,8 +24,6 @@ import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class BalanceLogActivity extends AppCompatActivity {
 
@@ -58,11 +56,7 @@ public class BalanceLogActivity extends AppCompatActivity {
 
         tvLogTitle.setText(getString(R.string.item_title_format, employeeName, leaveType));
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         rvBalanceLog.setLayoutManager(new LinearLayoutManager(this));
         logAdapter = new LogAdapter(logList);

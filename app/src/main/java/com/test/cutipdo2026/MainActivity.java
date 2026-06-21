@@ -91,19 +91,7 @@ public class MainActivity extends AppCompatActivity {
         mainProgressOverlay = findViewById(R.id.mainProgressOverlay);
         tvMainProgressMessage = findViewById(R.id.tvMainProgressMessage);
 
-        // Configure APIs
-        okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         // Setup RecyclerView
         rvBatchQueue.setLayoutManager(new LinearLayoutManager(this));
@@ -567,9 +555,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     successUploadCount++;
-                    String messageContent = getString(R.string.whatsapp_message_format,
-                            item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType());
-
                     sendSelectedItemsSequentially(items, index + 1);
                 } else {
                     mainProgressOverlay.setVisibility(View.GONE);

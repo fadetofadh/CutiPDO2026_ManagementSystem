@@ -22,8 +22,6 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CheckBalanceActivity extends AppCompatActivity {
 
@@ -61,18 +59,7 @@ public class CheckBalanceActivity extends AppCompatActivity {
         employeeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spBalanceEmployeeName.setAdapter(employeeAdapter);
 
-        okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         // 💡 NEW: Show loader immediately when activity layout inflation finishes
         progressDialog = new ProgressDialog(this);

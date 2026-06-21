@@ -70,12 +70,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         btnTypePdo = findViewById(R.id.btnTypePdo);
 
         // API Setup
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(new okhttp3.OkHttpClient.Builder().followRedirects(true).followSslRedirects(true).build())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         // Data setup
         @SuppressWarnings("unchecked")

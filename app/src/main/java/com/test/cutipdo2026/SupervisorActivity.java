@@ -57,18 +57,7 @@ public class SupervisorActivity extends AppCompatActivity {
 
         swipeRefreshSupervisor.setOnRefreshListener(this::fetchPendingQueue);
 
-        okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         rvPendingRequests.setLayoutManager(new LinearLayoutManager(this));
 

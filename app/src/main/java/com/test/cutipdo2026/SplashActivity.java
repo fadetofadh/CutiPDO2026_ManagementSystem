@@ -28,18 +28,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkApplicationVersionSmart() {
-        okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
-
-        retrofit2.Retrofit retrofit = new retrofit2.Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(okHttpClient)
-                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
-                .build();
-
-        GoogleSheetsApi api = retrofit.create(GoogleSheetsApi.class);
+        GoogleSheetsApi api = RetrofitClient.getApi(this);
         String cacheBuster = System.currentTimeMillis() + "";
 
         api.checkAppUpdate("checkUpdate", cacheBuster).enqueue(new Callback<>() {

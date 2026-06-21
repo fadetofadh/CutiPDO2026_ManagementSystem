@@ -18,8 +18,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SuperAdminActivity extends AppCompatActivity {
 
@@ -45,7 +43,7 @@ public class SuperAdminActivity extends AppCompatActivity {
         btnSubmitPdo = findViewById(R.id.btnSubmitPdo);
         etDescription = findViewById(R.id.etDescription);
 
-        setupRetrofit();
+        googleSheetsApi = RetrofitClient.getApi(this);
 
         // Extract pre-fetched data passed from LoginActivity
         ArrayList<EmployeeBalance> receivedList = (ArrayList<EmployeeBalance>) getIntent().getSerializableExtra("FULL_EMPLOYEE_LIST");
@@ -95,21 +93,6 @@ public class SuperAdminActivity extends AppCompatActivity {
         });
     }
 
-    private void setupRetrofit() {
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .followRedirects(true)
-                .followSslRedirects(true)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://script.google.com/macros/s/AKfycbxJTEynitpq3WVq9WC6KxbpNuBiVcrERBQSkYmKZ3HiebQ11QlcJRorJjGEYBYeSwre/")
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        googleSheetsApi = retrofit.create(GoogleSheetsApi.class);
-    }
-
     private void submitBatchPdo(List<String> names, String reason) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.msg_adding_pdo));
@@ -119,7 +102,7 @@ public class SuperAdminActivity extends AppCompatActivity {
         final int[] count = {0};
         for (String name : names) {
             LeaveRequest request = new LeaveRequest("add_pdo", name, pdoToAdd, "PDO", reason);
-            googleSheetsApi.sendRequest(request).enqueue(new Callback<>() {
+            googleSheetsApi.sendRequest(request).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     count[0]++;
