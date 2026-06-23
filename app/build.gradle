@@ -14,8 +14,8 @@ android {
         applicationId "com.test.cutipdo2026"
         minSdk 24
         targetSdk 36
-        versionCode 4
-        versionName "3.5"
+        versionCode 5
+        versionName "4.0"
 
         resConfigs "id"
 

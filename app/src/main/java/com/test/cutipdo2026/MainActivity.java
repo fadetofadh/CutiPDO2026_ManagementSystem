@@ -1,5 +1,7 @@
 package com.test.cutipdo2026;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText etSelectedDates, etLeaveDescription;
     private Button btnAddToBatch, btnSubmitToSpv;
-    private TextView tvTotalDaysDisplay, tvClearSelection, tvMainProgressMessage;
+    private TextView tvTotalDaysDisplay, tvClearSelection, tvSelectAll, tvMainProgressMessage;
     private Spinner spEmployeeName, spLeaveType;
     private RadioGroup rgCutiCategory;
     private RecyclerView rvBatchQueue;
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         etLeaveDescription = findViewById(R.id.etLeaveDescription);
         tvTotalDaysDisplay = findViewById(R.id.tvTotalDaysDisplay);
         tvClearSelection = findViewById(R.id.tvClearSelection);
+        tvSelectAll = findViewById(R.id.tvSelectAll);
         layoutQueueHeader = findViewById(R.id.layoutQueueHeader);
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
         btnSubmitToSpv = findViewById(R.id.btnSubmitToSpv);
@@ -115,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
 
         tvClearSelection.setOnClickListener(v -> {
             queueAdapter.clearAllMarks();
+            updateQueueUi();
+        });
+
+        tvSelectAll.setOnClickListener(v -> {
+            queueAdapter.selectAll();
             updateQueueUi();
         });
 
@@ -214,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                     
                     // 💡 Clean up: Remove special tags if switching back to PDO
                     String currentDesc = etLeaveDescription.getText().toString();
-                    if (currentDesc.equals("[Khusus]") || currentDesc.equals("[Bersurat]")) {
+                    if (currentDesc.equals("[Khusus] ") || currentDesc.equals("[Bersurat] ")) {
                         etLeaveDescription.setText("");
                     }
                 }
@@ -236,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                         
                         // Clear description if it only contained the tag
                         String desc = etLeaveDescription.getText().toString();
-                        if (desc.equals("[Khusus]") || desc.equals("[Bersurat]")) {
+                        if (desc.equals("[Khusus] ") || desc.equals("[Bersurat] ")) {
                             etLeaveDescription.setText("");
                         }
                     } else {
@@ -252,9 +260,68 @@ public class MainActivity extends AppCompatActivity {
 
         rgCutiCategory.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbKhusus) {
-                etLeaveDescription.setText("[Khusus]");
+                String current = etLeaveDescription.getText().toString();
+                // Avoid re-setting if already there to prevent cursor jumping
+                if (!current.startsWith("[Khusus] ")) {
+                    etLeaveDescription.setText("[Khusus] ");
+                    etLeaveDescription.setSelection(etLeaveDescription.getText().length());
+                }
             } else if (checkedId == R.id.rbBersurat) {
-                etLeaveDescription.setText("[Bersurat]");
+                String current = etLeaveDescription.getText().toString();
+                if (!current.startsWith("[Bersurat] ")) {
+                    etLeaveDescription.setText("[Bersurat] ");
+                    etLeaveDescription.setSelection(etLeaveDescription.getText().length());
+                }
+            } else {
+                // 💡 CLEANUP: If nothing is selected, strip the tag but keep the rest of the text
+                String text = etLeaveDescription.getText().toString();
+                if (text.startsWith("[Khusus] ")) {
+                    etLeaveDescription.setText(text.replace("[Khusus] ", ""));
+                } else if (text.startsWith("[Bersurat] ")) {
+                    etLeaveDescription.setText(text.replace("[Bersurat] ", ""));
+                }
+                // Unmark internal selection tags
+                for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
+                    rgCutiCategory.getChildAt(i).setTag(false);
+                }
+            }
+        });
+
+        // 🛡️ ENFORCE TAG PREFIX: Prevent typing before the tag. If tag is deleted, deselect category.
+        etLeaveDescription.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                String prefix = "";
+                int checkedId = rgCutiCategory.getCheckedRadioButtonId();
+                if (checkedId == R.id.rbKhusus) prefix = "[Khusus] ";
+                else if (checkedId == R.id.rbBersurat) prefix = "[Bersurat] ";
+
+                if (!prefix.isEmpty()) {
+                    if (!s.toString().startsWith(prefix)) {
+                        // 💡 BEST PRACTICE: If user deletes/modifies the tag, deselect the category
+                        rgCutiCategory.clearCheck();
+                        // Note: clearCheck() will trigger its listener, but won't re-enter this if block
+                    }
+                }
+
+                // 💡 DYNAMIC REFRESH: If "sakit" is typed, refresh the leave type options to allow (denda) path
+                resetLeaveTypeOptions();
+            }
+        });
+
+        // 💡 CURSOR PROTECTION & DYNAMIC TAG MANAGEMENT
+        etLeaveDescription.setOnClickListener(v -> {
+            String prefix = "";
+            int checkedId = rgCutiCategory.getCheckedRadioButtonId();
+            if (checkedId == R.id.rbKhusus) prefix = "[Khusus] ";
+            else if (checkedId == R.id.rbBersurat) prefix = "[Bersurat] ";
+            
+            if (!prefix.isEmpty() && etLeaveDescription.getSelectionStart() < prefix.length()) {
+                etLeaveDescription.setSelection(prefix.length());
             }
         });
 
@@ -265,13 +332,21 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<EmployeeBalance> preFetchedBalances = (ArrayList<EmployeeBalance>) getIntent().getSerializableExtra("PRE_FETCHED_BALANCES");
         @SuppressWarnings("unchecked")
         ArrayList<String> preFetchedNames = (ArrayList<String>) getIntent().getSerializableExtra("PRE_FETCHED_NAMES");
+        @SuppressWarnings("unchecked")
+        ArrayList<LeaveRequestData> preFetchedApproved = (ArrayList<LeaveRequestData>) getIntent().getSerializableExtra("PRE_FETCHED_APPROVED");
 
         employeeList.clear();
         employeeList.add(getString(R.string.prompt_select_employee_name));
 
         if (preFetchedBalances != null) {
+            String filterClass = getIntent().getStringExtra("FILTER_CLASS");
             for (EmployeeBalance b : preFetchedBalances) {
-                balanceMap.put(b.name, b);
+                // 💡 MASTER PASSCODE FIX: If we are in "Testing" mode, don't filter out the test user
+                if (Objects.equals(filterClass, "Testing")) {
+                    balanceMap.put(b.name, b);
+                } else {
+                    balanceMap.put(b.name, b);
+                }
                 Log.d("BALANCE_CHECK", "Loaded -> Emp: " + b.name + " Cuti: " + b.cutiBalance + " PDO: " + b.pdoBalance);
             }
         }
@@ -281,6 +356,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         employeeAdapter.notifyDataSetChanged();
+
+        // 💡 AUTO-SELECT: If there's only 1 employee (size=2 because of prompt), select it automatically
+        if (employeeList.size() == 2) {
+            spEmployeeName.setSelection(1);
+        }
 
         // 🔄 Partitioned Access: Filter the local batch queue to only show items for the current department
         syncAndFilterQueue();
@@ -305,44 +385,119 @@ public class MainActivity extends AppCompatActivity {
 
             EmployeeBalance balance = balanceMap.get(empName);
             if (balance != null) {
-                // 🛡️ NO DEDUCTION RULE: Do not subtract balance if "Khusus" or "Bersurat" is selected
+                String filterClass = getIntent().getStringExtra("FILTER_CLASS");
+                boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide"));
                 boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
+                boolean isSakit = description.toLowerCase().contains("sakit");
+
+                // 💡 DIVISION QUOTA CHECK: Only 1 person per division (H.K, Teknis, or Guide)
+                // We bypass this for Sakit or Special categories (Khusus/Bersurat)
+                if (isRestrictedDivision && !isSpecialCategory && !isSakit) {
+                    String startNew = selectedDateRangeString.split(" to ")[0];
+                    String endNew = selectedDateRangeString.contains(" to ") ? selectedDateRangeString.split(" to ")[1] : startNew;
+
+                    // 1. Check against Approved Database
+                    if (preFetchedApproved != null) {
+                        for (LeaveRequestData old : preFetchedApproved) {
+                            if (old.employeeName.equals(empName)) continue; // Skip self
+                            
+                            // 💡 IMPORTANT: Only block if they are in the SAME DIVISION
+                            EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
+                            if (otherEmp != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
+                                if (isDateOverlap(startNew, endNew, old.getFormattedDate())) {
+                                    Toast.makeText(this, "⚠️ " + old.employeeName + " (" + otherEmp.empClass + ") sudah ambil tanggal ini!", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Check against Local Batch Queue
+                    for (QueuedRequest req : batchQueue) {
+                        if (req.getEmployeeName().equals(empName)) continue; // Skip self
+                        
+                        EmployeeBalance otherEmp = balanceMap.get(req.getEmployeeName());
+                        if (otherEmp != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
+                            if (isDateOverlap(startNew, endNew, req.getTargetDate())) {
+                                Toast.makeText(this, "⚠️ " + req.getEmployeeName() + " (" + otherEmp.empClass + ") ada di daftar batch!", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // 💡 7 WORKING DAYS VALIDATION (Bypassed by Special Category or Sakit)
+                if (!isSpecialCategory && !isSakit) {
+                    String newStartStr = selectedDateRangeString.split(" to ")[0];
+                    String newEndStr = selectedDateRangeString.contains(" to ") ? selectedDateRangeString.split(" to ")[1] : selectedDateRangeString;
+
+                    // Collect all existing dates for this employee (DB + Queue)
+                    List<Pair<String, String>> existingRanges = new ArrayList<>();
+                    if (balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty()) {
+                        // Assuming DB date is a single date or we treat it as an end-point
+                        existingRanges.add(new Pair<>(balance.lastLeaveDate, balance.lastLeaveDate));
+                    }
+                    for (QueuedRequest req : batchQueue) {
+                        if (req.getEmployeeName().equals(empName)) {
+                            String start = req.getTargetDate().split(" to ")[0];
+                            String end = req.getTargetDate().contains(" to ") ? req.getTargetDate().split(" to ")[1] : start;
+                            existingRanges.add(new Pair<>(start, end));
+                        }
+                    }
+
+                    for (Pair<String, String> range : existingRanges) {
+                        // 1. Check if new date is AFTER an existing leave
+                        if (isDateAfter(newStartStr, range.second)) {
+                            int gap = countWorkDaysBetween(range.second, newStartStr);
+                            if (gap < 7) {
+                                Toast.makeText(this, "⚠️ Terlalu dekat dengan izin tanggal " + range.second + " (Cuma " + gap + " hari kerja)", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        // 2. Check if new date is BEFORE an existing leave
+                        else if (isDateAfter(range.first, newEndStr)) {
+                            int gap = countWorkDaysBetween(newEndStr, range.first);
+                            if (gap < 7) {
+                                Toast.makeText(this, "⚠️ Terlalu dekat dengan izin tanggal " + range.first + " (Cuma " + gap + " hari kerja)", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        // 3. Overlap check
+                        else {
+                            Toast.makeText(this, "⚠️ Tanggal ini bentrok dengan izin lain di daftar!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    }
+                }
 
                 if (!isSpecialCategory) {
-                    if (Objects.equals(leaveType, getString(R.string.cuti)) && balance.cutiBalance < calculatedDays) {
-                        Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_cuti, balance.cutiBalance), Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    if (Objects.equals(leaveType, getString(R.string.pdo)) && balance.pdoBalance < calculatedDays) {
-                        Toast.makeText(MainActivity.this, getString(R.string.toast_insufficient_pdo, balance.pdoBalance), Toast.LENGTH_LONG).show();
-                        return;
-                    }
+                    int selectedBalance = Objects.equals(leaveType, getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
 
-                    if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
-                    else balance.pdoBalance -= calculatedDays;
+                    if (selectedBalance < calculatedDays) {
+                        // 💡 PENALTY WARNING DIALOG
+                        new AlertDialog.Builder(this)
+                                .setTitle(R.string.dialog_insufficient_balance_title)
+                                .setMessage(getString(R.string.dialog_insufficient_balance_message, leaveType, selectedBalance))
+                                .setPositiveButton(R.string.btn_process_denda, (dialog, which) -> {
+                                    String finalDesc = etLeaveDescription.getText().toString().trim();
+                                    if (!finalDesc.toLowerCase().contains("(denda)")) {
+                                        finalDesc = (finalDesc.isEmpty() ? "(denda)" : finalDesc + " (denda)");
+                                    }
+                                    addToBatch(empName, selectedDateRangeString, calculatedDays, leaveType, finalDesc);
+                                })
+                                .setNegativeButton(R.string.btn_cancel, null)
+                                .show();
+                        return; // Exit the main listener, let the dialog handle it
+                    } else {
+                        // 💡 Deduct normally
+                        if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
+                        else balance.pdoBalance -= calculatedDays;
+                    }
                 }
             }
 
-            QueuedRequest newRequest = new QueuedRequest(empName, selectedDateRangeString, calculatedDays, leaveType, description);
-            batchQueue.add(newRequest);
-            queueManager.saveQueue(batchQueue);
-            queueAdapter.notifyItemInserted(batchQueue.size() - 1);
-            updateQueueUi();
-
-            Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
-
-            selectedDateRangeString = "";
-            calculatedDays = 0;
-            currentStartMs = 0;
-            currentEndMs = 0;
-            etSelectedDates.setText("");
-            etLeaveDescription.setText("");
-            rgCutiCategory.clearCheck();
-            for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
-                rgCutiCategory.getChildAt(i).setTag(false);
-            }
-            tvTotalDaysDisplay.setText(R.string.duration_zero);
-            resetLeaveTypeOptions();
+            // Normal path (sufficient balance or special category)
+            addToBatch(empName, selectedDateRangeString, calculatedDays, leaveType, description);
         });
 
         btnSubmitToSpv.setOnClickListener(v -> {
@@ -369,6 +524,74 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void addToBatch(String empName, String dateRange, int days, String type, String desc) {
+        QueuedRequest newRequest = new QueuedRequest(empName, dateRange, days, type, desc);
+        batchQueue.add(newRequest);
+        queueManager.saveQueue(batchQueue);
+        queueAdapter.notifyItemInserted(batchQueue.size() - 1);
+        updateQueueUi();
+
+        Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
+
+        // Reset UI
+        selectedDateRangeString = "";
+        calculatedDays = 0;
+        currentStartMs = 0;
+        currentEndMs = 0;
+        etSelectedDates.setText("");
+        etLeaveDescription.setText("");
+        rgCutiCategory.clearCheck();
+        tvTotalDaysDisplay.setText(R.string.duration_zero);
+        resetLeaveTypeOptions();
+    }
+
+    // 💡 Helper: Compares two dd/MM/yyyy strings
+    private boolean isDateAfter(String dateA, String dateB) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            return Objects.requireNonNull(sdf.parse(dateA)).after(sdf.parse(dateB));
+        } catch (Exception e) { return false; }
+    }
+
+    // 💡 Helper: Checks if two date ranges overlap
+    private boolean isDateOverlap(String startA, String endA, String rangeB) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date sA = sdf.parse(startA);
+            Date eA = sdf.parse(endA);
+
+            String[] partsB = rangeB.contains(" to ") ? rangeB.split(" to ") : new String[]{rangeB, rangeB};
+            Date sB = sdf.parse(partsB[0]);
+            Date eB = sdf.parse(partsB[1]);
+
+            // Two ranges overlap if (StartA <= EndB) AND (EndA >= StartB)
+            return (sA != null && eB != null && sB != null && eA != null) &&
+                    (sA.before(eB) || sA.equals(eB)) && (eA.after(sB) || eA.equals(sB));
+        } catch (Exception e) { return false; }
+    }
+
+    // 💡 Helper: Counts Wed-Sun days (skipping Mon/Tue)
+    private int countWorkDaysBetween(String startStr, String endStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(Objects.requireNonNull(sdf.parse(startStr)));
+            Date endDate = sdf.parse(endStr);
+
+            int workDays = 0;
+            cal.add(Calendar.DAY_OF_MONTH, 1); // Start counting from the day after
+
+            while (cal.getTime().before(endDate)) {
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+                if (dayOfWeek != Calendar.MONDAY && dayOfWeek != Calendar.TUESDAY) {
+                    workDays++;
+                }
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            return workDays;
+        } catch (Exception e) { return 99; }
+    }
+
     private void updateQueueUi() {
         if (batchQueue.isEmpty()) {
             layoutQueueHeader.setVisibility(View.GONE);
@@ -393,14 +616,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateClearButtonVisibility() {
-        boolean hasMarks = false;
+        int markedCount = 0;
         for (QueuedRequest req : batchQueue) {
             if (req.isMarked) {
-                hasMarks = true;
-                break;
+                markedCount++;
             }
         }
-        tvClearSelection.setVisibility(hasMarks ? View.VISIBLE : View.GONE);
+        boolean hasItems = !batchQueue.isEmpty();
+        tvSelectAll.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+        tvClearSelection.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
     }
 
     private void openInlineDatePicker(QueuedRequest request, final int position) {
@@ -526,20 +750,34 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index) {
         if (index >= items.size()) {
-            mainProgressOverlay.setVisibility(View.GONE);
-            Toast.makeText(this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
+            // 💡 ALL ITEMS FINISHED: Trigger ONE batch notification for the SPV
+            googleSheetsApi.sendRequest(new LeaveRequest("notify", "", "", 0, "", "")).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    mainProgressOverlay.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
 
-            // 💡 Clean up: Remove only the items that were successfully submitted
-            for (QueuedRequest submittedItem : items) {
-                batchQueue.remove(submittedItem);
-            }
+                    // Clean up: Remove only the items that were successfully submitted
+                    for (QueuedRequest submittedItem : items) {
+                        batchQueue.remove(submittedItem);
+                    }
 
-            queueManager.saveQueue(batchQueue);
-            queueAdapter.notifyDataSetChanged();
-            updateQueueUi();
+                    queueManager.saveQueue(batchQueue);
+                    queueAdapter.notifyDataSetChanged();
+                    updateQueueUi();
 
-            btnSubmitToSpv.setEnabled(true);
-            setUiEnabled(true); // 🔓 Unlock everything
+                    btnSubmitToSpv.setEnabled(true);
+                    setUiEnabled(true); // 🔓 Unlock everything
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    // Even if notification fails, the data is already saved
+                    mainProgressOverlay.setVisibility(View.GONE);
+                    btnSubmitToSpv.setEnabled(true);
+                    setUiEnabled(true);
+                }
+            });
             return;
         }
 
@@ -641,15 +879,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // 💡 Reset Special Category state when date changes to prevent stale tags
+        // 💡 FULL RESET: Clear category and text whenever dates change to prevent stale data
         rgCutiCategory.clearCheck();
-        for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
-            rgCutiCategory.getChildAt(i).setTag(false);
-        }
-        String currentDesc = etLeaveDescription.getText().toString();
-        if (currentDesc.equals("[Khusus] ") || currentDesc.equals("[Bersurat] ")) {
-            etLeaveDescription.setText("");
-        }
+        etLeaveDescription.setText("");
 
         boolean containsWeekend = false;
         Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -722,30 +954,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        EmployeeBalance balance = balanceMap.get(selectedEmployee);
-        
-        // 💡 Logic Update: Always allow "Cuti" to be shown so special categories can be selected
-        // We only show "Insufficient" if balance is 0 AND it's a weekday (where PDO isn't an option)
-        
+        // 💡 Logic Update: Always allow both Cuti and PDO so "Denda" path is always accessible
         leaveTypeList.add(getString(R.string.cuti));
-        if (balance != null && balance.pdoBalance >= calculatedDays) {
-            leaveTypeList.add(getString(R.string.pdo));
-        }
+        leaveTypeList.add(getString(R.string.pdo));
 
         leaveTypeAdapter.notifyDataSetChanged();
 
-        // 💡 Smart Selection: If only Cuti is available, select it.
-        if (leaveTypeList.size() == 1) {
-            spLeaveType.setSelection(0);
-        } else {
-            // Check if we should auto-select based on balance
-            if (balance != null) {
-                if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
-                    spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
-                } else {
-                    // Default to prompt or Cuti
-                    spLeaveType.setSelection(0);
-                }
+        EmployeeBalance balance = balanceMap.get(selectedEmployee);
+        if (balance != null) {
+            if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
+                spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
+            } else {
+                spLeaveType.setSelection(0);
             }
         }
         
@@ -753,6 +973,8 @@ public class MainActivity extends AppCompatActivity {
         String selectedType = spLeaveType.getSelectedItem().toString();
         if (selectedType.equalsIgnoreCase(getString(R.string.cuti))) {
             rgCutiCategory.setVisibility(View.VISIBLE);
+        } else {
+            rgCutiCategory.setVisibility(View.GONE);
         }
     }
 }

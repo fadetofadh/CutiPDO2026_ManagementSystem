@@ -26,7 +26,7 @@ public class CancelPortalActivity extends AppCompatActivity {
     private RecyclerView rvCancelHistory;
     private ProgressBar pbCancelLoader;
     private FrameLayout progressOverlay;
-    private TextView tvProgressMessage, tvClearSelectionCancel, tvNoHistory;
+    private TextView tvProgressMessage, tvClearSelectionCancel, tvSelectAllCancel, tvNoHistory;
     private Button btnBatchCancel;
     private SwipeRefreshLayout swipeRefreshCancel;
     private GoogleSheetsApi googleSheetsApi;
@@ -46,6 +46,7 @@ public class CancelPortalActivity extends AppCompatActivity {
         progressOverlay = findViewById(R.id.progressOverlay);
         tvProgressMessage = findViewById(R.id.tvProgressMessage);
         tvClearSelectionCancel = findViewById(R.id.tvClearSelectionCancel);
+        tvSelectAllCancel = findViewById(R.id.tvSelectAllCancel);
         tvNoHistory = findViewById(R.id.tvNoHistory);
         btnBatchCancel = findViewById(R.id.btnBatchCancel);
         swipeRefreshCancel = findViewById(R.id.swipeRefreshCancel);
@@ -90,7 +91,6 @@ public class CancelPortalActivity extends AppCompatActivity {
                     if (historyList.isEmpty()) {
                         tvNoHistory.setVisibility(View.VISIBLE);
                         rvCancelHistory.setVisibility(View.GONE);
-                        updateClearButtonVisibility();
                     } else {
                         // 📉 SORTING: Show newest approved items first in the Cancel Portal
                         ListSorter.sortNewestFirst(historyList);
@@ -125,6 +125,11 @@ public class CancelPortalActivity extends AppCompatActivity {
                         listAdapter.setSwipeLocked(true);
                         rvCancelHistory.setAdapter(listAdapter);
 
+                        tvSelectAllCancel.setOnClickListener(v -> {
+                            listAdapter.selectAll();
+                            updateClearButtonVisibility();
+                        });
+
                         tvClearSelectionCancel.setOnClickListener(v -> {
                             listAdapter.clearAllMarks();
                             updateClearButtonVisibility();
@@ -149,6 +154,14 @@ public class CancelPortalActivity extends AppCompatActivity {
                             public void onItemRangeChanged(int positionStart, int itemCount) {
                                 updateClearButtonVisibility();
                             }
+                            @Override
+                            public void onItemRangeInserted(int positionStart, int itemCount) {
+                                updateClearButtonVisibility();
+                            }
+                            @Override
+                            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                                updateClearButtonVisibility();
+                            }
                         });
 
                         new ItemTouchHelper(new UniversalSwipeCallback(new UniversalSwipeCallback.OnSwipeListener() {
@@ -162,6 +175,7 @@ public class CancelPortalActivity extends AppCompatActivity {
                             }
                         }, CancelPortalActivity.this, 0)).attachToRecyclerView(rvCancelHistory);
                     }
+                    updateClearButtonVisibility();
                 } else {
                     Toast.makeText(CancelPortalActivity.this, getString(R.string.toast_server_error_code, response.code()), Toast.LENGTH_LONG).show();
                 }
@@ -183,6 +197,8 @@ public class CancelPortalActivity extends AppCompatActivity {
                 markedCount++;
             }
         }
+        boolean hasItems = !historyList.isEmpty();
+        tvSelectAllCancel.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         tvClearSelectionCancel.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
         btnBatchCancel.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
         btnBatchCancel.setText(getString(R.string.btn_cancel_selected_count, markedCount));

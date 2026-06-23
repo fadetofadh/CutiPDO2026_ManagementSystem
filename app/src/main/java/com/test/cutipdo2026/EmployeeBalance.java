@@ -8,4 +8,5 @@ public class EmployeeBalance implements Serializable {
     public String empClass;
     public int cutiBalance;
     public int pdoBalance;
+    public String lastLeaveDate;
 }

@@ -2,7 +2,9 @@ package com.test.cutipdo2026;
 
 import com.google.gson.annotations.SerializedName;
 
-public class LeaveRequestData {
+import java.io.Serializable;
+
+public class LeaveRequestData implements Serializable {
     @SerializedName("rowNumber")
     public int rowNumber;
 

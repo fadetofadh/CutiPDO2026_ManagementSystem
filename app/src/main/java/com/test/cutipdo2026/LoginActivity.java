@@ -152,7 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchDataAndNavigateToKadiv(String filterClass, final boolean isSpv) {
+    private void fetchDataAndNavigateToKadiv(final String filterClass, final boolean isSpv) {
         ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.msg_sync_roster_balances));
         progressDialog.setCancelable(false);
@@ -162,21 +162,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ArrayList<EmployeeBalance> balanceList = new ArrayList<>(response.body());
+                    final ArrayList<EmployeeBalance> balanceList = new ArrayList<>(response.body());
 
                     googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<>() {
                         @Override
                         public void onResponse(@NonNull Call<List<String>> call2, @NonNull Response<List<String>> response2) {
-                            if (progressDialog.isShowing()) progressDialog.dismiss();
-
                             if (response2.isSuccessful() && response2.body() != null) {
-                                ArrayList<String> nameList = new ArrayList<>(response2.body());
+                                final ArrayList<String> nameList = new ArrayList<>(response2.body());
                                 etPasscode.setText("");
 
-                                ArrayList<EmployeeBalance> filteredBalances = balanceList;
-                                ArrayList<String> filteredNames = nameList;
+                                final ArrayList<EmployeeBalance> filteredBalances;
+                                final ArrayList<String> filteredNames;
 
-                                if (isSpv) {
+                                if (isSpv && !Objects.equals(filterClass, "Testing")) {
                                     filteredBalances = new ArrayList<>();
                                     filteredNames = new ArrayList<>();
                                     for (EmployeeBalance b : balanceList) {
@@ -185,15 +183,44 @@ public class LoginActivity extends AppCompatActivity {
                                             filteredNames.add(b.name);
                                         }
                                     }
+                                } else {
+                                    filteredBalances = balanceList;
+                                    filteredNames = nameList;
                                 }
 
-                                Class<?> targetActivity = isSpv ? SpvPortalActivity.class : KadivPortalActivity.class;
-                                Intent intent = new Intent(LoginActivity.this, targetActivity);
-                                intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
-                                intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
-                                intent.putExtra("FILTER_CLASS", isSpv ? "all" : filterClass);
-                                startActivity(intent);
+                                // 💡 Fetch all approved requests for this division to prevent overlaps
+                                googleSheetsApi.getAllRequests("all", filterClass, String.valueOf(System.currentTimeMillis())).enqueue(new Callback<>() {
+                                    @Override
+                                    public void onResponse(@NonNull Call<List<LeaveRequestData>> call3, @NonNull Response<List<LeaveRequestData>> response3) {
+                                        if (progressDialog.isShowing()) progressDialog.dismiss();
+                                        
+                                        ArrayList<LeaveRequestData> approvedList = (response3.isSuccessful() && response3.body() != null) 
+                                                ? new ArrayList<>(response3.body()) : new ArrayList<>();
+
+                                        Class<?> targetActivity = isSpv ? SpvPortalActivity.class : KadivPortalActivity.class;
+                                        Intent intent = new Intent(LoginActivity.this, targetActivity);
+                                        intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
+                                        intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
+                                        intent.putExtra("PRE_FETCHED_APPROVED", approvedList);
+                                        
+                                        String finalFilter = (isSpv && !Objects.equals(filterClass, "Testing")) ? "all" : filterClass;
+                                        intent.putExtra("FILTER_CLASS", finalFilter);
+                                        startActivity(intent);
+                                    }
+
+                                    @Override
+                                    public void onFailure(@NonNull Call<List<LeaveRequestData>> call3, @NonNull Throwable t3) {
+                                        if (progressDialog.isShowing()) progressDialog.dismiss();
+                                        Intent intent = new Intent(LoginActivity.this, isSpv ? SpvPortalActivity.class : KadivPortalActivity.class);
+                                        intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
+                                        intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
+                                        intent.putExtra("PRE_FETCHED_APPROVED", new ArrayList<LeaveRequestData>());
+                                        intent.putExtra("FILTER_CLASS", (isSpv && !Objects.equals(filterClass, "Testing")) ? "all" : filterClass);
+                                        startActivity(intent);
+                                    }
+                                });
                             } else {
+                                if (progressDialog.isShowing()) progressDialog.dismiss();
                                 Toast.makeText(LoginActivity.this, getString(R.string.toast_failed_loading_staff), Toast.LENGTH_SHORT).show();
                             }
                         }

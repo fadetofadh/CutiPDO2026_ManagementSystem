@@ -93,7 +93,9 @@
     <string name="supervisor_portal_subtitle">💡 Tap dan tahan atau geser untuk menyetujui.</string>
     <string name="no_pending_requests">Tidak ditemukan pengajuan yang menunggu persetujuan</string>
     <string name="btn_approve_selected_count">SETUJUI PILIHAN (%1$d)</string>
-    <string name="msg_batch_approving">Menyetujui Batch (%1$d/%2$d)&#8230;</string>
+    <string name="btn_decline_selected_count">TOLAK PILIHAN (%1$d)</string>
+    <string name="msg_batch_approving">Mengirim Batch Request (%1$d/%2$d)&#8230;</string>
+    <string name="msg_batch_declining">Menolak Batch Request (%1$d/%2$d)&#8230;</string>
 
     <!-- Placeholders / Tools -->
     <string name="placeholder_employee_category">Nama Karyawan &#8211; Kategori</string>
@@ -116,29 +118,29 @@
     <string name="toast_server_rejected_cancellation">Server menolak pembatalan: %1$d</string>
     <string name="toast_network_error">Kesalahan Jaringan: %1$s</string>
     <string name="dialog_revoke_title">🚨 BATALKAN PENGAJUAN IZIN?</string>
-    <string name="dialog_revoke_message">Apakah Anda yakin ingin membatalkan pengajuan untuk %1$s?\n\nTindakan ini akan:\n1. Menghapus semua entri dari Google Calendar.\n2. Mengembalikan %2$d hari ke saldo Sisa secara otomatis.</string>
+    <string name="dialog_revoke_message">Apakah Anda yakin ingin membatalkan pengajuan untuk %1$s?\n\nTindakan ini akan:\n1. Menghapus semua entri dari Google Calendar.\n2. Mengembalikan %2$d hari ke kuota Sisa secara otomatis.</string>
     <string name="btn_yes_revoke_refund">YA, BATALKAN &amp; KEMBALIKAN</string>
     <string name="btn_no">Tidak</string>
     <string name="btn_close">Tutup</string>
     <string name="msg_revoking_refunding">Membatalkan pengajuan &amp; mengembalikan kuota&#8230;</string>
 
-    <string name="toast_balance_sync_failed">Sinkronisasi basis data saldo server gagal.</string>
-    <string name="msg_downloading_balances">Mengunduh saldo terbaru&#8230; Mohon tunggu.</string>
+    <string name="toast_balance_sync_failed">Sinkronisasi basis data kuota server gagal.</string>
+    <string name="msg_downloading_balances">Mengunduh kuota terbaru&#8230; Mohon tunggu.</string>
 
     <string name="toast_incorrect_kadiv_passcode">Kata Sandi Kepala Divisi Salah!</string>
     <string name="toast_incorrect_spv_passcode">Kata Sandi Supervisor Salah!</string>
     <string name="toast_server_sync_failed">Sinkronisasi server gagal. Silakan coba lagi.</string>
     <string name="toast_failed_loading_staff">Gagal memuat daftar nama staf.</string>
-    <string name="toast_balance_sync_failed_generic">Sinkronisasi saldo server gagal.</string>
+    <string name="toast_balance_sync_failed_generic">Sinkronisasi kuota server gagal.</string>
     <string name="dialog_credits_title">Kredit Aplikasi</string>
     <string name="dialog_credits_message">Versi %1$s\n\nDibuat oleh Seseorang\nDikembangkan oleh wanwa\nBerdasarkan Ide dari Galeri Rasullloh</string>
     <string name="msg_sync_staff_directory">Sinkronisasi direktori staf lengkap&#8230; Mohon tunggu.</string>
-    <string name="msg_sync_roster_balances">Sinkronisasi daftar &amp; saldo&#8230; Mohon tunggu.</string>
+    <string name="msg_sync_roster_balances">Sinkronisasi daftar &amp; kuota&#8230; Mohon tunggu.</string>
 
     <string name="label_cuti_pdo">Cuti &#8212; PDO</string>
-    <string name="label_insufficient_balance">Saldo Tidak Cukup</string>
-    <string name="alert_insufficient_balance_msg">Karyawan ini tidak memiliki saldo yang cukup untuk izin selama %1$d hari.\n\nTersedia:\nCuti: %2$.1f\nPDO: %3$.1f</string>
-    <string name="alert_insufficient_balance_weekend_msg">Karyawan ini tidak memiliki saldo yang cukup untuk izin selama %1$d hari (Termasuk akhir pekan).\n\nTersedia:\nCuti: %2$.1f\nPDO: %3$.1f</string>
+    <string name="label_insufficient_balance">Sisa Kuota Tidak Cukup</string>
+    <string name="alert_insufficient_balance_msg">Karyawan ini tidak memiliki sisa kuota yang cukup untuk izin selama %1$d hari.\n\nTersedia:\nCuti: %2$d\nPDO: %3$d</string>
+    <string name="alert_insufficient_balance_weekend_msg">Karyawan ini tidak memiliki sisa kuota yang cukup untuk izin selama %1$d hari (Termasuk akhir pekan).\n\nTersedia:\nCuti: %2$d\nPDO: %3$d</string>
     <string name="btn_ok">OK</string>
     <string name="label_select_leave_dates_title">Pilih Tanggal Izin</string>
     <string name="label_modify_allocation_dates_title">Ubah Timeline Tanggal Alokasi</string>
@@ -146,11 +148,11 @@
 
     <string name="toast_select_leave_type">Silakan pilih opsi Jenis Izin yang valid!</string>
     <string name="toast_select_employee_dates">Silakan pilih karyawan dan rentang tanggal yang valid!</string>
-    <string name="toast_insufficient_cuti">❌ Saldo Cuti tidak cukup! (Tersedia: %1$.1f)</string>
-    <string name="toast_insufficient_pdo">❌ Saldo PDO tidak cukup! (Tersedia: %1$.1f)</string>
+    <string name="toast_insufficient_cuti">❌ Sisa Kuota Cuti tidak cukup! (Tersedia: %1$d)</string>
+    <string name="toast_insufficient_pdo">❌ Sisa Kuota PDO tidak cukup! (Tersedia: %1$d)</string>
     <string name="toast_added_to_batch">Ditambahkan ke antrean batch! Item: %1$d</string>
     <string name="toast_batch_empty">Antrean batch Anda kosong!</string>
-    <string name="toast_weekend_detected_cuti">ℹ️ Akhir pekan terdeteksi tetapi saldo PDO kosong. Otomatis menggunakan Cuti.</string>
+    <string name="toast_weekend_detected_cuti">ℹ️ Akhir pekan terdeteksi tetapi sisa kuota PDO kosong. Otomatis menggunakan Cuti.</string>
 
     <string name="toast_weekend_detected_pdo">ℹ️ Akhir pekan terdeteksi! Jenis izin dipaksa ke PDO.</string>
     <string name="toast_requests_submitted">🎉 Semua %1$d pengajuan telah dikirim ke Supervisor!</string>
@@ -180,6 +182,7 @@
     <string name="leave_log_title">Log Izin</string>
     <string name="no_history_found">Tidak ditemukan riwayat untuk kategori ini.</string>
     <string name="label_clear_marks">Hapus Tanda</string>
+    <string name="label_mark_all">Tandai Semua</string>
     <string name="toast_edit_coming_soon">Fitur edit segera hadir!</string>
     <string name="dialog_confirm_revoke_title">🚨 KONFIRMASI PEMBATALAN</string>
     <string name="dialog_batch_cancel_title">🚨 KONFIRMASI PEMBATALAN BATCH</string>
@@ -189,11 +192,12 @@
     <string name="toast_complete_all_fields">Silakan lengkapi semua bidang</string>
     <string name="toast_request_approved_logged">Pengajuan Disetujui &amp; Dicatat!</string>
     <string name="toast_batch_approve_complete">Persetujuan batch selesai!</string>
+    <string name="toast_batch_decline_complete">Penolakan batch selesai!</string>
     <string name="toast_server_error_no_data">Kesalahan server atau data tidak ditemukan.</string>
     <string name="toast_quick_submit_coming_soon">Fitur Pengiriman Cepat segera hadir!</string>
-    <string name="dialog_batch_cancel_msg">Anda akan membatalkan pengajuan berikut:\n\n%1$s\nTindakan ini akan menghapus acara kalender dan mengembalikan saldo sisa. Lanjutkan?</string>
+    <string name="dialog_batch_cancel_msg">Anda akan membatalkan pengajuan berikut:\n\n%1$s\nTindakan ini akan menghapus acara kalender dan mengembalikan kuota sisa. Lanjutkan?</string>
     <string name="btn_yes_cancel_all">YA, BATALKAN SEMUA</string>
-    <string name="dialog_confirm_revoke_message">Karyawan: %1$s\nTanggal: %2$s\nDurasi: %3$d Hari\n\nTindakan ini akan menghapus entri kalender dan mengembalikan saldo. Lanjutkan?</string>
+    <string name="dialog_confirm_revoke_message">Karyawan: %1$s\nTanggal: %2$s\nDurasi: %3$d Hari\n\nTindakan ini akan menghapus entri kalender dan mengembalikan kuota. Lanjutkan?</string>
     <string name="btn_yes_revoke">YA, BATALKAN</string>
 
     <!-- Content Descriptions -->
@@ -215,4 +219,8 @@
 
     <string name="label_khusus">Khusus</string>
     <string name="label_bersurat">Bersurat</string>
+    <string name="dialog_insufficient_balance_title">🚨 SALDO TIDAK CUKUP</string>
+    <string name="dialog_insufficient_balance_message">Sisa kuota %1$s tidak mencukupi (%2$d hari).\n\nJika dilanjutkan, pengajuan ini akan diproses sebagai DENDA. Apakah Anda yakin?</string>
+    <string name="btn_process_denda">YA, PROSES DENDA</string>
+    <string name="toast_denda_processed">🚨 Saldo habis! Izin diproses sebagai (denda).</string>
 </resources>

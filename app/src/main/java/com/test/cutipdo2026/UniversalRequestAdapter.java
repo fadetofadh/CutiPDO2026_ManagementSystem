@@ -64,6 +64,13 @@ public class UniversalRequestAdapter extends RecyclerView.Adapter<UniversalReque
         notifyDataSetChanged();
     }
 
+    public void selectAll() {
+        for (LeaveRequestData req : requestList) {
+            req.isMarked = true;
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         LeaveRequestData item = requestList.get(position);

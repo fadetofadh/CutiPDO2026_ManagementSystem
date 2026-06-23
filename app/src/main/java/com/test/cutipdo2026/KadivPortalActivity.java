@@ -21,12 +21,16 @@ public class KadivPortalActivity extends AppCompatActivity {
         ArrayList<EmployeeBalance> balanceList = (ArrayList<EmployeeBalance>) getIntent().getSerializableExtra("PRE_FETCHED_BALANCES");
         @SuppressWarnings("unchecked")
         ArrayList<String> nameList = (ArrayList<String>) getIntent().getSerializableExtra("PRE_FETCHED_NAMES");
+        @SuppressWarnings("unchecked")
+        ArrayList<LeaveRequestData> approvedList = (ArrayList<LeaveRequestData>) getIntent().getSerializableExtra("PRE_FETCHED_APPROVED");
         String filterClass = getIntent().getStringExtra("FILTER_CLASS");
 
         btnAddRequest.setOnClickListener(v -> {
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("PRE_FETCHED_BALANCES", balanceList);
             intent.putExtra("PRE_FETCHED_NAMES", nameList);
+            intent.putExtra("PRE_FETCHED_APPROVED", approvedList);
+            intent.putExtra("FILTER_CLASS", filterClass);
             startActivity(intent);
         });
 

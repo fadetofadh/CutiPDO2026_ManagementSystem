@@ -40,6 +40,18 @@
                         android:textColor="#333333" />
 
                     <TextView
+                        android:id="@+id/tvSelectAllSpv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_mark_all"
+                        android:textColor="#2D3748"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:padding="4dp"
+                        android:layout_marginEnd="8dp"
+                        android:visibility="gone" />
+
+                    <TextView
                         android:id="@+id/tvClearSelectionSpv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -66,20 +78,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@id/layoutHeaderSpv"
-                android:layout_above="@id/btnBatchActionSpv"
+                android:layout_above="@id/layoutBatchActionsSpv"
                 android:layout_marginBottom="10dp"
                 android:visibility="gone" />
 
-            <Button
-                android:id="@+id/btnBatchActionSpv"
+            <LinearLayout
+                android:id="@+id/layoutBatchActionsSpv"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:backgroundTint="#4CAF50"
-                android:text="@string/btn_approve_selected_count"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:paddingTop="10dp"
+                android:background="@android:color/white">
+
+                <Button
+                    android:id="@+id/btnBatchDeclineSpv"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="5dp"
+                    android:backgroundTint="#E53E3E"
+                    android:text="@string/btn_decline_selected_count"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnBatchApproveSpv"
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="5dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="@string/btn_approve_selected_count"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvNoData"

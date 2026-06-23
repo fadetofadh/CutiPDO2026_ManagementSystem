@@ -26,11 +26,12 @@ import retrofit2.Response;
 public class SupervisorActivity extends AppCompatActivity {
 
     private RecyclerView rvPendingRequests;
-    private TextView tvNoData, tvClearSelectionSpv;
+    private TextView tvNoData, tvClearSelectionSpv, tvSelectAllSpv;
     private ProgressBar pbSupervisorLoader;
     private FrameLayout progressOverlay;
+    private View layoutBatchActionsSpv;
     private TextView tvProgressMessage;
-    private Button btnBatchActionSpv;
+    private Button btnBatchApproveSpv, btnBatchDeclineSpv;
     private SwipeRefreshLayout swipeRefreshSupervisor;
     private GoogleSheetsApi googleSheetsApi;
     private List<LeaveRequestData> pendingList = new ArrayList<>();
@@ -47,10 +48,13 @@ public class SupervisorActivity extends AppCompatActivity {
         rvPendingRequests = findViewById(R.id.rvPendingRequests);
         tvNoData = findViewById(R.id.tvNoData);
         tvClearSelectionSpv = findViewById(R.id.tvClearSelectionSpv);
+        tvSelectAllSpv = findViewById(R.id.tvSelectAllSpv);
         pbSupervisorLoader = findViewById(R.id.pbSupervisorLoader);
         progressOverlay = findViewById(R.id.progressOverlay);
         tvProgressMessage = findViewById(R.id.tvProgressMessage);
-        btnBatchActionSpv = findViewById(R.id.btnBatchActionSpv);
+        layoutBatchActionsSpv = findViewById(R.id.layoutBatchActionsSpv);
+        btnBatchApproveSpv = findViewById(R.id.btnBatchApproveSpv);
+        btnBatchDeclineSpv = findViewById(R.id.btnBatchDeclineSpv);
         swipeRefreshSupervisor = findViewById(R.id.swipeRefreshSupervisor);
 
         swipeRefreshSupervisor.setOnRefreshListener(this::fetchPendingQueue);
@@ -107,19 +111,35 @@ public class SupervisorActivity extends AppCompatActivity {
                         listAdapter.setSwipeLocked(true); 
                         rvPendingRequests.setAdapter(listAdapter);
 
+                        tvSelectAllSpv.setOnClickListener(v -> {
+                            listAdapter.selectAll();
+                            updateClearButtonVisibility();
+                        });
+
                         tvClearSelectionSpv.setOnClickListener(v -> {
                             listAdapter.clearAllMarks();
                             updateClearButtonVisibility();
                         });
 
-                        btnBatchActionSpv.setOnClickListener(v -> {
+                        btnBatchApproveSpv.setOnClickListener(v -> {
                             List<LeaveRequestData> markedItems = new ArrayList<>();
                             for (LeaveRequestData req : pendingList) {
                                 if (req.isMarked) markedItems.add(req);
                             }
 
                             if (!markedItems.isEmpty()) {
-                                processBatchApproval(markedItems, 0);
+                                processBatchAction(markedItems, 0, "approve");
+                            }
+                        });
+
+                        btnBatchDeclineSpv.setOnClickListener(v -> {
+                            List<LeaveRequestData> markedItems = new ArrayList<>();
+                            for (LeaveRequestData req : pendingList) {
+                                if (req.isMarked) markedItems.add(req);
+                            }
+
+                            if (!markedItems.isEmpty()) {
+                                processBatchAction(markedItems, 0, "decline");
                             }
                         });
 
@@ -131,6 +151,16 @@ public class SupervisorActivity extends AppCompatActivity {
 
                             @Override
                             public void onItemRangeChanged(int positionStart, int itemCount) {
+                                updateClearButtonVisibility();
+                            }
+
+                            @Override
+                            public void onItemRangeInserted(int positionStart, int itemCount) {
+                                updateClearButtonVisibility();
+                            }
+
+                            @Override
+                            public void onItemRangeRemoved(int positionStart, int itemCount) {
                                 updateClearButtonVisibility();
                             }
                         });
@@ -157,6 +187,7 @@ public class SupervisorActivity extends AppCompatActivity {
                             }
                         }, SupervisorActivity.this, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT)).attachToRecyclerView(rvPendingRequests);
                     }
+                    updateClearButtonVisibility();
                 } else {
                     Toast.makeText(SupervisorActivity.this, getString(R.string.toast_server_error_code_supervisor, response.code()), Toast.LENGTH_SHORT).show();
                 }
@@ -179,35 +210,40 @@ public class SupervisorActivity extends AppCompatActivity {
                 markedCount++;
             }
         }
+        boolean hasItems = !pendingList.isEmpty();
+        tvSelectAllSpv.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         tvClearSelectionSpv.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
-        btnBatchActionSpv.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
-        btnBatchActionSpv.setText(getString(R.string.btn_approve_selected_count, markedCount));
+        layoutBatchActionsSpv.setVisibility(markedCount > 0 ? View.VISIBLE : View.GONE);
+        btnBatchApproveSpv.setText(getString(R.string.btn_approve_selected_count, markedCount));
+        btnBatchDeclineSpv.setText(getString(R.string.btn_decline_selected_count, markedCount));
     }
 
-    private void processBatchApproval(final List<LeaveRequestData> items, final int index) {
+    private void processBatchAction(final List<LeaveRequestData> items, final int index, final String action) {
         if (index >= items.size()) {
             progressOverlay.setVisibility(View.GONE);
             swipeRefreshSupervisor.setEnabled(true);
-            Toast.makeText(this, getString(R.string.toast_batch_approve_complete), Toast.LENGTH_SHORT).show();
+            String toastMsg = action.equals("approve") ? getString(R.string.toast_batch_approve_complete) : getString(R.string.toast_batch_decline_complete);
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
             fetchPendingQueue();
             return;
         }
 
         LeaveRequestData item = items.get(index);
-        tvProgressMessage.setText(getString(R.string.msg_batch_approving, (index + 1), items.size()));
+        String progressMsg = action.equals("approve") ? getString(R.string.msg_batch_approving, (index + 1), items.size()) : getString(R.string.msg_batch_declining, (index + 1), items.size());
+        tvProgressMessage.setText(progressMsg);
         progressOverlay.setVisibility(View.VISIBLE);
         swipeRefreshSupervisor.setEnabled(false);
 
-        LeaveRequest decisionPackage = new LeaveRequest("approve", item.rowNumber);
+        LeaveRequest decisionPackage = new LeaveRequest(action, item.rowNumber);
         googleSheetsApi.sendRequest(decisionPackage).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                new Handler(Looper.getMainLooper()).postDelayed(() -> processBatchApproval(items, index + 1), 500);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> processBatchAction(items, index + 1, action), 500);
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                processBatchApproval(items, index + 1);
+                processBatchAction(items, index + 1, action);
             }
         });
     }

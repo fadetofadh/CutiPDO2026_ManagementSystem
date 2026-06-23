@@ -51,6 +51,13 @@ public class ReviewQueueAdapter extends RecyclerView.Adapter<ReviewQueueAdapter.
         notifyDataSetChanged();
     }
 
+    public void selectAll() {
+        for (QueuedRequest req : batchList) {
+            req.isMarked = true;
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull QueueViewHolder holder, int position) {
         QueuedRequest item = batchList.get(position);

@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.util.Pair;
 import com.google.android.material.datepicker.CalendarConstraints;
@@ -122,6 +123,15 @@ public class SpvRequestActivity extends AppCompatActivity {
         btnTypePdo.setOnClickListener(v -> selectLeaveType(getString(R.string.pdo)));
 
         btnSubmitDirect.setOnClickListener(v -> executeDirectSubmission());
+
+        // 💡 SAKIT DYNAMIC BYPASS: Re-evaluate rules when typing "sakit"
+        etLeaveDescriptionSpv.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(android.text.Editable s) {
+                evaluateRules();
+            }
+        });
     }
 
     private void updateBalanceDisplay() {
@@ -193,37 +203,16 @@ public class SpvRequestActivity extends AppCompatActivity {
     }
 
     private void evaluateRules() {
-        String name = spEmployeeNameSpv.getSelectedItem().toString();
-        EmployeeBalance balance = balanceMap.get(name);
-
-        boolean containsWeekend = false;
         if (currentStartMs != 0 && currentEndMs != 0) {
-            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            cal.setTimeInMillis(currentStartMs);
-            while (cal.getTimeInMillis() <= currentEndMs) {
-                int day = cal.get(Calendar.DAY_OF_WEEK);
-                if (day == Calendar.SATURDAY || day == Calendar.SUNDAY) {
-                    containsWeekend = true;
-                    break;
-                }
-                cal.add(Calendar.DAY_OF_MONTH, 1);
-            }
+            // Logic for weekend detection if needed in the future
         }
 
-        boolean canCuti = balance != null && balance.cutiBalance >= calculatedDays;
-        boolean canPdo = balance != null && balance.pdoBalance >= calculatedDays;
-
-        if (containsWeekend && balance != null && balance.pdoBalance > 0) {
-            canCuti = false;
-        }
-
-        btnTypeCuti.setEnabled(canCuti && calculatedDays > 0);
-        btnTypeCuti.setAlpha(canCuti && calculatedDays > 0 ? 1.0f : 0.4f);
-        btnTypePdo.setEnabled(canPdo && calculatedDays > 0);
-        btnTypePdo.setAlpha(canPdo && calculatedDays > 0 ? 1.0f : 0.4f);
-
-        if (Objects.equals(selectedLeaveType, getString(R.string.cuti)) && !canCuti) selectLeaveType("");
-        if (Objects.equals(selectedLeaveType, getString(R.string.pdo)) && !canPdo) selectLeaveType("");
+        // 💡 GENERAL DENDA LOGIC: Always allow both Cuti and PDO buttons.
+        // We handle the (denda) marking during submission if balance is insufficient.
+        btnTypeCuti.setEnabled(calculatedDays > 0);
+        btnTypeCuti.setAlpha(calculatedDays > 0 ? 1.0f : 0.4f);
+        btnTypePdo.setEnabled(calculatedDays > 0);
+        btnTypePdo.setAlpha(calculatedDays > 0 ? 1.0f : 0.4f);
 
         updateSelectionVisuals();
     }
@@ -251,11 +240,72 @@ public class SpvRequestActivity extends AppCompatActivity {
             return;
         }
 
+        EmployeeBalance balance = balanceMap.get(name);
+        String filterClass = getIntent().getStringExtra("FILTER_CLASS");
+        boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide") || filterClass.equalsIgnoreCase("H.K."));
+        String description = etLeaveDescriptionSpv.getText().toString().trim();
+        boolean isSakit = description.toLowerCase().contains("sakit");
+
+        // 💡 GENERAL DENDA LOGIC: Allow any request with insufficient balance but mark as (denda)
+        int selectedBalanceValue = Objects.equals(selectedLeaveType, getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
+        if (selectedBalanceValue < calculatedDays) {
+            // 💡 PENALTY WARNING DIALOG
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.dialog_insufficient_balance_title)
+                    .setMessage(getString(R.string.dialog_insufficient_balance_message, selectedLeaveType, selectedBalanceValue))
+                    .setPositiveButton(R.string.btn_process_denda, (dialog, which) -> {
+                        String finalDesc = etLeaveDescriptionSpv.getText().toString().trim();
+                        if (!finalDesc.toLowerCase().contains("(denda)")) {
+                            finalDesc = (finalDesc.isEmpty() ? "(denda)" : finalDesc + " (denda)");
+                        }
+                        finalizeDirectSubmission(name, finalDesc, balance, isRestrictedDivision);
+                    })
+                    .setNegativeButton(R.string.btn_cancel, null)
+                    .show();
+            return;
+        }
+
+        finalizeDirectSubmission(name, description, balance, isRestrictedDivision);
+    }
+
+    private void finalizeDirectSubmission(String name, String description, EmployeeBalance balance, boolean isRestrictedDivision) {
+        // 💡 DIVISION QUOTA CHECK
+        if (isRestrictedDivision && !description.toLowerCase().contains("sakit")) {
+            @SuppressWarnings("unchecked")
+            ArrayList<LeaveRequestData> preFetchedApproved = (ArrayList<LeaveRequestData>) getIntent().getSerializableExtra("PRE_FETCHED_APPROVED");
+            if (preFetchedApproved != null) {
+                String startNew = selectedDateRangeString.split(" to ")[0];
+                String endNew = selectedDateRangeString.contains(" to ") ? selectedDateRangeString.split(" to ")[1] : startNew;
+
+                for (LeaveRequestData old : preFetchedApproved) {
+                    if (Objects.equals(old.employeeName, name)) continue;
+                    
+                    // 💡 IMPORTANT: Only block if they are in the SAME DIVISION
+                    EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
+                    if (otherEmp != null && balance != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
+                        if (isDateOverlap(startNew, endNew, old.getFormattedDate())) {
+                            Toast.makeText(this, "⚠️ " + old.employeeName + " (" + otherEmp.empClass + ") sudah ambil tanggal ini!", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 💡 7 WORKING DAYS VALIDATION
+        if (balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !description.toLowerCase().contains("sakit")) {
+            int gap = countWorkDaysBetween(balance.lastLeaveDate, selectedDateRangeString.split(" to ")[0]);
+            if (gap < 7) {
+                Toast.makeText(this, "⚠️ Belum 7 hari kerja sejak izin terakhir!", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
         btnSubmitDirect.setEnabled(false);
         btnSubmitDirect.setText(R.string.msg_processing);
 
         // Straight to approve!
-        LeaveRequest payload = new LeaveRequest("approve_direct", name, selectedDateRangeString, calculatedDays, selectedLeaveType, etLeaveDescriptionSpv.getText().toString().trim());
+        LeaveRequest payload = new LeaveRequest("approve_direct", name, selectedDateRangeString, calculatedDays, selectedLeaveType, description);
         
         googleSheetsApi.sendRequest(payload).enqueue(new Callback<>() {
             @Override
@@ -277,5 +327,35 @@ public class SpvRequestActivity extends AppCompatActivity {
                 btnSubmitDirect.setText(R.string.btn_submit);
             }
         });
+    }
+
+    private boolean isDateOverlap(String startA, String endA, String rangeB) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date sA = sdf.parse(startA);
+            Date eA = sdf.parse(endA);
+            String[] partsB = rangeB.contains(" to ") ? rangeB.split(" to ") : new String[]{rangeB, rangeB};
+            Date sB = sdf.parse(partsB[0]);
+            Date eB = sdf.parse(partsB[1]);
+            return (sA != null && eB != null && sB != null && eA != null) &&
+                    (sA.before(eB) || sA.equals(eB)) && (eA.after(sB) || eA.equals(sB));
+        } catch (Exception e) { return false; }
+    }
+
+    private int countWorkDaysBetween(String startStr, String endStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(Objects.requireNonNull(sdf.parse(startStr)));
+            Date endDate = sdf.parse(endStr);
+            int workDays = 0;
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            while (cal.getTime().before(endDate)) {
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+                if (dayOfWeek != Calendar.MONDAY && dayOfWeek != Calendar.TUESDAY) workDays++;
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+            return workDays;
+        } catch (Exception e) { return 99; }
     }
 }
