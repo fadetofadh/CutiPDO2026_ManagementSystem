@@ -307,9 +307,6 @@ public class MainActivity extends AppCompatActivity {
                         // Note: clearCheck() will trigger its listener, but won't re-enter this if block
                     }
                 }
-
-                // 💡 DYNAMIC REFRESH: If "sakit" is typed, refresh the leave type options to allow (denda) path
-                resetLeaveTypeOptions();
             }
         });
 
@@ -389,10 +386,12 @@ public class MainActivity extends AppCompatActivity {
                 boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide"));
                 boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
                 boolean isSakit = description.toLowerCase().contains("sakit");
+                // 💡 DW RULE: Allows bypassing quota if they hire a Daily Worker
+                boolean hasDW = description.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
 
                 // 💡 DIVISION QUOTA CHECK: Only 1 person per division (H.K, Teknis, or Guide)
-                // We bypass this for Sakit or Special categories (Khusus/Bersurat)
-                if (isRestrictedDivision && !isSpecialCategory && !isSakit) {
+                // Bypass for Sakit, Special categories, or if using Daily Worker (DW)
+                if (isRestrictedDivision && !isSpecialCategory && !isSakit && !hasDW) {
                     String startNew = selectedDateRangeString.split(" to ")[0];
                     String endNew = selectedDateRangeString.contains(" to ") ? selectedDateRangeString.split(" to ")[1] : startNew;
 
@@ -694,9 +693,62 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(R.string.label_edit_request)
                 .setView(layout)
                 .setPositiveButton(R.string.btn_save_changes, (dialog, which) -> {
+                    String newDesc = etEditDesc.getText().toString().trim();
+                    String oldDesc = request.getDescription();
+                    String empName = request.getEmployeeName();
+                    EmployeeBalance balance = balanceMap.get(empName);
+
+                    // 💡 1. CATEGORY LOCK: Prevent changing [Khusus]/[Bersurat] status
+                    boolean wasSpecial = oldDesc.contains("[Khusus]") || oldDesc.contains("[Bersurat]");
+                    boolean isSpecial = newDesc.contains("[Khusus]") || newDesc.contains("[Bersurat]");
+                    if (wasSpecial != isSpecial) {
+                        Toast.makeText(this, "⚠️ Status kategori (Khusus/Bersurat) tidak bisa diubah!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    // 💡 2. DATE VALIDATION: Re-check Quota and 7-Day rule if date changed
+                    boolean isSakitNew = newDesc.toLowerCase().contains("sakit");
+                    boolean hasDWNew = newDesc.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
+
+                    if (!Objects.equals(tempDate[0], request.getTargetDate()) && !isSpecial && !isSakitNew && !hasDWNew) {
+                        String startNew = tempDate[0].split(" to ")[0];
+                        String endNew = tempDate[0].contains(" to ") ? tempDate[0].split(" to ")[1] : startNew;
+
+                        // Check Quota (Excluding current item)
+                        for (QueuedRequest other : batchQueue) {
+                            if (other == request) continue;
+                            EmployeeBalance otherEmp = balanceMap.get(other.getEmployeeName());
+                            if (otherEmp != null && balance != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
+                                if (isDateOverlap(startNew, endNew, other.getTargetDate())) {
+                                    Toast.makeText(this, "⚠️ Bentrok dengan " + other.getEmployeeName() + " di daftar!", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                            }
+                        }
+                        // Note: 7-day rule check can also be added here if needed
+                    }
+
+                    // 💡 3. BALANCE SYNC: Refund old and deduct new
+                    if (!wasSpecial && balance != null) {
+                        // Refund old
+                        if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) balance.cutiBalance += request.getTotalDays();
+                        else balance.pdoBalance += request.getTotalDays();
+
+                        // Deduct new (Allow Denda path if insufficient)
+                        int selectedBal = Objects.equals(request.getLeaveType(), getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
+                        if (selectedBal < tempDays[0]) {
+                            if (!newDesc.toLowerCase().contains("(denda)")) {
+                                newDesc = (newDesc.isEmpty() ? "(denda)" : newDesc + " (denda)");
+                            }
+                        } else {
+                            if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) balance.cutiBalance -= tempDays[0];
+                            else balance.pdoBalance -= tempDays[0];
+                        }
+                    }
+
                     request.setTargetDate(tempDate[0]);
                     request.setTotalDays(tempDays[0]);
-                    request.setDescription(etEditDesc.getText().toString().trim());
+                    request.setDescription(newDesc);
 
                     queueManager.saveQueue(batchQueue);
                     queueAdapter.notifyItemChanged(position);
@@ -939,6 +991,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetLeaveTypeOptions() {
+        // Save current selection to restore it later
+        String currentSelection = spLeaveType.getSelectedItem() != null ? spLeaveType.getSelectedItem().toString() : "";
+        
         leaveTypeList.clear();
         String selectedEmployee = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "";
 
@@ -960,12 +1015,19 @@ public class MainActivity extends AppCompatActivity {
 
         leaveTypeAdapter.notifyDataSetChanged();
 
-        EmployeeBalance balance = balanceMap.get(selectedEmployee);
-        if (balance != null) {
-            if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
-                spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
-            } else {
-                spLeaveType.setSelection(0);
+        // 💡 Selection Management: Restore selection if it's still valid
+        int restoredIndex = leaveTypeList.indexOf(currentSelection);
+        if (restoredIndex != -1) {
+            spLeaveType.setSelection(restoredIndex);
+        } else {
+            // Smart Auto-Selection only if we don't have a valid previous selection
+            EmployeeBalance balance = balanceMap.get(selectedEmployee);
+            if (balance != null) {
+                if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
+                    spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
+                } else {
+                    spLeaveType.setSelection(0);
+                }
             }
         }
         

@@ -269,8 +269,11 @@ public class SpvRequestActivity extends AppCompatActivity {
     }
 
     private void finalizeDirectSubmission(String name, String description, EmployeeBalance balance, boolean isRestrictedDivision) {
+        boolean isSakit = description.toLowerCase().contains("sakit");
+        boolean hasDW = description.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
+
         // 💡 DIVISION QUOTA CHECK
-        if (isRestrictedDivision && !description.toLowerCase().contains("sakit")) {
+        if (isRestrictedDivision && !isSakit && !hasDW) {
             @SuppressWarnings("unchecked")
             ArrayList<LeaveRequestData> preFetchedApproved = (ArrayList<LeaveRequestData>) getIntent().getSerializableExtra("PRE_FETCHED_APPROVED");
             if (preFetchedApproved != null) {
