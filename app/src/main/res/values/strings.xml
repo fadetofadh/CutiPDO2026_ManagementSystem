@@ -223,4 +223,6 @@
     <string name="dialog_insufficient_balance_message">Sisa kuota %1$s tidak mencukupi (%2$d hari).\n\nJika dilanjutkan, pengajuan ini akan diproses sebagai DENDA. Apakah Anda yakin?</string>
     <string name="btn_process_denda">YA, PROSES DENDA</string>
     <string name="toast_denda_processed">🚨 Saldo habis! Izin diproses sebagai (denda).</string>
+    <string name="toast_timeout_error">Koneksi lemot (Timeout). Silakan cek riwayat atau coba lagi.</string>
+    <string name="toast_generic_error">Terjadi kesalahan: %1$s</string>
 </resources>

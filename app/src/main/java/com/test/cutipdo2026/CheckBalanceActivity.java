@@ -139,8 +139,20 @@ public class CheckBalanceActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
                 swipeRefreshBalance.setRefreshing(false);
-                Toast.makeText(CheckBalanceActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
             }
         });
+    }
+
+    private void handleNetworkError(Throwable t) {
+        String empName = spBalanceEmployeeName.getSelectedItem() != null ? spBalanceEmployeeName.getSelectedItem().toString() : "Visitor";
+        String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+        ErrorReporter.report(this, empName, "CheckBalanceActivity", t.getMessage(), errorType);
+
+        if (t instanceof java.net.SocketTimeoutException) {
+            Toast.makeText(this, R.string.toast_timeout_error, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 }

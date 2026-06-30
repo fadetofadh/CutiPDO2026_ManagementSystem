@@ -3,6 +3,7 @@ package com.test.cutipdo2026;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -56,18 +57,18 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> {
             String inputCode = etPasscode.getText().toString().trim();
             if (inputCode.isEmpty()) {
-                Toast.makeText(this, "Please enter passcode", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Masukkan Kata Sandi!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String roleType = rbSpv.isChecked() ? "SPV" : "KADIV";
 
             ProgressDialog loginProgress = new ProgressDialog(this);
-            loginProgress.setMessage("Verifying Credentials...");
+            loginProgress.setMessage("Memverifikasi Kredensial...");
             loginProgress.setCancelable(false);
             loginProgress.show();
 
-            googleSheetsApi.verifyLogin("login", inputCode, roleType).enqueue(new Callback<>() {
+            googleSheetsApi.verifyLogin("login", inputCode, roleType).enqueue(new Callback<LoginResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                     if (loginProgress.isShowing()) loginProgress.dismiss();
@@ -86,18 +87,20 @@ public class LoginActivity extends AppCompatActivity {
                                 fetchDataAndNavigateToKadiv(res.getFilterClass(), res.isSpv());
                             }
                         } else {
-                            String serverMsg = res.getMessage() != null ? res.getMessage() : "Unknown Error";
+                            String serverMsg = res.getMessage() != null ? res.getMessage() : "Kesalahan tidak diketahui";
                             Toast.makeText(LoginActivity.this, serverMsg, Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(LoginActivity.this, "Server Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        String errMsg = "HTTP Error " + response.code();
+                        ErrorReporter.report(LoginActivity.this, "Passcode: " + inputCode, "LoginActivity", errMsg, "Server Error");
+                        Toast.makeText(LoginActivity.this, "Kesalahan Server: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                     if (loginProgress.isShowing()) loginProgress.dismiss();
-                    Toast.makeText(LoginActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    handleNetworkError(t);
                 }
             });
         });
@@ -115,11 +118,31 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         TextView tvCreditPlaceholder = findViewById(R.id.tvCreditPlaceholder);
-        tvCreditPlaceholder.setOnClickListener(v -> new androidx.appcompat.app.AlertDialog.Builder(this)
+        tvCreditPlaceholder.setOnClickListener(v -> showCreditsDialog());
+    }
+
+    private void showCreditsDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_credits, null);
+        TextView tvVersion = dialogView.findViewById(R.id.tvVersion);
+        tvVersion.setText(getString(R.string.log_days_format, 0).replace("Hari: 0", "Versi " + BuildConfig.VERSION_NAME));
+        // Using log_days_format as a dummy to get "Versi " prefix if I don't want to add a new string resource right now
+        // Actually, it's better to just set it directly or use a better string.
+        tvVersion.setText("Versi " + BuildConfig.VERSION_NAME);
+
+        final int[] tapCount = {0};
+        tvVersion.setOnClickListener(view -> {
+            tapCount[0]++;
+            if (tapCount[0] >= 5) {
+                tapCount[0] = 0;
+                startActivity(new Intent(this, DeveloperOptionsActivity.class));
+            }
+        });
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_credits_title)
-                .setMessage(getString(R.string.dialog_credits_message, BuildConfig.VERSION_NAME))
+                .setView(dialogView)
                 .setPositiveButton(R.string.btn_close, null)
-                .show());
+                .show();
     }
 
     private void fetchDataAndNavigateToSuperAdmin() {
@@ -240,8 +263,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
             }
         });
+    }
+
+    private void handleNetworkError(Throwable t) {
+        String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+        ErrorReporter.report(this, "Attempt: " + etPasscode.getText().toString(), "LoginActivity", t.getMessage(), errorType);
+
+        if (t instanceof java.net.SocketTimeoutException) {
+            Toast.makeText(this, R.string.toast_timeout_error, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 }

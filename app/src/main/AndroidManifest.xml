@@ -74,6 +74,11 @@
             android:exported="false"
             android:label="@string/calendar_title" />
 
+        <activity
+            android:name=".DeveloperOptionsActivity"
+            android:exported="false"
+            android:label="Developer Options" />
+
     </application>
 
 </manifest>

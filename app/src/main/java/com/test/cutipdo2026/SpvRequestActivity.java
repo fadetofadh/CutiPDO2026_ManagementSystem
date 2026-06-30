@@ -1,6 +1,7 @@
 package com.test.cutipdo2026;
 
 import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -307,10 +308,14 @@ public class SpvRequestActivity extends AppCompatActivity {
         btnSubmitDirect.setEnabled(false);
         btnSubmitDirect.setText(R.string.msg_processing);
 
+        SharedPreferences prefs = getSharedPreferences("DEV_OPTS", MODE_PRIVATE);
+        String customRecipient = prefs.getBoolean("USE_LOCAL_NOTIF", false) ? prefs.getString("LOCAL_NOTIF_NUMBER", "") : null;
+
         // Straight to approve!
         LeaveRequest payload = new LeaveRequest("approve_direct", name, selectedDateRangeString, calculatedDays, selectedLeaveType, description);
-        
-        googleSheetsApi.sendRequest(payload).enqueue(new Callback<>() {
+        if (customRecipient != null) payload.setCustomRecipient(customRecipient);
+
+        googleSheetsApi.sendRequest(payload).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -325,11 +330,23 @@ public class SpvRequestActivity extends AppCompatActivity {
             }
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(SpvRequestActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
                 btnSubmitDirect.setEnabled(true);
                 btnSubmitDirect.setText(R.string.btn_submit);
             }
         });
+    }
+
+    private void handleNetworkError(Throwable t) {
+        String empName = spEmployeeNameSpv.getSelectedItem() != null ? spEmployeeNameSpv.getSelectedItem().toString() : "Unknown";
+        String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+        ErrorReporter.report(this, empName, "SpvRequestActivity", t.getMessage(), errorType);
+
+        if (t instanceof java.net.SocketTimeoutException) {
+            Toast.makeText(this, R.string.toast_timeout_error, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 
     private boolean isDateOverlap(String startA, String endA, String rangeB) {

@@ -2,6 +2,7 @@ package com.test.cutipdo2026;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -518,8 +519,11 @@ public class MainActivity extends AppCompatActivity {
             mainProgressOverlay.setVisibility(View.VISIBLE);
             tvMainProgressMessage.setText(getString(R.string.msg_uploading));
 
+            SharedPreferences prefs = getSharedPreferences("DEV_OPTS", MODE_PRIVATE);
+            String customRecipient = prefs.getBoolean("USE_LOCAL_NOTIF", false) ? prefs.getString("LOCAL_NOTIF_NUMBER", "") : null;
+
             successUploadCount = 0;
-            sendSelectedItemsSequentially(itemsToSend, 0);
+            sendSelectedItemsSequentially(itemsToSend, 0, customRecipient);
         });
     }
 
@@ -800,34 +804,41 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.spLeaveType).setAlpha(alpha);
     }
 
-    private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index) {
+    private void sendSelectedItemsSequentially(final ArrayList<QueuedRequest> items, final int index, final String customRecipient) {
         if (index >= items.size()) {
             // 💡 ALL ITEMS FINISHED: Trigger ONE batch notification for the SPV
-            googleSheetsApi.sendRequest(new LeaveRequest("notify", "", "", 0, "", "")).enqueue(new Callback<ResponseBody>() {
+            LeaveRequest notifyPayload = new LeaveRequest("notify", "", "", 0, "", "");
+            if (customRecipient != null) notifyPayload.setCustomRecipient(customRecipient);
+
+            googleSheetsApi.sendRequest(notifyPayload).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     mainProgressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(MainActivity.this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
-
-                    // Clean up: Remove only the items that were successfully submitted
-                    for (QueuedRequest submittedItem : items) {
-                        batchQueue.remove(submittedItem);
+                    if (response.isSuccessful()) {
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_requests_submitted, successUploadCount), Toast.LENGTH_LONG).show();
+                        // ... cleanup queue ...
+                        for (QueuedRequest submittedItem : items) {
+                            batchQueue.remove(submittedItem);
+                        }
+                        queueManager.saveQueue(batchQueue);
+                        queueAdapter.notifyDataSetChanged();
+                        updateQueueUi();
+                    } else {
+                        String empName = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "Unknown";
+                        ErrorReporter.report(MainActivity.this, empName, "MainActivity", "Server Error: " + response.code(), "HTTP Failure");
+                        Toast.makeText(MainActivity.this, "Gagal kirim: Kesalahan Server " + response.code(), Toast.LENGTH_LONG).show();
                     }
 
-                    queueManager.saveQueue(batchQueue);
-                    queueAdapter.notifyDataSetChanged();
-                    updateQueueUi();
-
                     btnSubmitToSpv.setEnabled(true);
-                    setUiEnabled(true); // 🔓 Unlock everything
+                    setUiEnabled(true);
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    // Even if notification fails, the data is already saved
                     mainProgressOverlay.setVisibility(View.GONE);
                     btnSubmitToSpv.setEnabled(true);
                     setUiEnabled(true);
+                    handleNetworkError(t);
                 }
             });
             return;
@@ -837,13 +848,14 @@ public class MainActivity extends AppCompatActivity {
         tvMainProgressMessage.setText(getString(R.string.msg_batch_approving, (index + 1), items.size()));
         
         LeaveRequest networkPayload = new LeaveRequest("submit", item.getEmployeeName(), item.getTargetDate(), item.getTotalDays(), item.getLeaveType(), item.getDescription());
+        if (customRecipient != null) networkPayload.setCustomRecipient(customRecipient);
 
         googleSheetsApi.sendRequest(networkPayload).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     successUploadCount++;
-                    sendSelectedItemsSequentially(items, index + 1);
+                    sendSelectedItemsSequentially(items, index + 1, customRecipient);
                 } else {
                     mainProgressOverlay.setVisibility(View.GONE);
                     Toast.makeText(MainActivity.this, getString(R.string.toast_upload_failed_pos, index), Toast.LENGTH_SHORT).show();
@@ -856,12 +868,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 mainProgressOverlay.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, getString(R.string.toast_upload_loop_failure, t.getMessage()), Toast.LENGTH_SHORT).show();
                 btnSubmitToSpv.setEnabled(true);
                 setUiEnabled(true); // 🔓 Unlock on failure
                 updateQueueUi();
+                handleNetworkError(t);
             }
         });
+    }
+
+    private void handleNetworkError(Throwable t) {
+        String empName = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "Unknown";
+        String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+        ErrorReporter.report(this, empName, "MainActivity", t.getMessage(), errorType);
+
+        if (t instanceof java.net.SocketTimeoutException) {
+            Toast.makeText(this, R.string.toast_timeout_error, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

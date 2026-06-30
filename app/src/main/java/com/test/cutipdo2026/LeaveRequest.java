@@ -8,6 +8,7 @@ public class LeaveRequest {
     private String leaveType;
     private int rowNumber; // GSON will convert this directly to "rowNumber" for the script
     private String description;
+    private String customRecipient; // 💡 NEW: Override WAHA recipient from Developer Options
 
     // Constructor for Division Head submission
     public LeaveRequest(String action, String employeeName, String targetDate, int totalDays, String leaveType, String description) {
@@ -17,6 +18,10 @@ public class LeaveRequest {
         this.totalDays = totalDays;
         this.leaveType = leaveType;
         this.description = description;
+    }
+
+    public void setCustomRecipient(String recipient) {
+        this.customRecipient = recipient;
     }
 
     // Constructor for SuperAdmin PDO addition

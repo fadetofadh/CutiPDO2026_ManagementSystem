@@ -198,7 +198,7 @@ public class SupervisorActivity extends AppCompatActivity {
                 pbSupervisorLoader.setVisibility(View.GONE);
                 swipeRefreshSupervisor.setRefreshing(false);
                 tvNoData.setVisibility(View.VISIBLE);
-                Toast.makeText(SupervisorActivity.this, getString(R.string.toast_load_list_failed, t.getMessage()), Toast.LENGTH_LONG).show();
+                handleNetworkError(t);
             }
         });
     }
@@ -277,6 +277,7 @@ public class SupervisorActivity extends AppCompatActivity {
                         rvPendingRequests.setVisibility(View.GONE);
                     }
                 } else {
+                    ErrorReporter.report(SupervisorActivity.this, "Supervisor", "SupervisorActivity", "Action: " + action + " | Error: " + response.code(), "Server Error");
                     Toast.makeText(SupervisorActivity.this, getString(R.string.toast_server_rejected_action, response.code()), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -285,8 +286,19 @@ public class SupervisorActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 progressOverlay.setVisibility(View.GONE);
                 swipeRefreshSupervisor.setEnabled(true);
-                Toast.makeText(SupervisorActivity.this, getString(R.string.toast_sync_error, t.getMessage()), Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
             }
         });
+    }
+
+    private void handleNetworkError(Throwable t) {
+        String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+        ErrorReporter.report(this, "Supervisor", "SupervisorActivity", t.getMessage(), errorType);
+
+        if (t instanceof java.net.SocketTimeoutException) {
+            Toast.makeText(this, R.string.toast_timeout_error, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -66,6 +67,13 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
+                // Report the error to admin before proceeding
+                String errorType = (t instanceof java.net.SocketTimeoutException) ? "Timeout" : "Network Error";
+                ErrorReporter.report(SplashActivity.this, "System", "SplashActivity", "Update Check: " + t.getMessage(), errorType);
+
+                if (t instanceof java.net.SocketTimeoutException) {
+                    Toast.makeText(SplashActivity.this, R.string.toast_timeout_error, Toast.LENGTH_SHORT).show();
+                }
                 proceedToLogin();
             }
         });

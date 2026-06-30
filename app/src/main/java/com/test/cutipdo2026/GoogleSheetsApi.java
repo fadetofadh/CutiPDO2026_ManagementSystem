@@ -57,4 +57,8 @@ public interface GoogleSheetsApi {
     // Sends your leave request batches out to the Apps Script backend
     @POST("exec")
     Call<ResponseBody> sendRequest(@Body LeaveRequest request);
+
+    // 💡 NEW: Report app errors directly to Admin via WAHA
+    @POST("exec")
+    Call<ResponseBody> reportError(@Body ErrorLog errorLog);
 }
