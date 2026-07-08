@@ -90,20 +90,25 @@
                 android:textColor="#555555"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/etPasscode"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_gravity="center_horizontal"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
-                android:background="@android:drawable/editbox_background_normal"
-                android:hint="@string/hint_enter_password"
                 android:maxWidth="488dp"
-                android:textColorHint="#757575"
-                android:autofillHints="password"
-                android:inputType="textPassword"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp" />
+                android:layout_gravity="center_horizontal"
+                app:endIconMode="password_toggle"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPasscode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_enter_password"
+                    android:textColorHint="#757575"
+                    android:autofillHints="password"
+                    android:inputType="textPassword" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/btnLogin"

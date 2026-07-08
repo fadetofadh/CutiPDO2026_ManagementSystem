@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +42,8 @@ public class SpvRequestActivity extends AppCompatActivity {
     private TextView tvTotalDaysDisplaySpv, tvCutiBalanceSpv, tvPdoBalanceSpv;
     private Spinner spEmployeeNameSpv;
     private LinearLayout btnTypeCuti, btnTypePdo;
+    private RadioGroup rgCutiCategorySpv;
+    private View ivShowRulesSpv;
 
     private final List<String> employeeList = new ArrayList<>();
     private final Map<String, EmployeeBalance> balanceMap = new HashMap<>();
@@ -68,6 +72,10 @@ public class SpvRequestActivity extends AppCompatActivity {
         spEmployeeNameSpv = findViewById(R.id.spEmployeeNameSpv);
         btnTypeCuti = findViewById(R.id.btnTypeCuti);
         btnTypePdo = findViewById(R.id.btnTypePdo);
+        rgCutiCategorySpv = findViewById(R.id.rgCutiCategorySpv);
+        ivShowRulesSpv = findViewById(R.id.ivShowRulesSpv);
+
+        ivShowRulesSpv.setOnClickListener(v -> showRulesDialog());
 
         // API Setup
         googleSheetsApi = RetrofitClient.getApi(this);
@@ -125,14 +133,52 @@ public class SpvRequestActivity extends AppCompatActivity {
 
         btnSubmitDirect.setOnClickListener(v -> executeDirectSubmission());
 
+        // 💡 CATEGORY LOGIC: Same as MainActivity
+        rgCutiCategorySpv.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbKhususSpv) {
+                String current = etLeaveDescriptionSpv.getText().toString();
+                if (!current.startsWith("[Khusus] ")) {
+                    etLeaveDescriptionSpv.setText("[Khusus] " + current.replace("[Bersurat] ", ""));
+                    etLeaveDescriptionSpv.setSelection(etLeaveDescriptionSpv.getText().length());
+                }
+            } else if (checkedId == R.id.rbBersuratSpv) {
+                String current = etLeaveDescriptionSpv.getText().toString();
+                if (!current.startsWith("[Bersurat] ")) {
+                    etLeaveDescriptionSpv.setText("[Bersurat] " + current.replace("[Khusus] ", ""));
+                    etLeaveDescriptionSpv.setSelection(etLeaveDescriptionSpv.getText().length());
+                }
+            } else {
+                String text = etLeaveDescriptionSpv.getText().toString();
+                etLeaveDescriptionSpv.setText(text.replace("[Khusus] ", "").replace("[Bersurat] ", ""));
+            }
+        });
+
         // 💡 SAKIT DYNAMIC BYPASS: Re-evaluate rules when typing "sakit"
         etLeaveDescriptionSpv.addTextChangedListener(new android.text.TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(android.text.Editable s) {
                 evaluateRules();
+                
+                // Prefix enforcement
+                String prefix = "";
+                int checkedId = rgCutiCategorySpv.getCheckedRadioButtonId();
+                if (checkedId == R.id.rbKhususSpv) prefix = "[Khusus] ";
+                else if (checkedId == R.id.rbBersuratSpv) prefix = "[Bersurat] ";
+
+                if (!prefix.isEmpty() && !s.toString().startsWith(prefix)) {
+                    rgCutiCategorySpv.clearCheck();
+                }
             }
         });
+    }
+
+    private void showRulesDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.label_rules_info)
+                .setMessage(android.text.Html.fromHtml(getString(R.string.msg_rules_content)))
+                .setPositiveButton(R.string.btn_ok, null)
+                .show();
     }
 
     private void updateBalanceDisplay() {
@@ -142,15 +188,19 @@ public class SpvRequestActivity extends AppCompatActivity {
             int displayCuti = balance.cutiBalance;
             int displayPdo = balance.pdoBalance;
 
+            boolean isSpecial = rgCutiCategorySpv.getCheckedRadioButtonId() != -1;
+
             // 💡 Apply "Virtual Deduction" if a leave type is currently selected
             if (Objects.equals(selectedLeaveType, getString(R.string.cuti))) {
-                displayCuti -= calculatedDays;
+                if (!isSpecial) {
+                    displayCuti -= calculatedDays;
+                }
             } else if (Objects.equals(selectedLeaveType, getString(R.string.pdo))) {
                 displayPdo -= calculatedDays;
             }
 
-            tvCutiBalanceSpv.setText(String.valueOf(displayCuti));
-            tvPdoBalanceSpv.setText(String.valueOf(displayPdo));
+            tvCutiBalanceSpv.setText(String.valueOf(Math.max(0, displayCuti)));
+            tvPdoBalanceSpv.setText(String.valueOf(Math.max(0, displayPdo)));
         } else {
             tvCutiBalanceSpv.setText(R.string.zero);
             tvPdoBalanceSpv.setText(R.string.zero);
@@ -198,6 +248,17 @@ public class SpvRequestActivity extends AppCompatActivity {
 
                 etSelectedDatesSpv.setText(selectedDateRangeString);
                 tvTotalDaysDisplaySpv.setText(getString(R.string.duration_placeholder, calculatedDays));
+
+                String name = spEmployeeNameSpv.getSelectedItem().toString();
+                EmployeeBalance balance = balanceMap.get(name);
+                if (balance != null) {
+                    // 💡 Rule 2: Force PDO if Cuti is 0 but PDO is available
+                    if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
+                        selectedLeaveType = getString(R.string.pdo);
+                        updateSelectionVisuals();
+                    }
+                }
+
                 updateBalanceDisplay(); // 💡 Refresh balance and rules with new date count
             }
         });
@@ -219,19 +280,40 @@ public class SpvRequestActivity extends AppCompatActivity {
     }
 
     private void selectLeaveType(String type) {
+        if (calculatedDays <= 0) {
+            Toast.makeText(this, "Pilih tanggal terlebih dahulu!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String empName = spEmployeeNameSpv.getSelectedItem().toString();
+        EmployeeBalance balance = balanceMap.get(empName);
+
+        // 💡 Rule: Warning if Cuti balance is 0
+        if (Objects.equals(type, getString(R.string.cuti)) && balance != null && balance.cutiBalance <= 0) {
+            Toast.makeText(this, "Saldo Cuti 0. Gunakan PDO atau pilih kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
+        }
+
         // If tapping the same type twice, deselect it (optional but good for UX)
         if (Objects.equals(selectedLeaveType, type)) {
             selectedLeaveType = "";
         } else {
             selectedLeaveType = type;
         }
+
+        if (Objects.equals(selectedLeaveType, getString(R.string.cuti))) {
+            rgCutiCategorySpv.setVisibility(View.VISIBLE);
+        } else {
+            rgCutiCategorySpv.setVisibility(View.GONE);
+            rgCutiCategorySpv.clearCheck();
+        }
+
         updateSelectionVisuals();
         updateBalanceDisplay(); // Refresh balance numbers with virtual deduction
     }
 
     private void updateSelectionVisuals() {
-        btnTypeCuti.setBackgroundColor(Objects.equals(selectedLeaveType, getString(R.string.cuti)) ? Color.LTGRAY : Color.TRANSPARENT);
-        btnTypePdo.setBackgroundColor(Objects.equals(selectedLeaveType, getString(R.string.pdo)) ? Color.LTGRAY : Color.TRANSPARENT);
+        btnTypeCuti.setSelected(Objects.equals(selectedLeaveType, getString(R.string.cuti)));
+        btnTypePdo.setSelected(Objects.equals(selectedLeaveType, getString(R.string.pdo)));
     }
 
     private void executeDirectSubmission() {
@@ -241,15 +323,24 @@ public class SpvRequestActivity extends AppCompatActivity {
             return;
         }
 
+        // 💡 Rule: Block Cuti on weekend if no special category
+        boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
+        boolean isSpecialCategory = rgCutiCategorySpv.getCheckedRadioButtonId() != -1;
+        if (containsWeekend && Objects.equals(selectedLeaveType, getString(R.string.cuti)) && !isSpecialCategory) {
+            Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         EmployeeBalance balance = balanceMap.get(name);
         String filterClass = getIntent().getStringExtra("FILTER_CLASS");
         boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide") || filterClass.equalsIgnoreCase("H.K."));
         String description = etLeaveDescriptionSpv.getText().toString().trim();
         boolean isSakit = description.toLowerCase().contains("sakit");
+        // 💡 isSpecialCategory is already defined above
 
         // 💡 GENERAL DENDA LOGIC: Allow any request with insufficient balance but mark as (denda)
         int selectedBalanceValue = Objects.equals(selectedLeaveType, getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
-        if (selectedBalanceValue < calculatedDays) {
+        if (!isSpecialCategory && selectedBalanceValue < calculatedDays) {
             // 💡 PENALTY WARNING DIALOG
             new AlertDialog.Builder(this)
                     .setTitle(R.string.dialog_insufficient_balance_title)
@@ -272,9 +363,10 @@ public class SpvRequestActivity extends AppCompatActivity {
     private void finalizeDirectSubmission(String name, String description, EmployeeBalance balance, boolean isRestrictedDivision) {
         boolean isSakit = description.toLowerCase().contains("sakit");
         boolean hasDW = description.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
+        boolean isSpecialCategory = description.contains("[Khusus]") || description.contains("[Bersurat]");
 
         // 💡 DIVISION QUOTA CHECK
-        if (isRestrictedDivision && !isSakit && !hasDW) {
+        if (isRestrictedDivision && !isSpecialCategory && !isSakit && !hasDW) {
             @SuppressWarnings("unchecked")
             ArrayList<LeaveRequestData> preFetchedApproved = (ArrayList<LeaveRequestData>) getIntent().getSerializableExtra("PRE_FETCHED_APPROVED");
             if (preFetchedApproved != null) {
@@ -283,6 +375,10 @@ public class SpvRequestActivity extends AppCompatActivity {
 
                 for (LeaveRequestData old : preFetchedApproved) {
                     if (Objects.equals(old.employeeName, name)) continue;
+
+                    // 💡 BUG FIX: Skip checks for Declined or Cancelled requests
+                    String oldStatus = (old.status != null) ? old.status.toUpperCase() : "PENDING";
+                    if (oldStatus.equals("DECLINED") || oldStatus.equals("CANCELLED")) continue;
                     
                     // 💡 IMPORTANT: Only block if they are in the SAME DIVISION
                     EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
@@ -297,7 +393,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         }
 
         // 💡 7 WORKING DAYS VALIDATION
-        if (balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !description.toLowerCase().contains("sakit")) {
+        if (!isSpecialCategory && balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !description.toLowerCase().contains("sakit")) {
             int gap = countWorkDaysBetween(balance.lastLeaveDate, selectedDateRangeString.split(" to ")[0]);
             if (gap < 7) {
                 Toast.makeText(this, "⚠️ Belum 7 hari kerja sejak izin terakhir!", Toast.LENGTH_LONG).show();
@@ -347,6 +443,19 @@ public class SpvRequestActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean isWeekendInRange(long start, long end) {
+        Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        checkCalendar.setTimeInMillis(start);
+        while (checkCalendar.getTimeInMillis() <= end) {
+            int dayOfWeek = checkCalendar.get(Calendar.DAY_OF_WEEK);
+            if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+                return true;
+            }
+            checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return false;
     }
 
     private boolean isDateOverlap(String startA, String endA, String rangeB) {

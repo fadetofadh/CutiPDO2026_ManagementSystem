@@ -46,8 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private EditText etSelectedDates, etLeaveDescription;
     private Button btnAddToBatch, btnSubmitToSpv;
     private TextView tvTotalDaysDisplay, tvClearSelection, tvSelectAll, tvMainProgressMessage;
+    private TextView tvCutiBalanceMain, tvPdoBalanceMain;
     private Spinner spEmployeeName, spLeaveType;
+    private LinearLayout btnTypeCutiMain, btnTypePdoMain;
     private RadioGroup rgCutiCategory;
+    private View ivShowRules;
     private RecyclerView rvBatchQueue;
     private View layoutQueueHeader, mainProgressOverlay;
 
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private String selectedDateRangeString = "";
     private int calculatedDays = 0;
     private int successUploadCount = 0;
+    private String selectedLeaveTypeMain = "";
 
     private long currentStartMs = 0;
     private long currentEndMs = 0;
@@ -92,6 +96,16 @@ public class MainActivity extends AppCompatActivity {
         rvBatchQueue = findViewById(R.id.rvBatchQueue);
         mainProgressOverlay = findViewById(R.id.mainProgressOverlay);
         tvMainProgressMessage = findViewById(R.id.tvMainProgressMessage);
+        ivShowRules = findViewById(R.id.ivShowRules);
+        tvCutiBalanceMain = findViewById(R.id.tvCutiBalanceMain);
+        tvPdoBalanceMain = findViewById(R.id.tvPdoBalanceMain);
+        btnTypeCutiMain = findViewById(R.id.btnTypeCutiMain);
+        btnTypePdoMain = findViewById(R.id.btnTypePdoMain);
+
+        ivShowRules.setOnClickListener(v -> showRulesDialog());
+
+        btnTypeCutiMain.setOnClickListener(v -> selectLeaveTypeMain(getString(R.string.cuti)));
+        btnTypePdoMain.setOnClickListener(v -> selectLeaveTypeMain(getString(R.string.pdo)));
 
         googleSheetsApi = RetrofitClient.getApi(this);
 
@@ -106,11 +120,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDeleteSelected(int position) {
                 if (position >= 0 && position < batchQueue.size()) {
+                    QueuedRequest request = batchQueue.get(position);
+                    
+                    // 💡 REFUND BALANCE: Put the days back before removing
+                    EmployeeBalance balance = balanceMap.get(request.getEmployeeName());
+                    boolean wasSpecial = request.getDescription().contains("[Khusus]") || request.getDescription().contains("[Bersurat]");
+                    
+                    if (balance != null && !wasSpecial) {
+                        if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) {
+                            balance.cutiBalance += request.getTotalDays();
+                        } else {
+                            balance.pdoBalance += request.getTotalDays();
+                        }
+                    }
+
                     batchQueue.remove(position);
                     queueManager.saveQueue(batchQueue);
                     queueAdapter.notifyItemRemoved(position);
                     queueAdapter.notifyItemRangeChanged(position, batchQueue.size());
+                    
                     updateQueueUi();
+                    updateBalanceDisplayMain(); // Refresh the buttons
+
                     Toast.makeText(MainActivity.this, getString(R.string.msg_item_removed), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -159,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 evaluateWeekendRestrictions();
+                updateBalanceDisplayMain();
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
@@ -207,8 +239,6 @@ public class MainActivity extends AppCompatActivity {
         };
         leaveTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spLeaveType.setAdapter(leaveTypeAdapter);
-
-        resetLeaveTypeOptions();
 
         // Radio Button Category Logic for "Cuti"
         spLeaveType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -339,13 +369,20 @@ public class MainActivity extends AppCompatActivity {
         if (preFetchedBalances != null) {
             String filterClass = getIntent().getStringExtra("FILTER_CLASS");
             for (EmployeeBalance b : preFetchedBalances) {
-                // 💡 MASTER PASSCODE FIX: If we are in "Testing" mode, don't filter out the test user
-                if (Objects.equals(filterClass, "Testing")) {
-                    balanceMap.put(b.name, b);
-                } else {
-                    balanceMap.put(b.name, b);
-                }
+                balanceMap.put(b.name, b);
                 Log.d("BALANCE_CHECK", "Loaded -> Emp: " + b.name + " Cuti: " + b.cutiBalance + " PDO: " + b.pdoBalance);
+            }
+        }
+
+        // 💡 4.5 SYNC QUEUE WITH BALANCES: Subtract already queued items from the live map
+        for (QueuedRequest req : batchQueue) {
+            EmployeeBalance b = balanceMap.get(req.getEmployeeName());
+            if (b != null) {
+                boolean isSpecial = req.getDescription().contains("[Khusus]") || req.getDescription().contains("[Bersurat]");
+                if (!isSpecial) {
+                    if (Objects.equals(req.getLeaveType(), getString(R.string.cuti))) b.cutiBalance -= req.getTotalDays();
+                    else b.pdoBalance -= req.getTotalDays();
+                }
             }
         }
 
@@ -369,12 +406,20 @@ public class MainActivity extends AppCompatActivity {
         btnAddToBatch.setOnClickListener(v -> {
             String empName = spEmployeeName.getSelectedItem().toString();
 
-            if (spLeaveType.getSelectedItem() == null || Objects.equals(spLeaveType.getSelectedItem().toString(), getString(R.string.label_cuti_pdo))) {
+            if (selectedLeaveTypeMain.isEmpty()) {
                 Toast.makeText(MainActivity.this, getString(R.string.toast_select_leave_type), Toast.LENGTH_SHORT).show();
                 return;
             }
-            String leaveType = spLeaveType.getSelectedItem().toString();
+            String leaveType = selectedLeaveTypeMain;
             String description = etLeaveDescription.getText().toString().trim();
+
+            // 💡 Rule: Block Cuti on weekend if no special category
+            boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
+            boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
+            if (containsWeekend && Objects.equals(leaveType, getString(R.string.cuti)) && !isSpecialCategory) {
+                Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
+                return;
+            }
 
             if (Objects.equals(empName, getString(R.string.prompt_select_employee_name)) || selectedDateRangeString.isEmpty() || calculatedDays == 0) {
                 Toast.makeText(MainActivity.this, getString(R.string.toast_select_employee_dates), Toast.LENGTH_SHORT).show();
@@ -385,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
             if (balance != null) {
                 String filterClass = getIntent().getStringExtra("FILTER_CLASS");
                 boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide"));
-                boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
+                // 💡 isSpecialCategory is already defined above
                 boolean isSakit = description.toLowerCase().contains("sakit");
                 // 💡 DW RULE: Allows bypassing quota if they hire a Daily Worker
                 boolean hasDW = description.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
@@ -400,6 +445,10 @@ public class MainActivity extends AppCompatActivity {
                     if (preFetchedApproved != null) {
                         for (LeaveRequestData old : preFetchedApproved) {
                             if (old.employeeName.equals(empName)) continue; // Skip self
+
+                            // 💡 BUG FIX: Skip checks for Declined or Cancelled requests
+                            String oldStatus = (old.status != null) ? old.status.toUpperCase() : "PENDING";
+                            if (oldStatus.equals("DECLINED") || oldStatus.equals("CANCELLED")) continue;
                             
                             // 💡 IMPORTANT: Only block if they are in the SAME DIVISION
                             EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
@@ -527,6 +576,77 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void selectLeaveTypeMain(String type) {
+        if (calculatedDays <= 0) {
+            Toast.makeText(this, "Pilih tanggal terlebih dahulu!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String empName = spEmployeeName.getSelectedItem().toString();
+        EmployeeBalance balance = balanceMap.get(empName);
+
+        // 💡 Rule: Warning if Cuti balance is 0
+        if (Objects.equals(type, getString(R.string.cuti)) && balance != null && balance.cutiBalance <= 0) {
+            Toast.makeText(this, "Saldo Cuti 0. Gunakan PDO atau pilih kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
+        }
+
+        if (Objects.equals(selectedLeaveTypeMain, type)) {
+            selectedLeaveTypeMain = "";
+        } else {
+            selectedLeaveTypeMain = type;
+        }
+
+        if (Objects.equals(selectedLeaveTypeMain, getString(R.string.cuti))) {
+            rgCutiCategory.setVisibility(View.VISIBLE);
+        } else {
+            rgCutiCategory.setVisibility(View.GONE);
+            rgCutiCategory.clearCheck();
+        }
+
+        updateSelectionVisualsMain();
+        updateBalanceDisplayMain();
+    }
+
+    private void updateSelectionVisualsMain() {
+        btnTypeCutiMain.setSelected(Objects.equals(selectedLeaveTypeMain, getString(R.string.cuti)));
+        btnTypePdoMain.setSelected(Objects.equals(selectedLeaveTypeMain, getString(R.string.pdo)));
+    }
+
+    private void updateBalanceDisplayMain() {
+        String empName = spEmployeeName.getSelectedItem().toString();
+        EmployeeBalance balance = balanceMap.get(empName);
+        if (balance != null) {
+            int displayCuti = balance.cutiBalance;
+            int displayPdo = balance.pdoBalance;
+
+            boolean isSpecial = rgCutiCategory.getCheckedRadioButtonId() != -1;
+
+            if (Objects.equals(selectedLeaveTypeMain, getString(R.string.cuti))) {
+                // 💡 Special categories (Khusus/Bersurat) do NOT deduct balance
+                if (!isSpecial) {
+                    displayCuti -= calculatedDays;
+                }
+            } else if (Objects.equals(selectedLeaveTypeMain, getString(R.string.pdo))) {
+                displayPdo -= calculatedDays;
+            }
+
+            // 💡 Rule: Do not show negative balance in UI
+            tvCutiBalanceMain.setText(String.valueOf(Math.max(0, displayCuti)));
+            tvPdoBalanceMain.setText(String.valueOf(Math.max(0, displayPdo)));
+        } else {
+            tvCutiBalanceMain.setText(R.string.zero);
+            tvPdoBalanceMain.setText(R.string.zero);
+        }
+    }
+
+    private void showRulesDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.label_rules_info)
+                .setMessage(android.text.Html.fromHtml(getString(R.string.msg_rules_content)))
+                .setPositiveButton(R.string.btn_ok, null)
+                .show();
+    }
+
     private void addToBatch(String empName, String dateRange, int days, String type, String desc) {
         QueuedRequest newRequest = new QueuedRequest(empName, dateRange, days, type, desc);
         batchQueue.add(newRequest);
@@ -536,6 +656,16 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
 
+        // 💡 PERMANENT LOCAL DEDUCTION: Update the balanceMap so the deduction stays visible
+        EmployeeBalance balance = balanceMap.get(empName);
+        if (balance != null) {
+            boolean isSpecial = desc.contains("[Khusus]") || desc.contains("[Bersurat]");
+            if (!isSpecial) {
+                if (Objects.equals(type, getString(R.string.cuti))) balance.cutiBalance -= days;
+                else balance.pdoBalance -= days;
+            }
+        }
+
         // Reset UI
         selectedDateRangeString = "";
         calculatedDays = 0;
@@ -544,8 +674,11 @@ public class MainActivity extends AppCompatActivity {
         etSelectedDates.setText("");
         etLeaveDescription.setText("");
         rgCutiCategory.clearCheck();
+        rgCutiCategory.setVisibility(View.GONE);
         tvTotalDaysDisplay.setText(R.string.duration_zero);
-        resetLeaveTypeOptions();
+        selectedLeaveTypeMain = "";
+        updateSelectionVisualsMain();
+        updateBalanceDisplayMain();
     }
 
     // 💡 Helper: Compares two dd/MM/yyyy strings
@@ -757,6 +890,7 @@ public class MainActivity extends AppCompatActivity {
                     queueManager.saveQueue(batchQueue);
                     queueAdapter.notifyItemChanged(position);
                     updateQueueUi();
+                    updateBalanceDisplayMain(); // Refresh the buttons
                     Toast.makeText(this, R.string.msg_changes_saved, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(R.string.btn_cancel, null)
@@ -945,13 +1079,13 @@ public class MainActivity extends AppCompatActivity {
                 tvTotalDaysDisplay.setText(getString(R.string.duration_placeholder, calculatedDays));
 
                 evaluateWeekendRestrictions();
+                updateBalanceDisplayMain();
             }
         });
     }
 
     private void evaluateWeekendRestrictions() {
         if (currentStartMs == 0 || currentEndMs == 0 || selectedDateRangeString.isEmpty()) {
-            resetLeaveTypeOptions();
             return;
         }
 
@@ -959,38 +1093,42 @@ public class MainActivity extends AppCompatActivity {
         rgCutiCategory.clearCheck();
         etLeaveDescription.setText("");
 
-        boolean containsWeekend = false;
-        Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        checkCalendar.setTimeInMillis(currentStartMs);
+        boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
 
-        while (checkCalendar.getTimeInMillis() <= currentEndMs) {
-            int dayOfWeek = checkCalendar.get(Calendar.DAY_OF_WEEK);
-            if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
-                containsWeekend = true;
-                break;
+        String selectedEmployee = spEmployeeName.getSelectedItem().toString();
+        EmployeeBalance balance = balanceMap.get(selectedEmployee);
+
+        if (balance != null) {
+            // 💡 Rule 2: Force PDO if Cuti is 0 but PDO is available
+            if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
+                selectedLeaveTypeMain = getString(R.string.pdo);
+                updateSelectionVisualsMain();
+                updateBalanceDisplayMain();
             }
-            checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
         }
 
         if (containsWeekend) {
-            String selectedEmployee = spEmployeeName.getSelectedItem().toString();
-            EmployeeBalance balance = balanceMap.get(selectedEmployee);
-
-            leaveTypeList.clear();
-            // Always allow both PDO and Cuti when a weekend is involved.
-            // PDO is standard for weekends, but Cuti is allowed for Special/Bersurat categories.
-            leaveTypeList.add(getString(R.string.pdo));
-            leaveTypeList.add(getString(R.string.cuti));
-
-            leaveTypeAdapter.notifyDataSetChanged();
-            
-            // Default to PDO as it's the standard for weekends
-            spLeaveType.setSelection(0);
-
             Toast.makeText(this, "ℹ️ Akhir pekan terdeteksi! Gunakan 'Cuti' hanya jika ini kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
-        } else {
-            resetLeaveTypeOptions();
+            // Automatically select PDO for weekend if nothing is selected or if Cuti is selected without special category
+            if (selectedLeaveTypeMain.isEmpty()) {
+                selectedLeaveTypeMain = getString(R.string.pdo);
+                updateSelectionVisualsMain();
+                updateBalanceDisplayMain();
+            }
         }
+    }
+
+    private boolean isWeekendInRange(long start, long end) {
+        Calendar checkCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        checkCalendar.setTimeInMillis(start);
+        while (checkCalendar.getTimeInMillis() <= end) {
+            int dayOfWeek = checkCalendar.get(Calendar.DAY_OF_WEEK);
+            if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+                return true;
+            }
+            checkCalendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return false;
     }
 
     private void showNoBalanceAlert(String title, String message) {
@@ -1009,58 +1147,10 @@ public class MainActivity extends AppCompatActivity {
                     currentEndMs = 0;
                     etSelectedDates.setText("");
                     tvTotalDaysDisplay.setText(R.string.duration_zero);
-                    resetLeaveTypeOptions();
+                    selectedLeaveTypeMain = "";
+                    updateSelectionVisualsMain();
+                    updateBalanceDisplayMain();
                 })
                 .show();
-    }
-
-    private void resetLeaveTypeOptions() {
-        // Save current selection to restore it later
-        String currentSelection = spLeaveType.getSelectedItem() != null ? spLeaveType.getSelectedItem().toString() : "";
-        
-        leaveTypeList.clear();
-        String selectedEmployee = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "";
-
-        if (currentStartMs == 0 || currentEndMs == 0 || Objects.equals(selectedEmployee, getString(R.string.prompt_select_employee_name))) {
-            leaveTypeList.add(getString(R.string.label_cuti_pdo));
-            leaveTypeList.add(getString(R.string.cuti));
-            leaveTypeList.add(getString(R.string.pdo));
-            leaveTypeAdapter.notifyDataSetChanged();
-            spLeaveType.setSelection(0);
-            
-            // 💡 Ensure category is hidden if data is reset
-            rgCutiCategory.setVisibility(View.GONE);
-            return;
-        }
-
-        // 💡 Logic Update: Always allow both Cuti and PDO so "Denda" path is always accessible
-        leaveTypeList.add(getString(R.string.cuti));
-        leaveTypeList.add(getString(R.string.pdo));
-
-        leaveTypeAdapter.notifyDataSetChanged();
-
-        // 💡 Selection Management: Restore selection if it's still valid
-        int restoredIndex = leaveTypeList.indexOf(currentSelection);
-        if (restoredIndex != -1) {
-            spLeaveType.setSelection(restoredIndex);
-        } else {
-            // Smart Auto-Selection only if we don't have a valid previous selection
-            EmployeeBalance balance = balanceMap.get(selectedEmployee);
-            if (balance != null) {
-                if (balance.cutiBalance < calculatedDays && balance.pdoBalance >= calculatedDays) {
-                    spLeaveType.setSelection(leaveTypeList.indexOf(getString(R.string.pdo)));
-                } else {
-                    spLeaveType.setSelection(0);
-                }
-            }
-        }
-        
-        // 💡 Trigger UI update for Cuti Category if Cuti is already selected
-        String selectedType = spLeaveType.getSelectedItem().toString();
-        if (selectedType.equalsIgnoreCase(getString(R.string.cuti))) {
-            rgCutiCategory.setVisibility(View.VISIBLE);
-        } else {
-            rgCutiCategory.setVisibility(View.GONE);
-        }
     }
 }

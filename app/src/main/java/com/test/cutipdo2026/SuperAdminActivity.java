@@ -1,6 +1,7 @@
 package com.test.cutipdo2026;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -99,8 +100,15 @@ public class SuperAdminActivity extends AppCompatActivity {
         progressDialog.show();
 
         final int[] count = {0};
+        
+        // 💡 ADD THIS: Read custom recipient for notifications
+        SharedPreferences prefs = getSharedPreferences("DEV_OPTS", MODE_PRIVATE);
+        String customRecipient = prefs.getBoolean("USE_LOCAL_NOTIF", false) ? prefs.getString("LOCAL_NOTIF_NUMBER", "") : null;
+
         for (String name : names) {
             LeaveRequest request = new LeaveRequest("add_pdo", name, pdoToAdd, "PDO", reason);
+            if (customRecipient != null) request.setCustomRecipient(customRecipient);
+
             googleSheetsApi.sendRequest(request).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {

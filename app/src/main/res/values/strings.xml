@@ -225,4 +225,15 @@
     <string name="toast_denda_processed">🚨 Saldo habis! Izin diproses sebagai (denda).</string>
     <string name="toast_timeout_error">Koneksi lemot (Timeout). Silakan cek riwayat atau coba lagi.</string>
     <string name="toast_generic_error">Terjadi kesalahan: %1$s</string>
+
+    <string name="label_rules_info">PANDUAN ATURAN IZIN</string>
+    <string name="msg_rules_content"><![CDATA[
+        💡 <b>Ketentuan Pengajuan:</b><br><br>
+        1. <b>Jeda 7 Hari:</b><br>Minimal ada 7 hari kerja (Senin-Selasa libur) sejak izin terakhir.<br><br>
+        2. <b>Kuota Divisi:</b><br>Hanya 1 orang per divisi (Teknis, Guide, H.K.) per tanggal.<br><br>
+        3. <b>Bypass (Sakit/DW):</b><br>Kata kunci <b>\'sakit\'</b> atau <b>\'DW\'</b> melewati aturan kuota divisi.<br><br>
+        4. <b>Tag (Denda):</b><br>Jika saldo 0, otomatis ditandai <b>(denda)</b> dan harap membayar ke kas Galeri.<br><br>
+        5. <b>Kategori Khusus:</b><br>Gunakan opsi <b>[Khusus]</b> atau <b>[Bersurat]</b> agar saldo tidak terpotong.<br><br>
+        6. <b>Akhir Pekan:</b><br>Sabtu/Minggu <b>disarankan PDO</b>. Cuti hanya untuk kategori Khusus/Bersurat.
+    ]]></string>
 </resources>
