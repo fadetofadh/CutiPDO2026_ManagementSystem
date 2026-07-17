@@ -120,27 +120,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDeleteSelected(int position) {
                 if (position >= 0 && position < batchQueue.size()) {
-                    QueuedRequest request = batchQueue.get(position);
-                    
-                    // 💡 REFUND BALANCE: Put the days back before removing
-                    EmployeeBalance balance = balanceMap.get(request.getEmployeeName());
-                    boolean wasSpecial = request.getDescription().contains("[Khusus]") || request.getDescription().contains("[Bersurat]");
-                    
-                    if (balance != null && !wasSpecial) {
-                        if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) {
-                            balance.cutiBalance += request.getTotalDays();
-                        } else {
-                            balance.pdoBalance += request.getTotalDays();
-                        }
-                    }
-
                     batchQueue.remove(position);
                     queueManager.saveQueue(batchQueue);
                     queueAdapter.notifyItemRemoved(position);
                     queueAdapter.notifyItemRangeChanged(position, batchQueue.size());
                     
                     updateQueueUi();
-                    updateBalanceDisplayMain(); // Refresh the buttons
+                    updateBalanceDisplayMain(); // 🔄 Dynamic calculation handles the "refund"
 
                     Toast.makeText(MainActivity.this, getString(R.string.msg_item_removed), Toast.LENGTH_SHORT).show();
                 }
@@ -367,22 +353,9 @@ public class MainActivity extends AppCompatActivity {
         employeeList.add(getString(R.string.prompt_select_employee_name));
 
         if (preFetchedBalances != null) {
-            String filterClass = getIntent().getStringExtra("FILTER_CLASS");
             for (EmployeeBalance b : preFetchedBalances) {
                 balanceMap.put(b.name, b);
                 Log.d("BALANCE_CHECK", "Loaded -> Emp: " + b.name + " Cuti: " + b.cutiBalance + " PDO: " + b.pdoBalance);
-            }
-        }
-
-        // 💡 4.5 SYNC QUEUE WITH BALANCES: Subtract already queued items from the live map
-        for (QueuedRequest req : batchQueue) {
-            EmployeeBalance b = balanceMap.get(req.getEmployeeName());
-            if (b != null) {
-                boolean isSpecial = req.getDescription().contains("[Khusus]") || req.getDescription().contains("[Bersurat]");
-                if (!isSpecial) {
-                    if (Objects.equals(req.getLeaveType(), getString(R.string.cuti))) b.cutiBalance -= req.getTotalDays();
-                    else b.pdoBalance -= req.getTotalDays();
-                }
             }
         }
 
@@ -520,13 +493,24 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (!isSpecialCategory) {
-                    int selectedBalance = Objects.equals(leaveType, getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
+                    // 🛡️ DYNAMIC BALANCE CHECK: Check against (Server Balance - Items in Queue)
+                    int virtualBalance = Objects.equals(leaveType, getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
+                    
+                    for (QueuedRequest req : batchQueue) {
+                        if (req.getEmployeeName().equals(empName) && Objects.equals(req.getLeaveType(), leaveType)) {
+                            boolean isQueuedSpecial = req.getDescription().contains("[Khusus]") || req.getDescription().contains("[Bersurat]");
+                            if (!isQueuedSpecial) {
+                                virtualBalance -= req.getTotalDays();
+                            }
+                        }
+                    }
 
-                    if (selectedBalance < calculatedDays) {
+                    if (virtualBalance < calculatedDays) {
                         // 💡 PENALTY WARNING DIALOG
+                        final int currentVisualBal = virtualBalance;
                         new AlertDialog.Builder(this)
                                 .setTitle(R.string.dialog_insufficient_balance_title)
-                                .setMessage(getString(R.string.dialog_insufficient_balance_message, leaveType, selectedBalance))
+                                .setMessage(getString(R.string.dialog_insufficient_balance_message, leaveType, currentVisualBal))
                                 .setPositiveButton(R.string.btn_process_denda, (dialog, which) -> {
                                     String finalDesc = etLeaveDescription.getText().toString().trim();
                                     if (!finalDesc.toLowerCase().contains("(denda)")) {
@@ -537,10 +521,6 @@ public class MainActivity extends AppCompatActivity {
                                 .setNegativeButton(R.string.btn_cancel, null)
                                 .show();
                         return; // Exit the main listener, let the dialog handle it
-                    } else {
-                        // 💡 Deduct normally
-                        if (Objects.equals(leaveType, getString(R.string.cuti))) balance.cutiBalance -= calculatedDays;
-                        else balance.pdoBalance -= calculatedDays;
                     }
                 }
             }
@@ -616,14 +596,28 @@ public class MainActivity extends AppCompatActivity {
         String empName = spEmployeeName.getSelectedItem().toString();
         EmployeeBalance balance = balanceMap.get(empName);
         if (balance != null) {
+            // 🛡️ DYNAMIC CALCULATION: Start from raw server balance
             int displayCuti = balance.cutiBalance;
             int displayPdo = balance.pdoBalance;
 
-            boolean isSpecial = rgCutiCategory.getCheckedRadioButtonId() != -1;
+            // 1. Subtract items already in the queue for this employee
+            for (QueuedRequest req : batchQueue) {
+                if (req.getEmployeeName().equals(empName)) {
+                    boolean isSpecial = req.getDescription().contains("[Khusus]") || req.getDescription().contains("[Bersurat]");
+                    if (!isSpecial) {
+                        if (Objects.equals(req.getLeaveType(), getString(R.string.cuti))) {
+                            displayCuti -= req.getTotalDays();
+                        } else {
+                            displayPdo -= req.getTotalDays();
+                        }
+                    }
+                }
+            }
 
+            // 2. Apply "Virtual Deduction" for the current selection
+            boolean isSelectingSpecial = rgCutiCategory.getCheckedRadioButtonId() != -1;
             if (Objects.equals(selectedLeaveTypeMain, getString(R.string.cuti))) {
-                // 💡 Special categories (Khusus/Bersurat) do NOT deduct balance
-                if (!isSpecial) {
+                if (!isSelectingSpecial) {
                     displayCuti -= calculatedDays;
                 }
             } else if (Objects.equals(selectedLeaveTypeMain, getString(R.string.pdo))) {
@@ -655,16 +649,6 @@ public class MainActivity extends AppCompatActivity {
         updateQueueUi();
 
         Toast.makeText(MainActivity.this, getString(R.string.toast_added_to_batch, batchQueue.size()), Toast.LENGTH_SHORT).show();
-
-        // 💡 PERMANENT LOCAL DEDUCTION: Update the balanceMap so the deduction stays visible
-        EmployeeBalance balance = balanceMap.get(empName);
-        if (balance != null) {
-            boolean isSpecial = desc.contains("[Khusus]") || desc.contains("[Bersurat]");
-            if (!isSpecial) {
-                if (Objects.equals(type, getString(R.string.cuti))) balance.cutiBalance -= days;
-                else balance.pdoBalance -= days;
-            }
-        }
 
         // Reset UI
         selectedDateRangeString = "";
@@ -865,24 +849,6 @@ public class MainActivity extends AppCompatActivity {
                         // Note: 7-day rule check can also be added here if needed
                     }
 
-                    // 💡 3. BALANCE SYNC: Refund old and deduct new
-                    if (!wasSpecial && balance != null) {
-                        // Refund old
-                        if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) balance.cutiBalance += request.getTotalDays();
-                        else balance.pdoBalance += request.getTotalDays();
-
-                        // Deduct new (Allow Denda path if insufficient)
-                        int selectedBal = Objects.equals(request.getLeaveType(), getString(R.string.cuti)) ? balance.cutiBalance : balance.pdoBalance;
-                        if (selectedBal < tempDays[0]) {
-                            if (!newDesc.toLowerCase().contains("(denda)")) {
-                                newDesc = (newDesc.isEmpty() ? "(denda)" : newDesc + " (denda)");
-                            }
-                        } else {
-                            if (Objects.equals(request.getLeaveType(), getString(R.string.cuti))) balance.cutiBalance -= tempDays[0];
-                            else balance.pdoBalance -= tempDays[0];
-                        }
-                    }
-
                     request.setTargetDate(tempDate[0]);
                     request.setTotalDays(tempDays[0]);
                     request.setDescription(newDesc);
@@ -890,7 +856,7 @@ public class MainActivity extends AppCompatActivity {
                     queueManager.saveQueue(batchQueue);
                     queueAdapter.notifyItemChanged(position);
                     updateQueueUi();
-                    updateBalanceDisplayMain(); // Refresh the buttons
+                    updateBalanceDisplayMain(); // 🔄 Dynamic calculation handles the sync
                     Toast.makeText(this, R.string.msg_changes_saved, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(R.string.btn_cancel, null)
