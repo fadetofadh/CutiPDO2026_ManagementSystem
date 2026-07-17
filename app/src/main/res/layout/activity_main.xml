@@ -294,15 +294,34 @@
                 android:layout_marginBottom="15dp"
                 android:visibility="gone" />
 
-            <Button
-                android:id="@+id/btnSubmitToSpv"
+            <LinearLayout
+                android:id="@+id/layoutBatchActions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/submit_all_to_supervisor_zero"
-                android:backgroundTint="#4CAF50"
-                android:textColor="#FFFFFF"
-                android:visibility="gone"
-                android:layout_marginBottom="15dp"/>
+                android:orientation="horizontal"
+                android:layout_marginBottom="15dp"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btnRemoveFromBatch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="@string/btn_remove_marked"
+                    android:backgroundTint="#E53935"
+                    android:textColor="#FFFFFF"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnSubmitToSpv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/btn_submit_marked"
+                    android:backgroundTint="#4CAF50"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

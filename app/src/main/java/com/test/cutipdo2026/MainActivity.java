@@ -44,11 +44,11 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private EditText etSelectedDates, etLeaveDescription;
-    private Button btnAddToBatch, btnSubmitToSpv;
+    private Button btnAddToBatch, btnSubmitToSpv, btnRemoveFromBatch;
     private TextView tvTotalDaysDisplay, tvClearSelection, tvSelectAll, tvMainProgressMessage;
     private TextView tvCutiBalanceMain, tvPdoBalanceMain;
     private Spinner spEmployeeName, spLeaveType;
-    private LinearLayout btnTypeCutiMain, btnTypePdoMain;
+    private LinearLayout btnTypeCutiMain, btnTypePdoMain, layoutBatchActions;
     private RadioGroup rgCutiCategory;
     private View ivShowRules;
     private RecyclerView rvBatchQueue;
@@ -93,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
         layoutQueueHeader = findViewById(R.id.layoutQueueHeader);
         btnAddToBatch = findViewById(R.id.btnAddToBatch);
         btnSubmitToSpv = findViewById(R.id.btnSubmitToSpv);
+        btnRemoveFromBatch = findViewById(R.id.btnRemoveFromBatch);
+        layoutBatchActions = findViewById(R.id.layoutBatchActions);
         rvBatchQueue = findViewById(R.id.rvBatchQueue);
         mainProgressOverlay = findViewById(R.id.mainProgressOverlay);
         tvMainProgressMessage = findViewById(R.id.tvMainProgressMessage);
@@ -529,6 +531,29 @@ public class MainActivity extends AppCompatActivity {
             addToBatch(empName, selectedDateRangeString, calculatedDays, leaveType, description);
         });
 
+        btnRemoveFromBatch.setOnClickListener(v -> {
+            ArrayList<QueuedRequest> markedItems = new ArrayList<>();
+            for (QueuedRequest req : batchQueue) {
+                if (req.isMarked) markedItems.add(req);
+            }
+
+            if (!markedItems.isEmpty()) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Hapus Pilihan?")
+                        .setMessage("Apakah Anda yakin ingin menghapus " + markedItems.size() + " item yang ditandai?")
+                        .setPositiveButton("Hapus", (dialog, which) -> {
+                            batchQueue.removeAll(markedItems);
+                            queueManager.saveQueue(batchQueue);
+                            queueAdapter.notifyDataSetChanged();
+                            updateQueueUi();
+                            updateBalanceDisplayMain();
+                            Toast.makeText(this, markedItems.size() + " item dihapus", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("Batal", null)
+                        .show();
+            }
+        });
+
         btnSubmitToSpv.setOnClickListener(v -> {
             // Determine which items to send
             ArrayList<QueuedRequest> itemsToSend = new ArrayList<>();
@@ -716,11 +741,11 @@ public class MainActivity extends AppCompatActivity {
         if (batchQueue.isEmpty()) {
             layoutQueueHeader.setVisibility(View.GONE);
             rvBatchQueue.setVisibility(View.GONE);
-            btnSubmitToSpv.setVisibility(View.GONE);
+            layoutBatchActions.setVisibility(View.GONE);
         } else {
             layoutQueueHeader.setVisibility(View.VISIBLE);
             rvBatchQueue.setVisibility(View.VISIBLE);
-            btnSubmitToSpv.setVisibility(View.VISIBLE);
+            layoutBatchActions.setVisibility(View.VISIBLE);
 
             // 💡 Dynamic Label: Use marked count if selection mode is active, otherwise use total size
             int markedCount = 0;
@@ -728,8 +753,28 @@ public class MainActivity extends AppCompatActivity {
                 if (req.isMarked) markedCount++;
             }
 
-            int displayCount = (markedCount > 0) ? markedCount : batchQueue.size();
-            btnSubmitToSpv.setText(getString(R.string.btn_submit_all_count, displayCount));
+            if (markedCount > 0) {
+                btnSubmitToSpv.setText(getString(R.string.btn_submit_marked, markedCount));
+                btnRemoveFromBatch.setText(getString(R.string.btn_remove_marked, markedCount));
+                btnRemoveFromBatch.setVisibility(View.VISIBLE);
+                
+                // Adjust weights: split 50/50
+                LinearLayout.LayoutParams p1 = (LinearLayout.LayoutParams) btnRemoveFromBatch.getLayoutParams();
+                p1.weight = 1;
+                btnRemoveFromBatch.setLayoutParams(p1);
+
+                LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) btnSubmitToSpv.getLayoutParams();
+                p2.weight = 1;
+                btnSubmitToSpv.setLayoutParams(p2);
+            } else {
+                btnSubmitToSpv.setText(getString(R.string.btn_submit_all_count, batchQueue.size()));
+                btnRemoveFromBatch.setVisibility(View.GONE);
+
+                // Adjust weight: take full width
+                LinearLayout.LayoutParams p2 = (LinearLayout.LayoutParams) btnSubmitToSpv.getLayoutParams();
+                p2.weight = 1;
+                btnSubmitToSpv.setLayoutParams(p2);
+            }
 
             updateClearButtonVisibility();
         }
@@ -923,6 +968,7 @@ public class MainActivity extends AppCompatActivity {
                         queueManager.saveQueue(batchQueue);
                         queueAdapter.notifyDataSetChanged();
                         updateQueueUi();
+                        updateBalanceDisplayMain(); // 🔄 Refresh balance visuals after queue cleared
                     } else {
                         String empName = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "Unknown";
                         ErrorReporter.report(MainActivity.this, empName, "MainActivity", "Server Error: " + response.code(), "HTTP Failure");

@@ -64,6 +64,8 @@
     <string name="review_batch_requests">TINJAU PENGAJUAN BATCH</string>
     <string name="review_queue_hint">💡 Geser item ke kiri untuk mengedit atau menghapus sebelum mengirim</string>
     <string name="submit_all_to_supervisor_zero">KIRIM SEMUA KE SUPERVISOR (0)</string>
+    <string name="btn_remove_marked">HAPUS PILIHAN (%1$d)</string>
+    <string name="btn_submit_marked">KIRIM PILIHAN (%1$d)</string>
 
     <!-- Splash -->
     <string name="splash_title">CUTI &amp; PDO</string>
