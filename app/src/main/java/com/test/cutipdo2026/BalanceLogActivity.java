@@ -131,8 +131,8 @@ public class BalanceLogActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull LogViewHolder holder, int position) {
             LeaveRequestData item = items.get(position);
             
-            // Determine dynamic title (PAST, TODAY, CURRENT, or UPCOMING)
-            String dynamicTitle = getDynamicTitle(item.getFormattedDate());
+            // Determine dynamic title (PAST, TODAY, CURRENT, UPCOMING, or ADDITIONAL)
+            String dynamicTitle = getDynamicTitle(item);
             holder.tvLogDate.setText(dynamicTitle);
 
             String status = Objects.requireNonNullElse(item.status, "-");
@@ -145,8 +145,8 @@ public class BalanceLogActivity extends AppCompatActivity {
             // Apply specific color for labels
             if (dynamicTitle.equals("PAST")) {
                 holder.tvLogDate.setTextColor(Color.parseColor("#718096")); // Gray for past
-            } else if (dynamicTitle.equals("TODAY") || dynamicTitle.equals("CURRENT") || dynamicTitle.equals("UPCOMING")) {
-                holder.tvLogDate.setTextColor(Color.parseColor("#2B6CB0")); // Blue for current/future
+            } else if (dynamicTitle.equals("TODAY") || dynamicTitle.equals("CURRENT") || dynamicTitle.equals("UPCOMING") || dynamicTitle.equals("ADDITIONAL")) {
+                holder.tvLogDate.setTextColor(Color.parseColor("#2B6CB0")); // Blue for current/future/top-up
             } else {
                 holder.tvLogDate.setTextColor(Color.parseColor("#2D3748")); // Default dark
             }
@@ -169,7 +169,14 @@ public class BalanceLogActivity extends AppCompatActivity {
             }
         }
 
-        private String getDynamicTitle(String dateRangeStr) {
+        private String getDynamicTitle(LeaveRequestData item) {
+            String dateRangeStr = item.getFormattedDate();
+            
+            // 💡 Handle SuperAdmin Top-ups
+            if (dateRangeStr.equalsIgnoreCase("SYSTEM") || (item.actionType != null && item.actionType.equalsIgnoreCase("Add PDO"))) {
+                return "ADDITIONAL";
+            }
+
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 Calendar today = Calendar.getInstance();

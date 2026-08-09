@@ -393,7 +393,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         }
 
         // 💡 7 WORKING DAYS VALIDATION
-        if (!isSpecialCategory && balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !description.toLowerCase().contains("sakit")) {
+        if (!isSpecialCategory && balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !balance.lastLeaveDate.equalsIgnoreCase("SYSTEM") && !description.toLowerCase().contains("sakit")) {
             int gap = countWorkDaysBetween(balance.lastLeaveDate, selectedDateRangeString.split(" to ")[0]);
             if (gap < 7) {
                 Toast.makeText(this, "⚠️ Belum 7 hari kerja sejak izin terakhir!", Toast.LENGTH_LONG).show();

@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
 
                     // Collect all existing dates for this employee (DB + Queue)
                     List<Pair<String, String>> existingRanges = new ArrayList<>();
-                    if (balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty()) {
+                    if (balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !balance.lastLeaveDate.equalsIgnoreCase("SYSTEM")) {
                         // Assuming DB date is a single date or we treat it as an end-point
                         existingRanges.add(new Pair<>(balance.lastLeaveDate, balance.lastLeaveDate));
                     }
