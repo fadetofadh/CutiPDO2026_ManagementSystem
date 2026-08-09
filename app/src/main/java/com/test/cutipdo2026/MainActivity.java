@@ -387,11 +387,12 @@ public class MainActivity extends AppCompatActivity {
             }
             String leaveType = selectedLeaveTypeMain;
             String description = etLeaveDescription.getText().toString().trim();
+            boolean isSakit = description.toLowerCase().contains("sakit");
 
-            // 💡 Rule: Block Cuti on weekend if no special category
+            // 💡 Rule: Block Cuti on weekend if no special category (Exception for Sakit)
             boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
             boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
-            if (containsWeekend && Objects.equals(leaveType, getString(R.string.cuti)) && !isSpecialCategory) {
+            if (containsWeekend && Objects.equals(leaveType, getString(R.string.cuti)) && !isSpecialCategory && !isSakit) {
                 Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -405,8 +406,8 @@ public class MainActivity extends AppCompatActivity {
             if (balance != null) {
                 String filterClass = getIntent().getStringExtra("FILTER_CLASS");
                 boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide"));
-                // 💡 isSpecialCategory is already defined above
-                boolean isSakit = description.toLowerCase().contains("sakit");
+                // 💡 isSpecialCategory and isSakit are already defined above
+
                 // 💡 DW RULE: Allows bypassing quota if they hire a Daily Worker
                 boolean hasDW = description.toUpperCase().matches(".*\\b(DW|DAILY WORKER)\\b.*");
 

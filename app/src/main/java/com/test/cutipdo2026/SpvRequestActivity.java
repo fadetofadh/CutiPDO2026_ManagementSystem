@@ -323,10 +323,13 @@ public class SpvRequestActivity extends AppCompatActivity {
             return;
         }
 
-        // 💡 Rule: Block Cuti on weekend if no special category
+        String description = etLeaveDescriptionSpv.getText().toString().trim();
+        boolean isSakit = description.toLowerCase().contains("sakit");
+
+        // 💡 Rule: Block Cuti on weekend if no special category (Exception for Sakit)
         boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
         boolean isSpecialCategory = rgCutiCategorySpv.getCheckedRadioButtonId() != -1;
-        if (containsWeekend && Objects.equals(selectedLeaveType, getString(R.string.cuti)) && !isSpecialCategory) {
+        if (containsWeekend && Objects.equals(selectedLeaveType, getString(R.string.cuti)) && !isSpecialCategory && !isSakit) {
             Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
             return;
         }
@@ -334,8 +337,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         EmployeeBalance balance = balanceMap.get(name);
         String filterClass = getIntent().getStringExtra("FILTER_CLASS");
         boolean isRestrictedDivision = filterClass != null && (filterClass.equalsIgnoreCase("Teknis") || filterClass.equalsIgnoreCase("Guide") || filterClass.equalsIgnoreCase("H.K."));
-        String description = etLeaveDescriptionSpv.getText().toString().trim();
-        boolean isSakit = description.toLowerCase().contains("sakit");
+        // 💡 isSakit is already defined above
         // 💡 isSpecialCategory is already defined above
 
         // 💡 GENERAL DENDA LOGIC: Allow any request with insufficient balance but mark as (denda)
