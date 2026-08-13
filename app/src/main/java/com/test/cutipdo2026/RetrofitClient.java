@@ -12,11 +12,13 @@ public class RetrofitClient {
     public static Retrofit getClient(Context context) {
         if (retrofit == null) {
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .connectTimeout(60, TimeUnit.SECONDS) // Increased to 60s for slow networks
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)      // 🛡️ Automatically retry if SSL handshakes fail
                     .followRedirects(true)
                     .followSslRedirects(true)
+                    .connectionPool(new okhttp3.ConnectionPool(0, 5, TimeUnit.MINUTES)) // 💡 Force fresh connections
                     .build();
 
             String baseUrl = context.getString(R.string.google_sheets_url);
