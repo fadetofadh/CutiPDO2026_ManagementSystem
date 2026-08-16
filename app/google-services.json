@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "907587668627",
+    "project_id": "pcs-system-f2d50",
+    "storage_bucket": "pcs-system-f2d50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:907587668627:android:25c4106f4764e4ca829b66",
+        "android_client_info": {
+          "package_name": "com.test.cutipdo2026"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiRX4o8k9rVTcB5jHdjCVXOZikTHtn8Xg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -42,4 +42,10 @@ public class KadivPortalActivity extends AppCompatActivity {
 
         btnBackToLogin.setOnClickListener(v -> finish());
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MaintenanceHelper.checkMaintenance(this);
+    }
 }

@@ -228,6 +228,33 @@
     <string name="toast_timeout_error">Koneksi lemot (Timeout). Silakan cek riwayat atau coba lagi.</string>
     <string name="toast_generic_error">Terjadi kesalahan: %1$s</string>
 
+    <!-- UI Message Alerts -->
+    <string name="msg_weekend_detected_cuti_warning">⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.</string>
+    <string name="msg_overlap_staff_warning">⚠️ %1$s (%2$s) sudah ambil tanggal ini!</string>
+    <string name="msg_overlap_batch_warning">⚠️ %1$s (%2$s) ada di daftar batch!</string>
+    <string name="msg_gap_too_short_warning">⚠️ Terlalu dekat dengan izin tanggal %1$s (Cuma %2$d hari kerja)</string>
+    <string name="msg_conflict_in_list_warning">⚠️ Tanggal ini bentrok dengan izin lain di daftar!</string>
+    <string name="msg_select_date_first">Pilih tanggal terlebih dahulu!</string>
+    <string name="msg_cuti_zero_warning">Saldo Cuti 0. Gunakan PDO atau pilih kategori Khusus/Bersurat.</string>
+    <string name="msg_category_lock_warning">⚠️ Status kategori (Khusus/Bersurat) tidak bisa diubah!</string>
+    <string name="msg_conflict_with_name_warning">⚠️ Bentrok dengan %1$s di daftar!</string>
+    <string name="msg_server_error_format">Gagal kirim: Kesalahan Server %1$d</string>
+    <string name="msg_weekend_info_alert">ℹ️ Akhir pekan terdeteksi! Gunakan \'Cuti\' hanya jika ini kategori Khusus/Bersurat.</string>
+    <string name="msg_load_schedule_failed">Gagal memuat jadwal</string>
+    <string name="msg_settings_saved">Settings saved!</string>
+    <string name="msg_enter_password">Masukkan Kata Sandi!</string>
+    <string name="msg_default_maintenance">System is currently down for maintenance.</string>
+    <string name="msg_no_app_found">No application found to handle this request.</string>
+    <string name="msg_insufficient_permission">Permission denied to post notifications.</string>
+    <string name="tag_khusus_prefix">[Khusus] </string>
+    <string name="tag_bersurat_prefix">[Bersurat] </string>
+
+    <!-- Maintenance & Notifications -->
+    <string name="maintenance_alert_title">⚠️ PEMELIHARAAN SISTEM</string>
+    <string name="maintenance_exit_btn">KELUAR APLIKASI</string>
+    <string name="notification_channel_id">PCS_ANNOUNCEMENTS</string>
+    <string name="notification_channel_name">Pengumuman Sistem</string>
+
     <string name="label_rules_info">PANDUAN ATURAN IZIN</string>
     <string name="msg_rules_content"><![CDATA[
         💡 <b>Ketentuan Pengajuan:</b><br><br>

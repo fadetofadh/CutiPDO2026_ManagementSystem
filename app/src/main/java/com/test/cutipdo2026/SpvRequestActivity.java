@@ -135,21 +135,23 @@ public class SpvRequestActivity extends AppCompatActivity {
 
         // 💡 CATEGORY LOGIC: Same as MainActivity
         rgCutiCategorySpv.setOnCheckedChangeListener((group, checkedId) -> {
+            String tagKhusus = getString(R.string.tag_khusus_prefix);
+            String tagBersurat = getString(R.string.tag_bersurat_prefix);
             if (checkedId == R.id.rbKhususSpv) {
                 String current = etLeaveDescriptionSpv.getText().toString();
-                if (!current.startsWith("[Khusus] ")) {
-                    etLeaveDescriptionSpv.setText("[Khusus] " + current.replace("[Bersurat] ", ""));
+                if (!current.startsWith(tagKhusus)) {
+                    etLeaveDescriptionSpv.setText(tagKhusus + current.replace(tagBersurat, ""));
                     etLeaveDescriptionSpv.setSelection(etLeaveDescriptionSpv.getText().length());
                 }
             } else if (checkedId == R.id.rbBersuratSpv) {
                 String current = etLeaveDescriptionSpv.getText().toString();
-                if (!current.startsWith("[Bersurat] ")) {
-                    etLeaveDescriptionSpv.setText("[Bersurat] " + current.replace("[Khusus] ", ""));
+                if (!current.startsWith(tagBersurat)) {
+                    etLeaveDescriptionSpv.setText(tagBersurat + current.replace(tagKhusus, ""));
                     etLeaveDescriptionSpv.setSelection(etLeaveDescriptionSpv.getText().length());
                 }
             } else {
                 String text = etLeaveDescriptionSpv.getText().toString();
-                etLeaveDescriptionSpv.setText(text.replace("[Khusus] ", "").replace("[Bersurat] ", ""));
+                etLeaveDescriptionSpv.setText(text.replace(tagKhusus, "").replace(tagBersurat, ""));
             }
         });
 
@@ -281,7 +283,7 @@ public class SpvRequestActivity extends AppCompatActivity {
 
     private void selectLeaveType(String type) {
         if (calculatedDays <= 0) {
-            Toast.makeText(this, "Pilih tanggal terlebih dahulu!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_select_date_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -290,7 +292,7 @@ public class SpvRequestActivity extends AppCompatActivity {
 
         // 💡 Rule: Warning if Cuti balance is 0
         if (Objects.equals(type, getString(R.string.cuti)) && balance != null && balance.cutiBalance <= 0) {
-            Toast.makeText(this, "Saldo Cuti 0. Gunakan PDO atau pilih kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.msg_cuti_zero_warning, Toast.LENGTH_LONG).show();
         }
 
         // If tapping the same type twice, deselect it (optional but good for UX)
@@ -330,7 +332,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
         boolean isSpecialCategory = rgCutiCategorySpv.getCheckedRadioButtonId() != -1;
         if (containsWeekend && Objects.equals(selectedLeaveType, getString(R.string.cuti)) && !isSpecialCategory && !isSakit) {
-            Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.msg_weekend_detected_cuti_warning, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -386,7 +388,7 @@ public class SpvRequestActivity extends AppCompatActivity {
                     EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
                     if (otherEmp != null && balance != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
                         if (isDateOverlap(startNew, endNew, old.getFormattedDate())) {
-                            Toast.makeText(this, "⚠️ " + old.employeeName + " (" + otherEmp.empClass + ") sudah ambil tanggal ini!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.msg_overlap_staff_warning, old.employeeName, otherEmp.empClass), Toast.LENGTH_LONG).show();
                             return;
                         }
                     }
@@ -398,7 +400,7 @@ public class SpvRequestActivity extends AppCompatActivity {
         if (!isSpecialCategory && balance != null && balance.lastLeaveDate != null && !balance.lastLeaveDate.isEmpty() && !balance.lastLeaveDate.equalsIgnoreCase("SYSTEM") && !description.toLowerCase().contains("sakit")) {
             int gap = countWorkDaysBetween(balance.lastLeaveDate, selectedDateRangeString.split(" to ")[0]);
             if (gap < 7) {
-                Toast.makeText(this, "⚠️ Belum 7 hari kerja sejak izin terakhir!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.msg_gap_too_short_warning, balance.lastLeaveDate, gap), Toast.LENGTH_LONG).show();
                 return;
             }
         }

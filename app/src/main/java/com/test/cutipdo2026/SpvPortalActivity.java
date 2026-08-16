@@ -49,4 +49,10 @@ public class SpvPortalActivity extends AppCompatActivity {
 
         btnBackToLoginSpv.setOnClickListener(v -> finish());
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MaintenanceHelper.checkMaintenance(this);
+    }
 }

@@ -112,7 +112,7 @@ public class CalendarViewActivity extends AppCompatActivity {
 
                     applyFilter();
                 } else {
-                    Toast.makeText(CalendarViewActivity.this, "Gagal memuat jadwal", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CalendarViewActivity.this, R.string.msg_load_schedule_failed, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -120,7 +120,7 @@ public class CalendarViewActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<List<LeaveRequestData>> call, @NonNull Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(CalendarViewActivity.this, "Kesalahan Jaringan: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CalendarViewActivity.this, getString(R.string.toast_network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

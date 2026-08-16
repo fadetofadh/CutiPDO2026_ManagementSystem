@@ -57,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> {
             String inputCode = etPasscode.getText().toString().trim();
             if (inputCode.isEmpty()) {
-                Toast.makeText(this, "Masukkan Kata Sandi!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.msg_enter_password, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -93,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         String errMsg = "HTTP Error " + response.code();
                         ErrorReporter.report(LoginActivity.this, "Passcode: " + inputCode, "LoginActivity", errMsg, "Server Error");
-                        Toast.makeText(LoginActivity.this, "Kesalahan Server: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.msg_server_error_format, response.code()), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -181,87 +181,53 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        googleSheetsApi.getBalances("balances", filterClass).enqueue(new Callback<>() {
+        googleSheetsApi.getLoginBundle("login_bundle", filterClass).enqueue(new Callback<BundleResponse>() {
             @Override
-            public void onResponse(@NonNull Call<List<EmployeeBalance>> call, @NonNull Response<List<EmployeeBalance>> response) {
+            public void onResponse(@NonNull Call<BundleResponse> call, @NonNull Response<BundleResponse> response) {
+                if (progressDialog.isShowing()) progressDialog.dismiss();
+
                 if (response.isSuccessful() && response.body() != null) {
-                    final ArrayList<EmployeeBalance> balanceList = new ArrayList<>(response.body());
+                    BundleResponse bundle = response.body();
+                    etPasscode.setText("");
 
-                    googleSheetsApi.getEmployees("employees", filterClass).enqueue(new Callback<>() {
-                        @Override
-                        public void onResponse(@NonNull Call<List<String>> call2, @NonNull Response<List<String>> response2) {
-                            if (response2.isSuccessful() && response2.body() != null) {
-                                final ArrayList<String> nameList = new ArrayList<>(response2.body());
-                                etPasscode.setText("");
+                    ArrayList<EmployeeBalance> balanceList = bundle.getBalances();
+                    ArrayList<String> nameList = bundle.getNames();
+                    ArrayList<LeaveRequestData> approvedList = bundle.getApproved();
 
-                                final ArrayList<EmployeeBalance> filteredBalances;
-                                final ArrayList<String> filteredNames;
+                    final ArrayList<EmployeeBalance> filteredBalances;
+                    final ArrayList<String> filteredNames;
 
-                                if (isSpv && !Objects.equals(filterClass, "Testing")) {
-                                    filteredBalances = new ArrayList<>();
-                                    filteredNames = new ArrayList<>();
-                                    for (EmployeeBalance b : balanceList) {
-                                        if (b.empClass != null && b.empClass.equalsIgnoreCase("SPV")) {
-                                            filteredBalances.add(b);
-                                            filteredNames.add(b.name);
-                                        }
-                                    }
-                                } else {
-                                    filteredBalances = balanceList;
-                                    filteredNames = nameList;
-                                }
-
-                                // 💡 Fetch all approved requests for this division to prevent overlaps
-                                googleSheetsApi.getAllRequests("all", filterClass, String.valueOf(System.currentTimeMillis())).enqueue(new Callback<>() {
-                                    @Override
-                                    public void onResponse(@NonNull Call<List<LeaveRequestData>> call3, @NonNull Response<List<LeaveRequestData>> response3) {
-                                        if (progressDialog.isShowing()) progressDialog.dismiss();
-                                        
-                                        ArrayList<LeaveRequestData> approvedList = (response3.isSuccessful() && response3.body() != null) 
-                                                ? new ArrayList<>(response3.body()) : new ArrayList<>();
-
-                                        Class<?> targetActivity = isSpv ? SpvPortalActivity.class : KadivPortalActivity.class;
-                                        Intent intent = new Intent(LoginActivity.this, targetActivity);
-                                        intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
-                                        intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
-                                        intent.putExtra("PRE_FETCHED_APPROVED", approvedList);
-                                        
-                                        String finalFilter = (isSpv && !Objects.equals(filterClass, "Testing")) ? "all" : filterClass;
-                                        intent.putExtra("FILTER_CLASS", finalFilter);
-                                        startActivity(intent);
-                                    }
-
-                                    @Override
-                                    public void onFailure(@NonNull Call<List<LeaveRequestData>> call3, @NonNull Throwable t3) {
-                                        if (progressDialog.isShowing()) progressDialog.dismiss();
-                                        Intent intent = new Intent(LoginActivity.this, isSpv ? SpvPortalActivity.class : KadivPortalActivity.class);
-                                        intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
-                                        intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
-                                        intent.putExtra("PRE_FETCHED_APPROVED", new ArrayList<LeaveRequestData>());
-                                        intent.putExtra("FILTER_CLASS", (isSpv && !Objects.equals(filterClass, "Testing")) ? "all" : filterClass);
-                                        startActivity(intent);
-                                    }
-                                });
-                            } else {
-                                if (progressDialog.isShowing()) progressDialog.dismiss();
-                                Toast.makeText(LoginActivity.this, getString(R.string.toast_failed_loading_staff), Toast.LENGTH_SHORT).show();
+                    if (isSpv && !Objects.equals(filterClass, "Testing")) {
+                        filteredBalances = new ArrayList<>();
+                        filteredNames = new ArrayList<>();
+                        for (EmployeeBalance b : balanceList) {
+                            if (b.empClass != null && b.empClass.equalsIgnoreCase("SPV")) {
+                                filteredBalances.add(b);
+                                filteredNames.add(b.name);
                             }
                         }
+                    } else {
+                        filteredBalances = balanceList;
+                        filteredNames = nameList;
+                    }
 
-                        @Override
-                        public void onFailure(@NonNull Call<List<String>> call2, @NonNull Throwable t2) {
-                            if (progressDialog.isShowing()) progressDialog.dismiss();
-                            Toast.makeText(LoginActivity.this, getString(R.string.toast_network_error, t2.getMessage()), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Class<?> targetActivity = isSpv ? SpvPortalActivity.class : KadivPortalActivity.class;
+                    Intent intent = new Intent(LoginActivity.this, targetActivity);
+                    intent.putExtra("PRE_FETCHED_BALANCES", filteredBalances);
+                    intent.putExtra("PRE_FETCHED_NAMES", filteredNames);
+                    intent.putExtra("PRE_FETCHED_APPROVED", approvedList);
+
+                    String finalFilter = (isSpv && !Objects.equals(filterClass, "Testing")) ? "all" : filterClass;
+                    intent.putExtra("FILTER_CLASS", finalFilter);
+                    startActivity(intent);
+
                 } else {
-                    if (progressDialog.isShowing()) progressDialog.dismiss();
                     Toast.makeText(LoginActivity.this, getString(R.string.toast_balance_sync_failed_generic), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<EmployeeBalance>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<BundleResponse> call, @NonNull Throwable t) {
                 if (progressDialog.isShowing()) progressDialog.dismiss();
                 handleNetworkError(t);
             }

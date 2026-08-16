@@ -263,7 +263,9 @@ public class MainActivity extends AppCompatActivity {
                         
                         // Clear description if it only contained the tag
                         String desc = etLeaveDescription.getText().toString();
-                        if (desc.equals("[Khusus] ") || desc.equals("[Bersurat] ")) {
+                        String tagKhusus = getString(R.string.tag_khusus_prefix);
+                        String tagBersurat = getString(R.string.tag_bersurat_prefix);
+                        if (desc.equals(tagKhusus) || desc.equals(tagBersurat)) {
                             etLeaveDescription.setText("");
                         }
                     } else {
@@ -278,26 +280,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         rgCutiCategory.setOnCheckedChangeListener((group, checkedId) -> {
+            String tagKhusus = getString(R.string.tag_khusus_prefix);
+            String tagBersurat = getString(R.string.tag_bersurat_prefix);
             if (checkedId == R.id.rbKhusus) {
                 String current = etLeaveDescription.getText().toString();
                 // Avoid re-setting if already there to prevent cursor jumping
-                if (!current.startsWith("[Khusus] ")) {
-                    etLeaveDescription.setText("[Khusus] ");
+                if (!current.startsWith(tagKhusus)) {
+                    etLeaveDescription.setText(tagKhusus);
                     etLeaveDescription.setSelection(etLeaveDescription.getText().length());
                 }
             } else if (checkedId == R.id.rbBersurat) {
                 String current = etLeaveDescription.getText().toString();
-                if (!current.startsWith("[Bersurat] ")) {
-                    etLeaveDescription.setText("[Bersurat] ");
+                if (!current.startsWith(tagBersurat)) {
+                    etLeaveDescription.setText(tagBersurat);
                     etLeaveDescription.setSelection(etLeaveDescription.getText().length());
                 }
             } else {
                 // 💡 CLEANUP: If nothing is selected, strip the tag but keep the rest of the text
                 String text = etLeaveDescription.getText().toString();
-                if (text.startsWith("[Khusus] ")) {
-                    etLeaveDescription.setText(text.replace("[Khusus] ", ""));
-                } else if (text.startsWith("[Bersurat] ")) {
-                    etLeaveDescription.setText(text.replace("[Bersurat] ", ""));
+                if (text.startsWith(tagKhusus)) {
+                    etLeaveDescription.setText(text.replace(tagKhusus, ""));
+                } else if (text.startsWith(tagBersurat)) {
+                    etLeaveDescription.setText(text.replace(tagBersurat, ""));
                 }
                 // Unmark internal selection tags
                 for (int i = 0; i < rgCutiCategory.getChildCount(); i++) {
@@ -316,8 +320,8 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String prefix = "";
                 int checkedId = rgCutiCategory.getCheckedRadioButtonId();
-                if (checkedId == R.id.rbKhusus) prefix = "[Khusus] ";
-                else if (checkedId == R.id.rbBersurat) prefix = "[Bersurat] ";
+                if (checkedId == R.id.rbKhusus) prefix = getString(R.string.tag_khusus_prefix);
+                else if (checkedId == R.id.rbBersurat) prefix = getString(R.string.tag_bersurat_prefix);
 
                 if (!prefix.isEmpty()) {
                     if (!s.toString().startsWith(prefix)) {
@@ -333,8 +337,8 @@ public class MainActivity extends AppCompatActivity {
         etLeaveDescription.setOnClickListener(v -> {
             String prefix = "";
             int checkedId = rgCutiCategory.getCheckedRadioButtonId();
-            if (checkedId == R.id.rbKhusus) prefix = "[Khusus] ";
-            else if (checkedId == R.id.rbBersurat) prefix = "[Bersurat] ";
+            if (checkedId == R.id.rbKhusus) prefix = getString(R.string.tag_khusus_prefix);
+            else if (checkedId == R.id.rbBersurat) prefix = getString(R.string.tag_bersurat_prefix);
             
             if (!prefix.isEmpty() && etLeaveDescription.getSelectionStart() < prefix.length()) {
                 etLeaveDescription.setSelection(prefix.length());
@@ -393,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
             boolean containsWeekend = isWeekendInRange(currentStartMs, currentEndMs);
             boolean isSpecialCategory = rgCutiCategory.getCheckedRadioButtonId() != -1;
             if (containsWeekend && Objects.equals(leaveType, getString(R.string.cuti)) && !isSpecialCategory && !isSakit) {
-                Toast.makeText(this, "⚠️ Weekend terdeteksi! Gunakan PDO atau pilih kategori Khusus/Bersurat untuk Cuti.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.msg_weekend_detected_cuti_warning, Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -430,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
                             EmployeeBalance otherEmp = balanceMap.get(old.employeeName);
                             if (otherEmp != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
                                 if (isDateOverlap(startNew, endNew, old.getFormattedDate())) {
-                                    Toast.makeText(this, "⚠️ " + old.employeeName + " (" + otherEmp.empClass + ") sudah ambil tanggal ini!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(this, getString(R.string.msg_overlap_staff_warning, old.employeeName, otherEmp.empClass), Toast.LENGTH_LONG).show();
                                     return;
                                 }
                             }
@@ -444,7 +448,7 @@ public class MainActivity extends AppCompatActivity {
                         EmployeeBalance otherEmp = balanceMap.get(req.getEmployeeName());
                         if (otherEmp != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
                             if (isDateOverlap(startNew, endNew, req.getTargetDate())) {
-                                Toast.makeText(this, "⚠️ " + req.getEmployeeName() + " (" + otherEmp.empClass + ") ada di daftar batch!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, getString(R.string.msg_overlap_batch_warning, req.getEmployeeName(), otherEmp.empClass), Toast.LENGTH_LONG).show();
                                 return;
                             }
                         }
@@ -475,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
                         if (isDateAfter(newStartStr, range.second)) {
                             int gap = countWorkDaysBetween(range.second, newStartStr);
                             if (gap < 7) {
-                                Toast.makeText(this, "⚠️ Terlalu dekat dengan izin tanggal " + range.second + " (Cuma " + gap + " hari kerja)", Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, getString(R.string.msg_gap_too_short_warning, range.second, gap), Toast.LENGTH_LONG).show();
                                 return;
                             }
                         }
@@ -483,13 +487,13 @@ public class MainActivity extends AppCompatActivity {
                         else if (isDateAfter(range.first, newEndStr)) {
                             int gap = countWorkDaysBetween(newEndStr, range.first);
                             if (gap < 7) {
-                                Toast.makeText(this, "⚠️ Terlalu dekat dengan izin tanggal " + range.first + " (Cuma " + gap + " hari kerja)", Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, getString(R.string.msg_gap_too_short_warning, range.first, gap), Toast.LENGTH_LONG).show();
                                 return;
                             }
                         }
                         // 3. Overlap check
                         else {
-                            Toast.makeText(this, "⚠️ Tanggal ini bentrok dengan izin lain di daftar!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, R.string.msg_conflict_in_list_warning, Toast.LENGTH_LONG).show();
                             return;
                         }
                     }
@@ -584,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectLeaveTypeMain(String type) {
         if (calculatedDays <= 0) {
-            Toast.makeText(this, "Pilih tanggal terlebih dahulu!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_select_date_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -593,7 +597,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 💡 Rule: Warning if Cuti balance is 0
         if (Objects.equals(type, getString(R.string.cuti)) && balance != null && balance.cutiBalance <= 0) {
-            Toast.makeText(this, "Saldo Cuti 0. Gunakan PDO atau pilih kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.msg_cuti_zero_warning, Toast.LENGTH_LONG).show();
         }
 
         if (Objects.equals(selectedLeaveTypeMain, type)) {
@@ -866,10 +870,10 @@ public class MainActivity extends AppCompatActivity {
                     EmployeeBalance balance = balanceMap.get(empName);
 
                     // 💡 1. CATEGORY LOCK: Prevent changing [Khusus]/[Bersurat] status
-                    boolean wasSpecial = oldDesc.contains("[Khusus]") || oldDesc.contains("[Bersurat]");
-                    boolean isSpecial = newDesc.contains("[Khusus]") || newDesc.contains("[Bersurat]");
+                    boolean wasSpecial = oldDesc.contains(getString(R.string.tag_khusus_prefix)) || oldDesc.contains(getString(R.string.tag_bersurat_prefix));
+                    boolean isSpecial = newDesc.contains(getString(R.string.tag_khusus_prefix)) || newDesc.contains(getString(R.string.tag_bersurat_prefix));
                     if (wasSpecial != isSpecial) {
-                        Toast.makeText(this, "⚠️ Status kategori (Khusus/Bersurat) tidak bisa diubah!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, R.string.msg_category_lock_warning, Toast.LENGTH_LONG).show();
                         return;
                     }
 
@@ -887,7 +891,7 @@ public class MainActivity extends AppCompatActivity {
                             EmployeeBalance otherEmp = balanceMap.get(other.getEmployeeName());
                             if (otherEmp != null && balance != null && Objects.equals(otherEmp.empClass, balance.empClass)) {
                                 if (isDateOverlap(startNew, endNew, other.getTargetDate())) {
-                                    Toast.makeText(this, "⚠️ Bentrok dengan " + other.getEmployeeName() + " di daftar!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(this, getString(R.string.msg_conflict_with_name_warning, other.getEmployeeName()), Toast.LENGTH_LONG).show();
                                     return;
                                 }
                             }
@@ -973,7 +977,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         String empName = spEmployeeName.getSelectedItem() != null ? spEmployeeName.getSelectedItem().toString() : "Unknown";
                         ErrorReporter.report(MainActivity.this, empName, "MainActivity", "Server Error: " + response.code(), "HTTP Failure");
-                        Toast.makeText(MainActivity.this, "Gagal kirim: Kesalahan Server " + response.code(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, getString(R.string.msg_server_error_format, response.code()), Toast.LENGTH_LONG).show();
                     }
 
                     btnSubmitToSpv.setEnabled(true);
@@ -1039,6 +1043,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         syncAndFilterQueue();
+        MaintenanceHelper.checkMaintenance(this);
     }
 
     private void syncAndFilterQueue() {
@@ -1121,7 +1126,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (containsWeekend) {
-            Toast.makeText(this, "ℹ️ Akhir pekan terdeteksi! Gunakan 'Cuti' hanya jika ini kategori Khusus/Bersurat.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.msg_weekend_info_alert, Toast.LENGTH_LONG).show();
             // Automatically select PDO for weekend if nothing is selected or if Cuti is selected without special category
             if (selectedLeaveTypeMain.isEmpty()) {
                 selectedLeaveTypeMain = getString(R.string.pdo);

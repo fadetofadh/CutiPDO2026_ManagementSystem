@@ -54,6 +54,13 @@ public interface GoogleSheetsApi {
             @Query("cb") String cacheBuster
     );
 
+    // 💡 NEW: Bundled Sync for Login
+    @GET("exec")
+    Call<BundleResponse> getLoginBundle(
+            @Query("type") String type,          // "login_bundle"
+            @Query("filterClass") String filterClass
+    );
+
     // Sends your leave request batches out to the Apps Script backend
     @POST("exec")
     Call<ResponseBody> sendRequest(@Body LeaveRequest request);

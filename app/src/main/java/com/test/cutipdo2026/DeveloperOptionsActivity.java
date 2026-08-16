@@ -45,7 +45,7 @@ public class DeveloperOptionsActivity extends AppCompatActivity {
                     .putBoolean("USE_LOCAL_NOTIF", cbUseLocalNotif.isChecked())
                     .putString("LOCAL_NOTIF_NUMBER", num)
                     .apply();
-            Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_settings_saved, Toast.LENGTH_SHORT).show();
             finish();
         });
     }

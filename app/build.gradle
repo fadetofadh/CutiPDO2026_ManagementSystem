@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -14,8 +15,8 @@ android {
         applicationId "com.test.cutipdo2026"
         minSdk 24
         targetSdk 36
-        versionCode 7
-        versionName "5.5"
+        versionCode 8
+        versionName "6.0"
 
         resConfigs "id"
 
@@ -52,4 +53,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     // Swipe down to refresh
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // Firebase
+    implementation platform(libs.firebase.bom)
+    implementation libs.firebase.messaging
 }
